@@ -10,7 +10,7 @@ This repository houses the core project, which includes the API and database sys
 Please note that HayaseDB is still in early development, so some features may not yet be functional. Stay tuned as we continue to enhance our project!
 
 ## Overview
-- [Introduction](#hayasedb-api)
+- [Introduction](#hayasedb-api--)
 - [Overview](#overview)
 - [Project Setup](#project-setup)
 - [Wiki](#wiki)
