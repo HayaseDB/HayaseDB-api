@@ -12,6 +12,12 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: production
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      PORT: ${PORT}
+      BASE_URL: ${BASE_URL}
+      LOG_LEVEL: ${LOG_LEVEL}
     depends_on:
       - mongo
     pull_policy: build
@@ -35,6 +41,7 @@ services:
       MONGO_DATABASE: ${MONGO_DATABASE}
       PORT: ${PORT}
       BASE_URL: ${BASE_URL}
+      LOG_LEVEL: ${LOG_LEVEL}
     depends_on:
       - mongo
     pull_policy: build
@@ -51,7 +58,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-    pull_policy: build
 
 volumes:
   mongo-data:
