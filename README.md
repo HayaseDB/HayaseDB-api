@@ -1,6 +1,7 @@
 <img src="https://github.com/user-attachments/assets/62a1704b-14ad-412f-ad8e-196db8d63007">
 
-# HayaseDB API
+# HayaseDB API  <img src="https://img.shields.io/badge/Project Status-early development-brightgreen" align="center"/>
+
 
 HayaseDB is an open-source anime database designed for fans and developers alike. It offers comprehensive information on anime titles, characters, episode summaries, and more, all in one easy-to-navigate platform.
 
