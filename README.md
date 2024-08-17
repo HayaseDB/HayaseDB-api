@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://i.ibb.co/kG0dCJK/Hayse-DB-banner-final2-cropped.png">
+  <img src="https://github.com/user-attachments/assets/07b0b615-74de-4b05-ad6d-ba38a97fd170">
 </p>
 
 ## Overview
