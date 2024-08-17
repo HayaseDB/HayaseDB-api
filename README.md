@@ -41,7 +41,7 @@ npm run docker:build:prod
 
 ## Reporting Issues
 
-If you encounter any problems while using PicScape or have suggestions for improvement, please don't hesitate to open an issue on the GitHub repository. Your feedback is crucial in helping me identify areas for enhancement and address any issues that arise.
+If you encounter any problems while using HayaseDB or have suggestions for improvement, please don't hesitate to open an issue on the GitHub repository. Your feedback is crucial in helping me identify areas for enhancement and address any issues that arise.
 
 To report an issue:
 
