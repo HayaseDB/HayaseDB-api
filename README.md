@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/62a1704b-14ad-412f-ad8e-196db8d63007">
-</p>
+<img src="https://github.com/user-attachments/assets/62a1704b-14ad-412f-ad8e-196db8d63007">
 
 # HayaseDB API
 
@@ -27,6 +25,12 @@ npm run docker:dev
 ### Run in production  mode
 ```
 npm run docker:prod
+```
+
+### Build
+```
+npm run docker:build:dev
+npm run docker:build:prod
 ```
 
 ## Wiki

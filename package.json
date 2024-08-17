@@ -4,7 +4,10 @@
   "description": "HayaseDB is an open-source anime database designed for fans and developers alike. It offers comprehensive information on anime titles, characters, episode summaries, and more, all in one easy-to-navigate platform.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "docker:dev": "docker-compose up hayasedb-dev",
+    "docker:prod": "docker-compose up hayasedb-prod",
+    "docker:build:dev": "docker-compose build --build-arg NODE_ENV=development",
+    "docker:build:prod": "docker-compose build --build-arg NODE_ENV=production"
   },
   "repository": {
     "type": "git",
@@ -15,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/AIO-Develope/HayaseDB-api/issues"
   },
-  "homepage": "https://github.com/AIO-Develope/HayaseDB-api#readme"
+  "homepage": "https://github.com/AIO-Develope/HayaseDB-api#readme",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
 }

@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  hayasedb-prod:
+    container_name: HayaseDB-prod
+    restart: always
+    build:
+      context: .
+      args:
+        NODE_ENV: production
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - mongo
+    pull_policy: build
+
+  hayasedb-dev:
+    container_name: HayaseDB-dev
+    restart: always
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+    volumes:
+      - ./src:/usr/src/app/src
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      PORT: ${PORT}
+      BASE_URL: ${BASE_URL}
+    depends_on:
+      - mongo
+    pull_policy: build
+
+  mongo:
+    container_name: HayaseDB-mongo
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    pull_policy: build
+
+volumes:
+  mongo-data:
