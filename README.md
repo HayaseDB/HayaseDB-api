@@ -2,18 +2,20 @@
   <img src="https://github.com/user-attachments/assets/62a1704b-14ad-412f-ad8e-196db8d63007">
 </p>
 
+# HayaseDB API
+
+HayaseDB is an open-source anime database designed for fans and developers alike. It offers comprehensive information on anime titles, characters, episode summaries, and more, all in one easy-to-navigate platform.
+
+This repository houses the core project, which includes the API and database system for HayaseDB. It focuses exclusively on backend functionality, without any frontend or user interface components. This repository is intended primarily for developers who want to interact directly with the API. If you're not a developer or prefer to access the database without coding knowledge, we recommend using our [frontend website](hayasedb.com), which offers an easy-to-use interface for exploring the database.
+
+Please note that HayaseDB is still in early development, so some features may not yet be functional. Stay tuned as we continue to enhance our project!
+
 ## Overview
-- [Introduction](#picscape-backend)
+- [Introduction](#hayasedb-api)
+- [Overview](#overview)
 - [Project Setup](#project-setup)
-- [Project Status](#project-status)
-- [API Routes](#api-routes)
+- [Wiki](#wiki)
 - [Reporting Issues](#reporting-issues)
-
-
-
-HayaseDB is a public anime database where users can find detailed information about their favorite shows. It provides data on anime titles, characters, episode counts, and more, all in one place. Ideal for anime fans and developers, HayaseDB is open-source and community-driven, ensuring up-to-date and accurate information.
-
-
 
 ## Project Setup
 
@@ -27,31 +29,10 @@ npm run docker:dev
 npm run docker:prod
 ```
 
-
-### For the complete functionality of this project, the [frontend](https://github.com/AIO-Develope/PicScape-Frontend/) is essential.
-
-## API Routes (extremely outdated and I will move it to a wiki soon)
-
-### authRoutes.js
-```
-POST /auth/login
-The endpoint provides the JWT authentication key only if the email and password sent in the request body correctly correspond to a registered user.
-
-POST /api/register
-This endpoint receives a request with a password, email and username in the body, then  adds it to the "Account" collection.
-```
-
-### fetchRoutes.js
-```
-GET /fetch/account
-This endpoint responds with the account information corresponding to the token contained in the "Authorization" header.
-
-POST /fetch/account/:username
-This endpoint responds with the account information corresponding to the username specified in the parameter ":username".
-```
-
-## Project Status
-PicScape is a relatively new project and it may currently lack some functionality and features. However, I am continually improving the project in the future. Additionally, PicScape will be available as a fully functional service in the future, ready for you to use.
+## Wiki
+- Concept
+- Project Structure
+- API routes
 
 ## Reporting Issues
 
@@ -59,7 +40,7 @@ If you encounter any problems while using PicScape or have suggestions for impro
 
 To report an issue:
 
-1. Go to the [Issues](https://github.com/AIO-Develope/PicScape-Backend/issues) section of the repository.
+1. Go to the [Issues](https://github.com/AIO-Develope/HayaseDB-api/issues) section of the repository.
 2. Provide a clear and detailed description of the problem you've encountered or the feature you'd like to suggest.
 3. If possible, include steps to reproduce the issue or examples to clarify your suggestion.
 5. Add any relevant files.
