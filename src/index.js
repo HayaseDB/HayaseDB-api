@@ -8,6 +8,10 @@ require('./utils/validateEnv');
 const errorHandler = require('./middlewares/errorHandler');
 const notFoundHandler = require('./middlewares/notFoundHandler');
 
+
+// Controllers
+const userRoutes = require('./routes/userRoutes');
+
 // Define express as "app"
 const app = express();
 
@@ -24,7 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 connectToMongoDB();
 
 // Routes
-
+app.use('/user', userRoutes);
 
 // Handlers
 app.use(errorHandler);
