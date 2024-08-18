@@ -8,7 +8,7 @@
     "docker:prod": "docker-compose up hayasedb-prod",
     "docker:build:dev": "docker-compose build --build-arg NODE_ENV=development",
     "docker:build:prod": "docker-compose build --build-arg NODE_ENV=production",
-    "docker:clear": "docker-compose down --volumes --remove-orphans && docker system prune -af && docker volume prune -f",
+    "docker:clear": "docker-compose down --volumes --remove-orphans && docker volume prune -f",
     "docker:rebuild": "npm run docker:clear && npm run docker:build:dev"
   },
   "repository": {
@@ -24,6 +24,7 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.3",
     "morgan": "^1.10.0"
   }
