@@ -12,7 +12,7 @@ function errorHandler(err, req, res, next) {
       message: err.message || 'Internal Server Error',
     };
   
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && process.env.LOG_LEVEL === 'debug') {
       response.stack = err.stack.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     }
   
