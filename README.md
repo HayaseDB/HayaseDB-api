@@ -1,4 +1,7 @@
-<img src="https://github.com/user-attachments/assets/62a1704b-14ad-412f-ad8e-196db8d63007">
+![HayaseDB_banner_final_alles_waves_light](https://github.com/user-attachments/assets/10d43f0d-60bd-445d-96b3-1609903fadb4)
+
+
+
 
 # HayaseDB API  <img src="https://img.shields.io/badge/Project Status-early development-brightgreen" align="center"/>
 
