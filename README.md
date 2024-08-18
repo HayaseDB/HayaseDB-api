@@ -1,4 +1,5 @@
-![HayaseDB_banner_final_alles_waves_light](https://github.com/user-attachments/assets/3a978bd9-8d80-4c73-8d29-6f5cbf456a4e)
+![HayaseDB_banner_final_alles_waves_light](https://github.com/user-attachments/assets/037cadcd-831e-4f31-8c71-42e6c3db88ee)
+
 
 
 
