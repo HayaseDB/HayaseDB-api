@@ -11,6 +11,7 @@ const notFoundHandler = require('./middlewares/notFoundHandler');
 
 // Controllers
 const userRoutes = require('./routes/userRoutes');
+const apiKeyRoutes = require('./routes/apiKeyRoutes');
 
 // Define express as "app"
 const app = express();
@@ -29,6 +30,7 @@ connectToMongoDB();
 
 // Routes
 app.use('/user', userRoutes);
+app.use('/key', apiKeyRoutes);
 
 // Handlers
 app.use(errorHandler);
