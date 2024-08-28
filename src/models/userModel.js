@@ -16,11 +16,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    apiKeyId: { 
-        type: String,
-        unique: true 
-    },
-
+    apiKeys: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ApiKey'
+    }],
 }, {
     timestamps: true,
 });
