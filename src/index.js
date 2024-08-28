@@ -12,12 +12,14 @@ const notFoundHandler = require('./middlewares/notFoundHandler');
 // Controllers
 const userRoutes = require('./routes/userRoutes');
 const apiKeyRoutes = require('./routes/apiKeyRoutes');
+const mediaRoutes = require('./routes/mediaRoutes');
+const dataRoutes = require('./routes/dataRoutes');
 
 // Define express as "app"
 const app = express();
 
 // Middleware
-if (process.env.LOG_LEVEL == "normal" || process.env.LOG_LEVEL == "debug") {
+if (process.env.LOG_LEVEL === "normal" || process.env.LOG_LEVEL === "debug") {
   app.use(morgan('dev'));
 }
 
@@ -26,11 +28,17 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // MongoDB
-connectToMongoDB();
+connectToMongoDB().then(r =>
+  console.log("Connected to MongoDB")
+);
 
 // Routes
 app.use('/user', userRoutes);
 app.use('/key', apiKeyRoutes);
+
+
+app.use('/api/media', mediaRoutes)
+app.use('/api/data', dataRoutes)
 
 // Handlers
 app.use(errorHandler);

@@ -8,7 +8,6 @@ const connectToMongoDB = async () => {
       writeConcern: { w: 'majority' },
       authSource: 'admin'
     });
-    console.log('Connected to MongoDB');
   } catch (error) {
     console.error('MongoDB connection error:', error);
     process.exit(1);

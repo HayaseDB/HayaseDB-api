@@ -2,7 +2,7 @@ const apiKeyService = require('../services/apiKeyService');
 
 exports.createApiKey = async (req, res) => {
     try {
-        const userId = req.body.userId;
+        const userId = req.user.id
         const apiKey = await apiKeyService.createApiKey(userId);
         res.status(201).json({ apiKey });
     } catch (error) {
@@ -13,7 +13,7 @@ exports.createApiKey = async (req, res) => {
 
 exports.getApiKeysForUser = async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const userId = req.user.id
         const apiKeys = await apiKeyService.getApiKeysForUser(userId);
         res.status(200).json({ apiKeys });
     } catch (error) {

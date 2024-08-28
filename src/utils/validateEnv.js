@@ -5,7 +5,7 @@ const requiredEnvVars = [
   'MONGO_DATABASE',
   'LOG_LEVEL',
   'JWT_SECRET'
-  // 'JWT_EXPIRES_IN' is no longer mandatory
+  // 'JWT_EXPIRES_IN'
 ];
 
 function validateEnv() {
