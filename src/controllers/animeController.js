@@ -1,8 +1,10 @@
 const animeService = require('../services/animeService');
 const {AnimeErrorCodes} = require("../utils/errorCodes");
 const fieldsConfig = require('../utils/fieldsConfig');
-const mediaService = require('../services/mediaService'); // Adjust path as necessary
-const characterService = require('../services/characterService'); // Adjust path as necessary
+const {convertMediaToUrl} = require("../utils/mediaUtils");
+const {fetchAndNestDocument} = require("../utils/documentUtils");
+
+
 exports.createAnime = async (req, res) => {
     try {
         const result = await animeService.createAnime(req.body);
@@ -55,49 +57,11 @@ exports.getAnimeById = async (req, res) => {
         let anime = result.data.toObject();
         const schemaConfig = fieldsConfig.anime;
 
-        const fetchAndNestDocument = async (field, ids) => {
-            const serviceMap = {
-                'Media': mediaService,
-                'Character': characterService,
-            };
-
-            const service = serviceMap[schemaConfig[field].ref];
-            if (service) {
-                try {
-                    const isArray = Array.isArray(ids);
-                    const fetchDocument = async (id) => {
-                        const doc = await service.getById(id);
-                        if (doc.error) {
-                            return null;
-                        }
-                        return doc.data.toObject();
-                    };
-
-                    if (isArray) {
-                        return await Promise.all(ids.map(id => fetchDocument(id)));
-                    } else {
-                        return await fetchDocument(ids);
-                    }
-                } catch (err) {
-                    console.error(`Error fetching ${schemaConfig[field].ref} by ID:`, err);
-                    return null;
-                }
-            }
-            return null;
-        };
         for (const field in schemaConfig) {
             if (schemaConfig[field].media && anime[field]) {
-                const mediaResult = await mediaService.getMediaById(anime[field]);
-                if (mediaResult.media) {
-                    anime[field] = {
-                        url: `${process.env.BASE_URL}/api/fetch/media/${mediaResult.media._id}`,
-                        mediaId: mediaResult.media._id
-                    };
-                } else {
-                    anime[field] = null;
-                }
+                anime[field] = await convertMediaToUrl(anime[field]);
             }
-            if (schemaConfig[field].nesting && anime[field] && anime[field]) {
+            if (schemaConfig[field].nesting && anime[field]) {
                 const nestedDocument = await fetchAndNestDocument(field, anime[field]);
                 if (nestedDocument) {
                     anime[field] = nestedDocument;
@@ -107,6 +71,14 @@ exports.getAnimeById = async (req, res) => {
             }
         }
 
+        if (Array.isArray(anime.characters)) {
+            anime.characters = await Promise.all(anime.characters.map(async (character) => {
+                if (character.image) {
+                    character.image = await convertMediaToUrl(character.image);
+                }
+                return character;
+            }));
+        }
 
         res.json(anime);
     } catch (err) {
