@@ -31,7 +31,8 @@ module.exports = {
             type: 'objectIds',
             trim: true,
             default: [],
-            ref: 'Character'
+            ref: 'Character',
+            nesting: true
         },
         cover: {
             type: 'objectId',

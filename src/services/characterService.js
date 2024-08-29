@@ -127,7 +127,7 @@ exports.deleteCharacter = async (characterId) => {
     }
 };
 
-exports.getCharacterById = async (characterId) => {
+exports.getById = async (characterId) => {
     if (!isValidObjectId(characterId)) {
         return { error: CharacterErrorCodes.INVALID_ID };
     }

@@ -40,7 +40,7 @@ exports.editCharacter = async (req, res) => {
 
 exports.getCharacterById = async (req, res) => {
     try {
-        const result = await characterService.getCharacterById(req.params.id);
+        const result = await characterService.getById(req.params.id);
         if (result.error) {
             return res.status(404).json({ error: result.error });
         }

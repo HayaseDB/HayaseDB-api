@@ -78,7 +78,7 @@ exports.editAnime = async (animeId, data) => {
     }
 };
 
-exports.getAnimeById = async (animeId) => {
+exports.getById = async (animeId) => {
     if (!isValidObjectId(animeId)) {
         return { error: AnimeErrorCodes.INVALID_ID };
     }
