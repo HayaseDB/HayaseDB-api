@@ -5,6 +5,7 @@ const MediaModel = require('../models/mediaModel');
 const schemaConfig = fieldsConfig.anime;
 
 const schemaFields = {};
+const mediaFields = [];
 Object.keys(schemaConfig).forEach(field => {
     const { type, trim, required, default: defaultValue, ref } = schemaConfig[field];
 
@@ -37,16 +38,5 @@ Object.keys(schemaConfig).forEach(field => {
 });
 
 const animeSchema = new mongoose.Schema(schemaFields, { timestamps: true });
-
-animeSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
-    if (this.cover) {
-        try {
-            await MediaModel.findByIdAndDelete(this.cover);
-        } catch (err) {
-            return next(err);
-        }
-    }
-    next();
-});
 
 module.exports = mongoose.model('Anime', animeSchema, 'Animes');

@@ -2,16 +2,16 @@ const animeService = require('../services/animeService');
 const mediaService = require('../services/mediaService');
 const {AnimeErrorCodes} = require("../utils/errorCodes");
 const fieldsConfig = require('../utils/fieldsConfig');
+
 exports.createAnime = async (req, res) => {
     try {
         const result = await animeService.createAnime(req.body);
-
         if (result.error) {
             return res.status(400).json({ error: result.error });
         }
-
         res.status(201).json(result.data);
     } catch (err) {
+        console.error('Error creating anime:', err);
         res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
 };
@@ -60,10 +60,8 @@ exports.getAnimeById = async (req, res) => {
                 const mediaResult = await mediaService.getMediaById(anime[field]);
                 if (mediaResult.media) {
                     anime[field] = `${process.env.BASE_URL}/api/fetch/media/${mediaResult.media._id}`;
-                    console.log(`Updated ${field}:`, anime[field]);
                 } else {
                     anime[field] = null;
-                    console.log(`Media not found for ${field}:`, mediaResult.error);
                 }
             }
         }
