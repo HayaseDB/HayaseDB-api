@@ -24,12 +24,15 @@ exports.createAnime = async (animeData) => {
     const sanitizedData = sanitizeAnimeData(animeData);
 
     try {
+        if (!sanitizedData.title) {
+            return { error: AnimeErrorCodes.INVALID_BODY };
+        }
         const existingAnime = await checkDuplicate(sanitizedData.title);
         if (existingAnime) {
             return { error: AnimeErrorCodes.DUPLICATE_TITLE };
         }
 
-        const anime = new Anime(sanitizedData);
+        const anime = new Anime({title: sanitizedData.title});
         await anime.save();
         return { data: anime };
     } catch (error) {
@@ -59,6 +62,13 @@ exports.editAnime = async (animeId, updateData) => {
     const sanitizedData = sanitizeAnimeData(updateData);
 
     try {
+
+
+        const anime = await Anime.findByIdAndUpdate(animeId, sanitizedData, { new: true });
+        if (!anime) {
+            return { error: AnimeErrorCodes.ANIME_NOT_FOUND };
+        }
+
         if (sanitizedData.title) {
             const existingAnime = await checkDuplicate(sanitizedData.title);
             if (existingAnime && existingAnime._id.toString() !== animeId) {
@@ -66,10 +76,6 @@ exports.editAnime = async (animeId, updateData) => {
             }
         }
 
-        const anime = await Anime.findByIdAndUpdate(animeId, sanitizedData, { new: true });
-        if (!anime) {
-            return { error: AnimeErrorCodes.ANIME_NOT_FOUND };
-        }
         return { data: anime };
     } catch (error) {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };

@@ -1,4 +1,4 @@
-const animeService = require('../../services/animeService');
+const animeService = require('../services/animeService');
 
 exports.createAnime = async (req, res) => {
     const { error, data } = await animeService.createAnime(req.body);
