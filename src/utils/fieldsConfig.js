@@ -4,7 +4,6 @@ module.exports = {
         title: {
             type: 'string',
             trim: true,
-            required: true,
             default: null,
             unique: true
         },
@@ -46,7 +45,6 @@ module.exports = {
         name: {
             type: 'string',
             trim: true,
-            required: true,
             default: null,
             unique: true
         },

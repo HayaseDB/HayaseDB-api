@@ -55,22 +55,24 @@ exports.editAnime = async (animeId, data) => {
     }
     try {
         const sanitizedData = sanitization.sanitizeData(data, 'anime');
-        const anime = await Anime.findByIdAndUpdate(animeId, sanitizedData, { new: true });
+        const existingAnime = await Anime.findById(animeId);
 
-        if (!anime) {
+        if (!existingAnime) {
             return { error: AnimeErrorCodes.ANIME_NOT_FOUND };
         }
 
         const uniqueFields = getUniqueFields('anime');
         for (const field of uniqueFields) {
-            if (sanitizedData[field] && sanitizedData[field] !== anime[field]) {
-                const existingDocument = await checkUniqueField(Anime, field, sanitizedData[field]);
+            if (sanitizedData[field] && sanitizedData[field] !== existingAnime[field]) {
+                const existingDocument = await checkUniqueField(Anime, field, sanitizedData[field], animeId);
                 if (existingDocument) {
                     return { error: AnimeErrorCodes.DUPLICATE };
                 }
             }
         }
-        return { data: anime };
+
+        const updatedAnime = await Anime.findByIdAndUpdate(animeId, sanitizedData, { new: true });
+        return { data: updatedAnime };
     } catch (error) {
         return handleDatabaseError(error);
     }

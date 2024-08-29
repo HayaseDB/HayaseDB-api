@@ -6,10 +6,11 @@ const getUniqueFields = (modelName) => {
     return Object.keys(config).filter(field => config[field].unique);
 };
 
-const checkUniqueField = async (model, fieldName, fieldValue) => {
-    const query = {};
-    query[fieldName] = fieldValue;
+const checkUniqueField = async (model, fieldName, fieldValue, excludeId) => {
+    const query = { [fieldName]: fieldValue };
+    if (excludeId) {
+        query._id = { $ne: excludeId };
+    }
     return await model.findOne(query);
 };
-
 module.exports = { getUniqueFields, checkUniqueField };
