@@ -4,16 +4,10 @@ const morgan = require('morgan');
 const { connectToMongoDB } = require('./utils/mongo');
 
 // Middleware imports
-require('./utils/validateEnv');
 const errorHandler = require('./middlewares/errorHandler');
 const notFoundHandler = require('./middlewares/notFoundHandler');
 
 
-// Controllers
-const userRoutes = require('./routes/userRoutes');
-const apiRoutes = require('./routes/apiRoutes');
-const mediaRoutes = require('./routes/api/mediaUploadRoutes');
-const dataRoutes = require('./routes/api/dataUploadRoutes');
 
 // Define express as "app"
 const app = express();
@@ -32,10 +26,11 @@ connectToMongoDB().then(r =>
   console.log("Connected to MongoDB")
 );
 
-// Routes
-app.use('/user', userRoutes);
 
-app.use('/api', apiRoutes)
+// Routes
+const userRoutes = require("./routes/userRoutes");
+
+app.use('/user', userRoutes);
 
 // Handlers
 app.use(errorHandler);
