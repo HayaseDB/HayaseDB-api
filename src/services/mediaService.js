@@ -1,7 +1,7 @@
 const MediaModel = require('../models/mediaModel');
 const { MediaErrorCodes } = require('../utils/errorCodes');
-const { Types } = require('mongoose');
-
+const { Types, startSession} = require('mongoose');
+const fieldsConfig = require('../utils/fieldsConfig');
 const isValidObjectId = (id) => Types.ObjectId.isValid(id);
 
 const createMediaDocument = async (file) => {
@@ -69,28 +69,48 @@ const updateDocumentFieldWithMedia = async (model, documentId, field, mediaId) =
 };
 
 const addMedia = async (model, documentId, field, file) => {
+    const session = await startSession();
+    session.startTransaction();
     let mediaResult;
+
     try {
+        const schemaConfig = fieldsConfig[model.modelName.toLowerCase()];
+
+        if (!schemaConfig[field]) {
+            return { error: { ...MediaErrorCodes.INVALID_BODY, message: 'Field is not configured.' } };
+        }
+
+        if (!schemaConfig[field].media) {
+            return { error: { ...MediaErrorCodes.INVALID_BODY, message: 'Field is not configured as media.' } };
+        }
+
         mediaResult = await createMediaDocument(file);
         if (mediaResult.error) {
+            await session.abortTransaction();
+            await session.endSession();
             return mediaResult;
         }
 
         const updatedDocumentResult = await updateDocumentFieldWithMedia(model, documentId, field, mediaResult.data._id);
         if (updatedDocumentResult.error) {
             await deleteMediaDocument(mediaResult.data._id);
+            await session.abortTransaction();
+            await session.endSession();
             return updatedDocumentResult;
         }
 
+        await session.commitTransaction();
+        await session.endSession();
         return { data: updatedDocumentResult.data };
     } catch (error) {
         if (mediaResult && mediaResult.data && mediaResult.data._id) {
             await deleteMediaDocument(mediaResult.data._id);
         }
+        await session.abortTransaction();
+        await session.endSession();
         return { error: { ...MediaErrorCodes.DATABASE_ERROR, message: 'Error adding media.', details: error.message } };
     }
 };
-
 
 const getMediaById = async (id) => {
     if (!isValidObjectId(id)) {
