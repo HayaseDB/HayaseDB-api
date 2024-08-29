@@ -1,8 +1,8 @@
 const express = require('express');
 
 const fetchRoutes = require('./api/fetchRoutes');
-const dataRoutes = require('./api/dataRoutes');
-const mediaRoutes = require('./api/mediaRoutes');
+const dataRoutes = require('./api/dataUploadRoutes');
+const mediaRoutes = require('./api/mediaUploadRoutes');
 
 const {authenticateApiKey} = require("../services/apiKeyService");
 const {authenticateUser} = require("../middlewares/authMiddleware");

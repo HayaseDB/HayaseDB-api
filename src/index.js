@@ -12,8 +12,8 @@ const notFoundHandler = require('./middlewares/notFoundHandler');
 // Controllers
 const userRoutes = require('./routes/userRoutes');
 const apiRoutes = require('./routes/apiRoutes');
-const mediaRoutes = require('./routes/api/mediaRoutes');
-const dataRoutes = require('./routes/api/dataRoutes');
+const mediaRoutes = require('./routes/api/mediaUploadRoutes');
+const dataRoutes = require('./routes/api/dataUploadRoutes');
 
 // Define express as "app"
 const app = express();
@@ -34,6 +34,7 @@ connectToMongoDB().then(r =>
 
 // Routes
 app.use('/user', userRoutes);
+
 app.use('/api', apiRoutes)
 
 // Handlers
