@@ -5,7 +5,8 @@ module.exports = {
             type: 'string',
             trim: true,
             required: true,
-            default: null
+            default: null,
+            unique: true
         },
         genre: {
             type: 'string',
@@ -27,6 +28,12 @@ module.exports = {
             trim: true,
             default: null
         },
+        characters: {
+            type: 'objectIds',
+            trim: true,
+            default: [],
+            ref: 'Character'
+        },
         cover: {
             type: 'objectId',
             trim: true,
@@ -40,7 +47,8 @@ module.exports = {
             type: 'string',
             trim: true,
             required: true,
-            default: null
+            default: null,
+            unique: true
         },
         role: {
             type: 'string',
@@ -53,9 +61,11 @@ module.exports = {
             default: null
         },
         image: {
-            type: 'string',
+            type: 'objectId',
             trim: true,
-            default: null
+            default: null,
+            ref: 'Media',
+            media: true
         }
     }
 };

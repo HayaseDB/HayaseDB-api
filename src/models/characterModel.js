@@ -6,12 +6,32 @@ const schemaConfig = fieldsConfig.character;
 const schemaFields = {};
 Object.keys(schemaConfig).forEach(field => {
     const { type, trim, required, default: defaultValue } = schemaConfig[field];
+
+    let mongooseType;
+    switch (type) {
+        case 'string':
+            mongooseType = String;
+            break;
+        case 'number':
+            mongooseType = Number;
+            break;
+        case 'date':
+            mongooseType = Date;
+            break;
+        case 'objectIds':
+            mongooseType = [mongoose.Schema.Types.ObjectId];
+            break;
+        case 'objectId':
+            mongooseType = mongoose.Schema.Types.ObjectId;
+            break;
+        default:
+            mongooseType = type;
+            break;
+    }
+
     schemaFields[field] = {
-        type: type === 'string' ? String
-            : type === 'number' ? Number
-                : type === 'date' ? Date
-                    : type,
-        trim: trim || undefined,
+        type: mongooseType,
+        trim: type === 'string' ? trim : undefined,
         required: required || undefined,
         default: defaultValue || undefined
     };

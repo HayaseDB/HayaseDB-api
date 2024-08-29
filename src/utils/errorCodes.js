@@ -1,7 +1,7 @@
 exports.AnimeErrorCodes = {
-    DUPLICATE_TITLE: {
-        code: 'DUPLICATE_TITLE',
-        message: 'Anime with this title already exists'
+    DUPLICATE: {
+        code: 'DUPLICATE',
+        message: 'Duplicated unique variable'
     },
     ANIME_NOT_FOUND: {
         code: 'ANIME_NOT_FOUND',
@@ -57,5 +57,17 @@ exports.CharacterErrorCodes = {
     INVALID_ID: {
         code: 'INVALID_ID',
         message: 'The provided ID is not valid'
-    }
+    },
+    INVALID_ANIME_ID: {
+        code: 'INVALID_ID',
+        message: 'The provided ID is not valid'
+    },
+    INVALID_BODY: {
+        code: 'INVALID_BODY',
+        message: 'The request body is not containing the required content or is invalid'
+    },
+    DUPLICATE: {
+        code: 'DUPLICATE',
+        message: 'Duplicated unique variable'
+    },
 };

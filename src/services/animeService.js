@@ -2,6 +2,7 @@ const Anime = require('../models/animeModel');
 const { AnimeErrorCodes } = require('../utils/errorCodes');
 const { Types } = require('mongoose');
 const sanitization = require('../utils/sanitization');
+const {getUniqueFields, checkUniqueField} = require("../utils/uniqueCheck");
 
 const isValidObjectId = (id) => Types.ObjectId.isValid(id);
 
@@ -15,9 +16,14 @@ exports.createAnime = async (data) => {
             return { error: AnimeErrorCodes.INVALID_BODY };
         }
 
-        const existingAnime = await Anime.findOne({ title: sanitizedData.title });
-        if (existingAnime) {
-            return { error: AnimeErrorCodes.DUPLICATE_TITLE };
+        const uniqueFields = getUniqueFields('anime');
+        for (const field of uniqueFields) {
+            if (sanitizedData[field]) {
+                const existingDocument = await checkUniqueField(Anime, field, sanitizedData[field]);
+                if (existingDocument) {
+                    return { error: AnimeErrorCodes.DUPLICATE };
+                }
+            }
         }
 
         const anime = new Anime(sanitizedData);
@@ -55,13 +61,15 @@ exports.editAnime = async (animeId, data) => {
             return { error: AnimeErrorCodes.ANIME_NOT_FOUND };
         }
 
-        if (sanitizedData.title) {
-            const existingAnime = await Anime.findOne({ title: sanitizedData.title });
-            if (existingAnime && existingAnime._id.toString() !== animeId) {
-                return { error: AnimeErrorCodes.DUPLICATE_TITLE };
+        const uniqueFields = getUniqueFields('anime');
+        for (const field of uniqueFields) {
+            if (sanitizedData[field] && sanitizedData[field] !== anime[field]) {
+                const existingDocument = await checkUniqueField(Anime, field, sanitizedData[field]);
+                if (existingDocument) {
+                    return { error: AnimeErrorCodes.DUPLICATE };
+                }
             }
         }
-
         return { data: anime };
     } catch (error) {
         return handleDatabaseError(error);

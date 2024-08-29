@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const fieldsConfig = require('../utils/fieldsConfig');
-const MediaModel = require('../models/mediaModel');
 
 const schemaConfig = fieldsConfig.anime;
 
@@ -19,6 +18,9 @@ Object.keys(schemaConfig).forEach(field => {
             break;
         case 'date':
             mongooseType = Date;
+            break;
+        case 'objectIds':
+            mongooseType = [mongoose.Schema.Types.ObjectId];
             break;
         case 'objectId':
             mongooseType = mongoose.Schema.Types.ObjectId;
