@@ -29,8 +29,10 @@ connectToMongoDB().then(r =>
 
 // Routes
 const userRoutes = require("./routes/userRoutes");
+const apiRoutes = require("./routes/apiRoutes");
 
 app.use('/user', userRoutes);
+app.use('/api', apiRoutes);
 
 // Handlers
 app.use(errorHandler);

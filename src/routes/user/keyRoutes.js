@@ -1,16 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const keyController = require('../../controllers/keyController');
-const userAuth = require('../../middlewares/userAuth');
 
-router.post('/create', userAuth, keyController.create);
+router.post('/create', keyController.create);
 
-router.get('/list', userAuth, keyController.list);
+router.get('/list', keyController.list);
 
-router.get('/validate', userAuth, keyController.validate);
+router.get('/validate', keyController.validate);
 
-router.delete('/revoke', userAuth, keyController.revoke);
+router.delete('/revoke', keyController.revoke);
 
-router.post('/regenerate', userAuth, keyController.regenerate);
+router.post('/regenerate', keyController.regenerate);
 
 module.exports = router;

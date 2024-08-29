@@ -1,5 +1,6 @@
 const express = require('express');
 const userController = require('../controllers/userController');
+const userAuth = require('../middlewares/userAuth');
 
 const keyRoutes = require('./user/keyRoutes');
 
@@ -13,6 +14,6 @@ router.post('/register', userController.register);
 router.post('/login', userController.login);
 
 // /user/key routes
-router.use('/key', keyRoutes)
+router.use('/key', userAuth, keyRoutes)
 
 module.exports = router;
