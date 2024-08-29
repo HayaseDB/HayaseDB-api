@@ -1,34 +1,76 @@
 const animeService = require('../services/animeService');
-
+const mediaService = require('../services/mediaService');
+const {AnimeErrorCodes} = require("../utils/errorCodes");
+const fieldsConfig = require('../utils/fieldsConfig');
 exports.createAnime = async (req, res) => {
-    const { error, data } = await animeService.createAnime(req.body);
-    if (error) {
-        return res.status(400).json({ error: error });
+    try {
+        const result = await animeService.createAnime(req.body);
+
+        if (result.error) {
+            return res.status(400).json({ error: result.error });
+        }
+
+        res.status(201).json(result.data);
+    } catch (err) {
+        res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
-    res.status(201).json(data);
 };
 
 exports.deleteAnime = async (req, res) => {
-    const { error } = await animeService.deleteAnime(req.params.id);
-    if (error) {
-        return res.status(404).json({ error: error });
+    try {
+        const result = await animeService.deleteAnime(req.params.id);
+
+        if (result.error) {
+            return res.status(404).json({ error: result.error });
+        }
+
+        res.status(204).end();
+    } catch (err) {
+        res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
-    res.status(204).end();
 };
 
 exports.editAnime = async (req, res) => {
-    const { error, data } = await animeService.editAnime(req.params.id, req.body);
-    if (error) {
-        return res.status(404).json({ error: error });
+    try {
+        const result = await animeService.editAnime(req.params.id, req.body);
+
+        if (result.error) {
+            return res.status(result.error.code === 'INVALID_BODY' ? 400 : 404).json({ error: result.error });
+        }
+
+        res.json(result.data);
+    } catch (err) {
+        res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
-    res.json(data);
 };
 
 exports.getAnimeById = async (req, res) => {
-    const { error, data } = await animeService.getAnimeById(req.params.id);
-    if (error) {
-        return res.status(404).json({ error: error });
-    }
-    res.json(data);
-};
+    try {
+        const result = await animeService.getAnimeById(req.params.id);
 
+        if (result.error) {
+            return res.status(404).json({ error: result.error });
+        }
+
+        let anime = result.data.toObject();
+        const schemaConfig = fieldsConfig.anime;
+
+        for (const field in schemaConfig) {
+            if (schemaConfig[field].media && anime[field]) {
+                const mediaResult = await mediaService.getMediaById(anime[field]);
+                if (mediaResult.media) {
+                    anime[field] = `${process.env.BASE_URL}/api/fetch/media/${mediaResult.media._id}`;
+                    console.log(`Updated ${field}:`, anime[field]);
+                } else {
+                    anime[field] = null;
+                    console.log(`Media not found for ${field}:`, mediaResult.error);
+                }
+            }
+        }
+
+        res.json(anime);
+    } catch (err) {
+        console.error("Error in getAnimeById:", err);
+        res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
+    }
+};

@@ -6,7 +6,7 @@ const mediaController = require('../../../controllers/mediaController');
 const router = express.Router();
 
 router.post('/anime', animeController.createAnime);
-router.post('/media/:modelType', upload.single('file'), mediaController.postMedia);
+router.post('/media/:model', upload.single('file'), mediaController.postMedia);
 
 
 module.exports = router;

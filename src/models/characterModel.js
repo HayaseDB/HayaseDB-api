@@ -1,28 +1,22 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const fieldsConfig = require('../utils/fieldsConfig');
 
-const characterSchema = new Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    description: {
-        type: String,
-        trim: true,
-    },
-    animeId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Animes',
-    },
-    mediaId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Media',
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    }
+const schemaConfig = fieldsConfig.character;
+
+const schemaFields = {};
+Object.keys(schemaConfig).forEach(field => {
+    const { type, trim, required, default: defaultValue } = schemaConfig[field];
+    schemaFields[field] = {
+        type: type === 'string' ? String
+            : type === 'number' ? Number
+                : type === 'date' ? Date
+                    : type,
+        trim: trim || undefined,
+        required: required || undefined,
+        default: defaultValue || undefined
+    };
 });
+
+const characterSchema = new mongoose.Schema(schemaFields, { timestamps: true });
 
 module.exports = mongoose.model('Character', characterSchema, 'Characters');
