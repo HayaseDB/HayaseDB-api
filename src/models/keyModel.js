@@ -5,7 +5,7 @@ const keySchema = new Schema({
     title: { type: String, required: true },
     key: { type: String, required: true, unique: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    rateLimit: { type: Number, default: 5 },
+    rateLimit: { type: Number, default: 60 },
     requests: { type: Number, default: 0 },
     rateLimitActive: { type: Boolean, default: true },
     lastRequest: { type: Date, default: Date.now },

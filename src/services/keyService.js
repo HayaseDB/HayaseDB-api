@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const { KeyErrorCodes } = require('../utils/errorCodes');
 
 // Create a new API key
-exports.createKey = async (title, userId, rateLimit = 5, rateLimitActive = true) => {
+exports.createKey = async (title, userId, rateLimit = 60, rateLimitActive = true) => {
     try {
         const key = crypto.randomBytes(32).toString('hex');
         const newKey = new Key({ title, key, userId, rateLimit, rateLimitActive });

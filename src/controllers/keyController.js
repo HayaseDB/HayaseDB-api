@@ -4,9 +4,9 @@ const { KeyErrorCodes } = require('../utils/errorCodes');
 // Create a new API key
 exports.create = async (req, res) => {
     try {
-        const { title, rateLimit, rateLimitActive } = req.body;
+        const { title } = req.body;
         const userId = req.user._id;
-        const key = await keyService.createKey(title, userId, rateLimit, rateLimitActive);
+        const key = await keyService.createKey(title, userId);
         res.status(201).json({ message: 'API key created successfully', keyId: key._id, title: key.title, key: key.key });
     } catch (error) {
         const status = error.code === KeyErrorCodes.DUPLICATE_KEY.code ? 409 : 500;
