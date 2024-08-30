@@ -11,7 +11,11 @@ const parseField = (field, value, fieldConfig) => {
         return parseInt(value, 10);
     }
     if (fieldConfig.type === 'date' && fieldConfig.parse) {
-        return new Date(value);
+        const date = new Date(value);
+        if (isNaN(date.getTime())) {
+            throw new Error(`Invalid date format for field "${field}"`);
+        }
+        return date;
     }
     return value;
 };

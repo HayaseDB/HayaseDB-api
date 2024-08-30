@@ -32,7 +32,7 @@ exports.editAnime = async (req, res) => {
     try {
         const result = await animeService.editAnime(req.params.id, req.body);
         if (result.error) {
-            return res.status(result.error.code === 'INVALID_BODY' ? 400 : 404).json({ error: result.error });
+            return res.status(result.error.code === 'INVALID_BODY' || 'DATABASE_ERROR' ? 400 : 404).json({ error: result.error });
         }
         res.json(result.data);
     } catch (err) {
