@@ -1,7 +1,10 @@
 const Key = require('../models/keyModel');
 const crypto = require('crypto');
 
-exports.createKey = async (title, userId) => {
+
+
+
+exports.createKey = async (title, userId, rateLimit, rateLimitActive) => {
     const key = crypto.randomBytes(32).toString('hex');
     const newKey = new Key({ title, key, userId });
     return await newKey.save();
@@ -9,7 +12,7 @@ exports.createKey = async (title, userId) => {
 
 // List API keys for a user
 exports.listKeys = async (userId) => {
-    return Key.find({userId}).select('_id title rateLimit userId createdAt');
+    return Key.find({userId}).select('_id title userId rateLimit requests rateLimitActive lastRequest createdAt');
 };
 
 // Revoke an API key
@@ -34,10 +37,10 @@ exports.regenerateKey = async (keyId) => {
 
 // Find a key by its value
 exports.findByKey = async (key) => {
-    return Key.findOne({key}).select('_id title rateLimit userId createdAt');
+    return Key.findOne({key}).select('_id title userId rateLimit requests rateLimitActive lastRequest createdAt');
 };
 
 // Find a key by its ID
 exports.findById = async (keyId) => {
-    return Key.findById(keyId).select('_id title rateLimit userId createdAt');
+    return Key.findById(keyId).select('_id title userId rateLimit requests rateLimitActive lastRequest createdAt');
 };

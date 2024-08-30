@@ -6,7 +6,7 @@ exports.create = async (req, res) => {
         const { title } = req.body;
         const userId = req.user._id;
         const key = await keyService.createKey(title, userId);
-        res.status(201).json({ message: 'API key created successfully', keyId: key._id, key: key.key });
+        res.status(201).json({ message: 'API key created successfully', keyId: key._id, title: key.title, key: key.key });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

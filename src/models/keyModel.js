@@ -4,9 +4,19 @@ const { Schema } = mongoose;
 const keySchema = new Schema({
     title: { type: String, required: true },
     key: { type: String, required: true, unique: true },
-    createdAt: { type: Date, default: Date.now },
-    rateLimit: { type: Number, default: 1000 },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    rateLimit: { type: Number, default: 5 },
+    requests: { type: Number, default: 0 },
+    rateLimitActive: { type: Boolean, default: true },
+    lastRequest: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Key', keySchema, 'Keys');
+keySchema.methods.resetRequestCount = function() {
+    this.requests = 0;
+    this.lastRequest = Date.now();
+};
+
+const Key = mongoose.model('Key', keySchema, 'Keys');
+
+module.exports = Key;
