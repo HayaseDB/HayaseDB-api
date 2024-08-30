@@ -1,4 +1,5 @@
 const keyService = require('../services/keyService');
+const { KeyErrorCodes } = require('../utils/errorCodes');
 
 const allowedOrigins = [
     'http://localhost:3000',
@@ -34,16 +35,16 @@ const validateAPIKey = async (apiKey) => {
         }
 
         if (key.requests > key.rateLimit) {
-            return { isValid: false, key: null, error: 'Rate limit exceeded' };
+            return { isValid: false, key: null, error: KeyErrorCodes.RATE_LIMIT_EXCEEDED };
         }
 
         await key.save();
         return { isValid: true, key };
     } catch (err) {
-        console.error('Error validating API key:', err);
-        return { isValid: false, key: null, error: 'Internal server error' };
+        return { isValid: false, key: null, error: KeyErrorCodes.INTERNAL_SERVER_ERROR };
     }
 };
+
 
 exports.combinedAuthMiddleware = async (req, res, next) => {
     const origin = req.headers.origin;
@@ -53,7 +54,11 @@ exports.combinedAuthMiddleware = async (req, res, next) => {
     let apiKeyValidation = { isValid: false, key: null };
 
     if (apiKey) {
-        apiKeyValidation = await validateAPIKey(apiKey);
+        try {
+            apiKeyValidation = await validateAPIKey(apiKey);
+        } catch (error) {
+            return res.status(500).json(KeyErrorCodes.INTERNAL_SERVER_ERROR);
+        }
     }
 
     if (isOriginAllowed || apiKeyValidation.isValid) {
@@ -71,8 +76,8 @@ exports.combinedAuthMiddleware = async (req, res, next) => {
 
         return next();
     } else {
-        const status = apiKeyValidation.error === 'Rate limit exceeded' ? 429 : 403;
-        const message = apiKeyValidation.error || 'Forbidden: Invalid origin or API key';
+        const status = apiKeyValidation.code === 'INVALID_KEY' ? 429 : 403;
+        const message = apiKeyValidation.error || KeyErrorCodes.REQUEST_REFUSED;
         return res.status(status).json({ error: message });
     }
 };
