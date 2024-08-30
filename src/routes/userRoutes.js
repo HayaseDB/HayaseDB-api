@@ -1,8 +1,19 @@
 const express = require('express');
-const router = express.Router();
 const userController = require('../controllers/userController');
+const userAuth = require('../middlewares/userAuth');
 
-router.post('/register', userController.registerUser);
-router.get('/login', userController.loginUser);
+const keyRoutes = require('./user/keyRoutes');
+
+const router = express.Router();
+
+
+// Register route
+router.post('/register', userController.register);
+
+// Login route
+router.post('/login', userController.login);
+
+// /user/key routes
+router.use('/key', userAuth, keyRoutes)
 
 module.exports = router;

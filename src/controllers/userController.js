@@ -1,48 +1,33 @@
 const userService = require('../services/userService');
 
-exports.registerUser = async (req, res) => {
+exports.register = async (req, res) => {
     try {
-        const newUser = await userService.createUser(req.body);
-        
-        const token = userService.generateToken(newUser);
-        res.json({
-            message: 'Registered  successful',
-            user: {
-                id: newUser._id,
-                username: newUser.username,
-                email: newUser.email
-            },
-            token
-        });    } catch (error) {
-        res.status(400).json({ message: error.message });
+        const { username, email, password } = req.body;
+
+
+        const existingUser = await userService.findUserByEmail(email);
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email already in use' });
+        }
+
+        const user = await userService.register(username, email, password);
+        return res.status(201).json({ message: 'User registered successfully', userId: user._id });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
     }
 };
 
-exports.loginUser = async (req, res) => {
-    const { email, password } = req.body;
-
+exports.login = async (req, res) => {
     try {
-        const user = await userService.getUserByEmail(email);
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid email or password' });
-        }
+        const { email, password } = req.body;
 
-        const isPasswordValid = await userService.validatePassword(user, password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ message: 'Invalid email or password' });
-        }
-        
-        const token = userService.generateToken(user);
-        res.json({
+        const { user, token } = await userService.login(email, password);
+        return res.status(200).json({
             message: 'Login successful',
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email
-            },
-            token
+            token,
+            user: { id: user._id, username: user.username, email: user.email },
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 };
