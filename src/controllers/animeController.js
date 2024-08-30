@@ -12,7 +12,6 @@ exports.createAnime = async (req, res) => {
         }
         res.status(201).json(result.data);
     } catch (err) {
-        console.error('Error creating anime:', err);
         res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
 };
@@ -72,7 +71,6 @@ exports.getAnimeById = async (req, res) => {
 
         res.json(anime);
     } catch (err) {
-        console.error("Error in getAnimeById:", err);
         res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
 };

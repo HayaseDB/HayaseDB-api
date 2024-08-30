@@ -20,7 +20,6 @@ const validateAPIKey = async (apiKey) => {
     try {
         const key = await keyService.findByKey(apiKey);
         if (!key) return { isValid: false, key: null };
-        console.log(key)
         if (!key.rateLimitActive) return { isValid: true, key };
 
 
