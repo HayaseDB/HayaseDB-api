@@ -16,7 +16,7 @@ const parseField = (field, value, fieldConfig) => {
     return value;
 };
 
-exports.sanitizeData = (data, modelType) => {
+exports.sanitizeData = (data, modelType, isUpdate = false) => {
     const config = fieldsConfig[modelType];
     if (!config) {
         throw new Error('Invalid model type');
@@ -28,7 +28,9 @@ exports.sanitizeData = (data, modelType) => {
         const rules = config[field];
         let value = data[field];
 
-        validateRequiredField(field, value, rules);
+        if (!isUpdate) {
+            validateRequiredField(field, value, rules);
+        }
 
         if (value !== undefined && value !== null) {
             if (rules.trim && typeof value === 'string') {
@@ -38,7 +40,7 @@ exports.sanitizeData = (data, modelType) => {
             value = parseField(field, value, rules);
 
             sanitizedData[field] = value;
-        } else if (rules.default !== undefined) {
+        } else if (!isUpdate && rules.default !== undefined) {
             sanitizedData[field] = rules.default;
         }
     });

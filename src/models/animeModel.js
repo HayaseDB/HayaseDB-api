@@ -19,6 +19,9 @@ Object.keys(schemaConfig).forEach(field => {
         case 'date':
             mongooseType = Date;
             break;
+        case 'array':
+            mongooseType = Array;
+            break;
         case 'objectIds':
             mongooseType = [mongoose.Schema.Types.ObjectId];
             break;

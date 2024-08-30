@@ -4,17 +4,31 @@ const { CharacterErrorCodes, AnimeErrorCodes} = require('../utils/errorCodes');
 const { Types, startSession } = require('mongoose');
 const sanitization = require('../utils/sanitization');
 const {getUniqueFields, checkUniqueField} = require("../utils/uniqueCheck");
+const {character} = require("../utils/fieldsConfig");
 
+const getEditableFields = () => {
+    return Object.keys(character).filter(field => character[field].editable);
+};
 const isValidObjectId = (id) => Types.ObjectId.isValid(id);
 
 const handleDatabaseError = (error) => ({ error: { ...CharacterErrorCodes.DATABASE_ERROR, details: error.message } });
+
 
 exports.createCharacter = async (data, animeId) => {
     const session = await startSession();
     session.startTransaction();
 
     try {
-        const sanitizedData = sanitization.sanitizeData(data, 'character');
+
+        const editableFields = getEditableFields();
+        const createData = Object.keys(data).reduce((acc, key) => {
+            if (editableFields.includes(key)) {
+                acc[key] = data[key];
+            }
+            return acc;
+        }, {});
+
+        const sanitizedData = sanitization.sanitizeData(createData, 'character');
 
         if (!sanitizedData.name) {
             return { error: AnimeErrorCodes.INVALID_BODY };
@@ -25,6 +39,8 @@ exports.createCharacter = async (data, animeId) => {
             await session.endSession();
             return { error: CharacterErrorCodes.INVALID_ANIME_ID };
         }
+
+
 
         const uniqueFields = getUniqueFields('character');
         for (const field of uniqueFields) {
@@ -66,19 +82,28 @@ exports.createCharacter = async (data, animeId) => {
     }
 };
 
-
-
 exports.editCharacter = async (characterId, data) => {
     if (!isValidObjectId(characterId)) {
         return { error: CharacterErrorCodes.INVALID_ID };
     }
+
     try {
-        const sanitizedData = sanitization.sanitizeData(data, 'character');
+        const editableFields = getEditableFields();
+        const updateData = Object.keys(data).reduce((acc, key) => {
+            if (editableFields.includes(key)) {
+                acc[key] = data[key];
+            }
+            return acc;
+        }, {});
+
+        const sanitizedData = sanitization.sanitizeData(updateData, 'character');
         const existingCharacter = await CharacterModel.findById(characterId);
 
         if (!existingCharacter) {
             return { error: CharacterErrorCodes.CHARACTER_NOT_FOUND };
         }
+
+
 
         const uniqueFields = getUniqueFields('character');
         for (const field of uniqueFields) {
@@ -96,6 +121,7 @@ exports.editCharacter = async (characterId, data) => {
         return handleDatabaseError(error);
     }
 };
+
 exports.deleteCharacter = async (characterId) => {
     if (!isValidObjectId(characterId)) {
         return { error: CharacterErrorCodes.INVALID_ID };
