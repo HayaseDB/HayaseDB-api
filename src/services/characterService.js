@@ -2,8 +2,8 @@ const CharacterModel = require('../models/characterModel');
 const AnimeModel = require('../models/animeModel');
 const { CharacterErrorCodes, AnimeErrorCodes} = require('../utils/errorCodes');
 const { Types, startSession } = require('mongoose');
-const sanitization = require('../utils/sanitization');
-const {getUniqueFields, checkUniqueField} = require("../utils/uniqueCheck");
+const sanitization = require('../utils/sanitizationUtil');
+const {getUniqueFields, checkUniqueField} = require("../utils/uniqueCheckUtil");
 const {character} = require("../utils/fieldsConfig");
 
 const getEditableFields = () => {

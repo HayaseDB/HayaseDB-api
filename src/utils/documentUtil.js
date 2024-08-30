@@ -1,10 +1,10 @@
-const mediaUtils = require('./mediaUtils');
+const mediaUtil = require('./mediaUtil');
 const characterService = require('../services/characterService');
-const fieldsConfig = require('../utils/fieldsConfig');
+const fieldsConfig = require('./fieldsConfig');
 
 const fetchAndNestDocument = async (field, ids) => {
     const serviceMap = {
-        'Media': mediaUtils,
+        'Media': mediaUtil,
         'Character': characterService,
     };
 
@@ -21,7 +21,7 @@ const fetchAndNestDocument = async (field, ids) => {
 
                 for (const nestedField in fieldsConfig.anime) {
                     if (fieldsConfig.anime[nestedField].media && docData[nestedField]) {
-                        docData[nestedField] = await mediaUtils.convertMediaToUrl(docData[nestedField]);
+                        docData[nestedField] = await mediaUtil.convertMediaToUrl(docData[nestedField]);
                     }
                 }
 

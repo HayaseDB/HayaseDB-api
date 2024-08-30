@@ -13,4 +13,5 @@ const checkUniqueField = async (model, fieldName, fieldValue, excludeId) => {
     }
     return await model.findOne(query);
 };
+
 module.exports = { getUniqueFields, checkUniqueField };
