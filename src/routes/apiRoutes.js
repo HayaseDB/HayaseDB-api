@@ -11,7 +11,7 @@ const router = express.Router();
 
 
 
-router.use('/modify', webAuth, userAuth, requestLogger, modifyRoutes)
+router.use('/modify', webAuth, userAuth, modifyRoutes)
 
 router.use('/fetch', orAuth, fetchRoutes);
 
