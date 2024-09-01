@@ -1,19 +1,70 @@
+const cors = require('cors');
 const keyService = require('../services/keyService');
 const { KeyErrorCodes } = require('../utils/errorCodes');
 
 const allowedOrigins = [
+    'https://hayaseDB.com',
     'http://localhost:3000',
-    //'https://hayaseDB.com'
+    'http://localhost:8080',
 ];
-
 const rateLimitWindow = 60 * 1000;
 
-const checkOrigin = (origin) => allowedOrigins.includes(origin);
+const corsOptions = {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
+};
 
-const setCORSHeaders = (res, origin) => {
+const keyAuth = async (req, res, next) => {
+    const apiKey = req.headers['x-api-key'];
+
+    if (!apiKey) {
+        return res.status(401).json({ error: 'API key required' });
+    }
+
+    try {
+        const apiKeyValidation = await validateAPIKey(apiKey);
+
+        if (apiKeyValidation.isValid) {
+            req.apiKey = apiKeyValidation.key;
+            return next();
+        } else {
+            const status = apiKeyValidation.error === KeyErrorCodes.RATE_LIMIT_EXCEEDED ? 429 : 403;
+            return res.status(status).json({ error: apiKeyValidation.error || 'Invalid API key' });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+const webAuth = (req, res, next) => {
+    const origin = req.headers.origin;
+
+    if (!allowedOrigins.includes(origin)) {
+        return res.status(403).json({ error: 'Origin not allowed' });
+    }
+
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key');
+
+    return next();
+};
+
+const orAuth = (req, res, next) => {
+    keyAuth(req, res, (keyAuthError) => {
+        if (!keyAuthError) {
+            return next();
+        }
+
+        webAuth(req, res, (webAuthError) => {
+            if (!webAuthError) {
+                return next();
+            }
+
+            return res.status(403).json({ error: 'Access denied' });
+        });
+    });
 };
 
 const validateAPIKey = async (apiKey) => {
@@ -45,38 +96,9 @@ const validateAPIKey = async (apiKey) => {
 };
 
 
-exports.combinedAuthMiddleware = async (req, res, next) => {
-    const origin = req.headers.origin;
-    const apiKey = req.headers['x-api-key'];
-
-    const isOriginAllowed = checkOrigin(origin);
-    let apiKeyValidation = { isValid: false, key: null };
-
-    if (apiKey) {
-        try {
-            apiKeyValidation = await validateAPIKey(apiKey);
-        } catch (error) {
-            return res.status(500).json(KeyErrorCodes.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    if (isOriginAllowed || apiKeyValidation.isValid) {
-        if (isOriginAllowed) {
-            setCORSHeaders(res, origin);
-        }
-
-        if (req.method === 'OPTIONS') {
-            return res.status(204).end();
-        }
-
-        if (apiKeyValidation.isValid) {
-            req.apiKey = apiKeyValidation.key;
-        }
-
-        return next();
-    } else {
-        const status = apiKeyValidation.code === 'INVALID_KEY' ? 429 : 403;
-        const message = apiKeyValidation.error || KeyErrorCodes.REQUEST_REFUSED;
-        return res.status(status).json({ error: message });
-    }
+module.exports = {
+    keyAuth,
+    webAuth,
+    orAuth,
+    corsOptions
 };

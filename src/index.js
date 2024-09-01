@@ -26,12 +26,18 @@ connectToMongoDB().then(r =>
   console.log("Connected to MongoDB")
 );
 
+const cors = require('cors')
+
 
 // Routes
 const userRoutes = require("./routes/userRoutes");
 const apiRoutes = require("./routes/apiRoutes");
+const {webAuth, corsOptions} = require("./middlewares/corsMiddleware");
 
-app.use('/user', userRoutes);
+app.use(cors(corsOptions));
+
+
+app.use('/user', webAuth, userRoutes);
 app.use('/api', apiRoutes);
 
 // Handlers
