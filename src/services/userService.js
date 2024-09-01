@@ -52,14 +52,14 @@ const generateToken = (userId) => {
     return jwt.sign(payload, secret, options);
 };
 
-exports.verifyToken = (token) => {
+exports.verifyToken = async (token) => {
     try {
-        return jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return { isValid: true, userId: decoded.userId };
     } catch (error) {
-        throw new Error('Invalid or expired token');
+        return { isValid: false };
     }
 };
-
 exports.findUserById = async (userId) => {
     return User.findById(userId);
 };
@@ -67,3 +67,5 @@ exports.findUserById = async (userId) => {
 exports.findUserByEmail = async (email) => {
     return User.findOne({ email });
 };
+
+

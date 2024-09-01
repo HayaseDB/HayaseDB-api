@@ -31,3 +31,32 @@ exports.login = async (req, res) => {
         return res.status(400).json({ message: error.message });
     }
 };
+
+exports.check = async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        const token = authHeader && authHeader.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        const { isValid, userId } = await userService.verifyToken(token);
+
+        if (isValid) {
+            const user = await userService.findUserById(userId);
+            if (user) {
+                return res.status(200).json({
+                    isValid: true,
+                    user: { id: user._id, username: user.username }
+                });
+            } else {
+                return res.status(404).json({ message: 'User not found' });
+            }
+        } else {
+            return res.status(403).json({ isValid: false });
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
