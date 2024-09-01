@@ -1,7 +1,31 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+const {USERNAME_LIST} = require('../utils/usernameList.js');
+const crypto = require('crypto');
 
-exports.register = async (username, email, password) => {
+
+async function generateUsername() {
+    let username;
+    let isTaken = true;
+
+    while (isTaken) {
+        const randomWord = USERNAME_LIST[Math.floor(Math.random() * USERNAME_LIST.length)];
+        const randomSuffix = crypto.randomInt(1, 1000);
+        username = `${randomWord}${randomSuffix}`;
+
+        isTaken = await isUsernameTaken(username);
+    }
+
+    return username;
+}
+
+const isUsernameTaken = async (username) => {
+    const user = await User.findOne({ username: username });
+    return !!user;
+};
+
+exports.register = async (email, password) => {
+    const username = await generateUsername();
     const user = new User({ username, email, password });
     return await user.save();
 };

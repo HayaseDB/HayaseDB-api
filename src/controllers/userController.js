@@ -2,7 +2,7 @@ const userService = require('../services/userService');
 
 exports.register = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { email, password } = req.body;
 
 
         const existingUser = await userService.findUserByEmail(email);
@@ -10,7 +10,7 @@ exports.register = async (req, res) => {
             return res.status(400).json({ message: 'Email already in use' });
         }
 
-        const user = await userService.register(username, email, password);
+        const user = await userService.register(email, password);
         return res.status(201).json({ message: 'User registered successfully', userId: user._id });
     } catch (error) {
         return res.status(500).json({ message: error.message });
