@@ -6,7 +6,7 @@ COPY package*.json ./
 
 # Install dependencies (only production dependencies)
 ARG NODE_ENV
-RUN npm ci --only=production
+RUN npm install
 
 COPY ./src ./src
 
