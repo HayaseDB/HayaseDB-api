@@ -6,6 +6,8 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:8080',
     'https://api.hayasedb.com',
+    'https://web.hayasedb.com',
+
 ];
 const rateLimitWindow = 60 * 1000;
 
