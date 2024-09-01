@@ -1,4 +1,3 @@
-const cors = require('cors');
 const keyService = require('../services/keyService');
 const { KeyErrorCodes } = require('../utils/errorCodes');
 
@@ -12,7 +11,8 @@ const rateLimitWindow = 60 * 1000;
 const corsOptions = {
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+    credentials: true,
 };
 
 const keyAuth = async (req, res, next) => {
@@ -52,27 +52,38 @@ const webAuth = (req, res, next) => {
 };
 
 const orAuth = (req, res, next) => {
-    keyAuth(req, res, (keyAuthError) => {
-        if (!keyAuthError) {
-            return next();
-        }
+    const apiKey = req.headers['x-api-key'];
 
+    if (apiKey) {
+        keyAuth(req, res, (keyAuthError) => {
+            if (!keyAuthError) {
+                return next();
+            }
+
+            return res.status(403).json({ error: 'Invalid API key' });
+        });
+    } else {
         webAuth(req, res, (webAuthError) => {
             if (!webAuthError) {
                 return next();
             }
-
-            return res.status(403).json({ error: 'Access denied' });
+            return res.status(403).json({ error: 'Origin not allowed' });
         });
-    });
+    }
 };
+
 
 const validateAPIKey = async (apiKey) => {
     try {
         const key = await keyService.findByKey(apiKey);
-        if (!key) return { isValid: false, key: null };
-        if (!key.rateLimitActive) return { isValid: true, key };
 
+        if (!key) {
+            return { isValid: false, key: null, error: KeyErrorCodes.KEY_NOT_FOUND };
+        }
+
+        if (!key.rateLimitActive) {
+            return { isValid: true, key };
+        }
 
         const currentTime = Date.now();
         const timeDifference = currentTime - new Date(key.lastRequest).getTime();
@@ -90,11 +101,16 @@ const validateAPIKey = async (apiKey) => {
 
         await key.save();
         return { isValid: true, key };
-    } catch (err) {
+
+    } catch (error) {
+        console.error("validateAPIKey Error:", error);
+
+        if (error === KeyErrorCodes.KEY_NOT_FOUND) {
+            return { isValid: false, key: null, error: KeyErrorCodes.KEY_NOT_FOUND };
+        }
         return { isValid: false, key: null, error: KeyErrorCodes.INTERNAL_SERVER_ERROR };
     }
 };
-
 
 module.exports = {
     keyAuth,
