@@ -106,8 +106,6 @@ const validateAPIKey = async (apiKey) => {
         return { isValid: true, key };
 
     } catch (error) {
-        console.error("validateAPIKey Error:", error);
-
         if (error === KeyErrorCodes.KEY_NOT_FOUND) {
             return { isValid: false, key: null, error: KeyErrorCodes.KEY_NOT_FOUND };
         }
