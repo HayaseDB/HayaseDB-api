@@ -1,16 +1,19 @@
 
 services:
   hayasedb:
-    container_name: HayaseDB-prod
+    container_name: HayaseDB-dev
     restart: always
     build:
       context: .
       args:
-        NODE_ENV: production
+        NODE_ENV: development
+    volumes:
+      - ./src:/usr/src/app/src
+      - /usr/src/app/node_modules
     ports:
       - "3000:3000"
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       MONGO_USERNAME: ${MONGO_USERNAME}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       MONGO_DATABASE: ${MONGO_DATABASE}
