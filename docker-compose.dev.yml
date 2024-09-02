@@ -7,6 +7,7 @@ services:
       context: .
       args:
         NODE_ENV: development
+      dockerfile: Dockerfile.dev
     volumes:
       - ./src:/usr/src/app/src
       - /usr/src/app/node_modules
