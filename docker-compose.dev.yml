@@ -1,7 +1,6 @@
 
 services:
-
-  hayasedb-dev:
+  hayasedb:
     container_name: HayaseDB-dev
     restart: always
     build:
@@ -38,6 +37,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    attach: false
 
 volumes:
   mongo-data:
