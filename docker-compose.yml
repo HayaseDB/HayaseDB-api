@@ -21,7 +21,6 @@ services:
     depends_on:
       - mongo
     pull_policy: build
-
   mongo:
     container_name: HayaseDB-mongo
     image: mongo:latest
