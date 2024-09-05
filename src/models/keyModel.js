@@ -6,6 +6,7 @@ const keySchema = new Schema({
     key: { type: String, required: true, unique: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     rateLimit: { type: Number, default: 60 },
+    limitRequestsCounter: { type: Number, default: 0 },
     requests: { type: Number, default: 0 },
     rateLimitActive: { type: Boolean, default: true },
     lastRequest: { type: Date, default: Date.now },
@@ -13,7 +14,7 @@ const keySchema = new Schema({
 });
 
 keySchema.methods.resetRequestCount = function() {
-    this.requests = 0;
+    this.limitRequestsCounter = 0;
     this.lastRequest = Date.now();
 };
 

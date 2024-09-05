@@ -19,7 +19,7 @@ exports.createKey = async (title, userId, rateLimit = 60, rateLimitActive = true
 // List API keys for a user
 exports.listKeys = async (userId) => {
     try {
-        return await Key.find({ userId }).select('_id title userId rateLimit rateLimitActive requests lastRequest createdAt');
+        return await Key.find({ userId }).select('_id title userId rateLimit rateLimitActive requests limitRequestsCounter lastRequest createdAt');
     } catch (error) {
         throw KeyErrorCodes.DATABASE_ERROR;
     }
@@ -61,7 +61,7 @@ exports.regenerateKey = async (keyId) => {
 // Find a key by its value
 exports.findByKey = async (key) => {
     try {
-        const keyData = await Key.findOne({ key }).select('_id title userId rateLimit rateLimitActive requests lastRequest createdAt');
+        const keyData = await Key.findOne({ key }).select('_id title userId rateLimit rateLimitActive requests lastRequest createdAt limitRequestsCounter');
         if (!keyData) {
             throw KeyErrorCodes.KEY_NOT_FOUND;
         }

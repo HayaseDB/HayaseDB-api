@@ -91,21 +91,32 @@ const validateAPIKey = async (apiKey) => {
         const currentTime = Date.now();
         const timeDifference = currentTime - new Date(key.lastRequest).getTime();
 
+
+
         if (timeDifference > rateLimitWindow) {
-            key.requests = 1;
+            key.limitRequestsCounter = 1;
             key.lastRequest = currentTime;
         } else {
-            key.requests += 1;
+            key.limitRequestsCounter += 1;
         }
 
-        if (key.requests > key.rateLimit) {
+        if (isNaN(key.requests)) {
+            key.requests = 0;
+        }
+        key.requests += 1;
+
+        if (key.limitRequestsCounter > key.rateLimit) {
             return { isValid: false, key: null, error: KeyErrorCodes.RATE_LIMIT_EXCEEDED };
         }
 
         await key.save();
+
+
+
         return { isValid: true, key };
 
     } catch (error) {
+        console.error('Error in validateAPIKey:', error);
         if (error === KeyErrorCodes.KEY_NOT_FOUND) {
             return { isValid: false, key: null, error: KeyErrorCodes.KEY_NOT_FOUND };
         }
