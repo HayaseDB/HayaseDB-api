@@ -2,6 +2,21 @@ const Key = require('../models/keyModel');
 const crypto = require('crypto');
 const { KeyErrorCodes } = require('../utils/errorCodes');
 
+const validateAndUpdateKey = async (keyData) => {
+    const rateLimitWindow = 60 * 1000;
+    const currentTime = Date.now();
+    const timeDifference = currentTime - new Date(keyData.lastRequest).getTime();
+
+    if (timeDifference > rateLimitWindow) {
+        keyData.limitRequestsCounter = 0;
+        keyData.lastRequest = currentTime;
+    }
+
+    if (keyData.isModified()) {
+        await keyData.save();
+    }
+};
+
 // Create a new API key
 exports.createKey = async (title, userId, rateLimit = 60, rateLimitActive = true) => {
     try {
@@ -9,7 +24,7 @@ exports.createKey = async (title, userId, rateLimit = 60, rateLimitActive = true
         const newKey = new Key({ title, key, userId, rateLimit, rateLimitActive });
         return await newKey.save();
     } catch (error) {
-        if (error.code === 11000) { // MongoDB duplicate key error code
+        if (error.code === 11000) {
             throw KeyErrorCodes.DUPLICATE_KEY;
         }
         throw KeyErrorCodes.DATABASE_ERROR;
@@ -19,11 +34,21 @@ exports.createKey = async (title, userId, rateLimit = 60, rateLimitActive = true
 // List API keys for a user
 exports.listKeys = async (userId) => {
     try {
-        return await Key.find({ userId }).select('_id title userId rateLimit rateLimitActive requests limitRequestsCounter lastRequest createdAt');
+        // Retrieve all keys for the user
+        const keys = await Key.find({ userId })
+            .select('_id title userId rateLimit rateLimitActive requests limitRequestsCounter lastRequest createdAt');
+
+        // Validate and update each key
+        for (const key of keys) {
+            await validateAndUpdateKey(key);
+        }
+
+        return keys;
     } catch (error) {
         throw KeyErrorCodes.DATABASE_ERROR;
     }
 };
+
 
 // Revoke an API key
 exports.revokeKey = async (keyId) => {
@@ -62,9 +87,13 @@ exports.regenerateKey = async (keyId) => {
 exports.findByKey = async (key) => {
     try {
         const keyData = await Key.findOne({ key }).select('_id title userId rateLimit rateLimitActive requests lastRequest createdAt limitRequestsCounter');
+
         if (!keyData) {
             throw KeyErrorCodes.KEY_NOT_FOUND;
         }
+
+        await validateAndUpdateKey(keyData);
+
         return keyData;
     } catch (error) {
         if (error.code) {
@@ -77,10 +106,15 @@ exports.findByKey = async (key) => {
 // Find a key by its ID
 exports.findById = async (keyId) => {
     try {
-        const keyData = await Key.findById(keyId).select('_id title userId rateLimit rateLimitActive requests lastRequest createdAt');
+        const keyData = await Key.findById(keyId)
+            .select('_id title userId rateLimit rateLimitActive requests lastRequest createdAt limitRequestsCounter');
+
         if (!keyData) {
             throw KeyErrorCodes.KEY_NOT_FOUND;
         }
+
+        await validateAndUpdateKey(keyData);
+
         return keyData;
     } catch (error) {
         if (error.code) {
