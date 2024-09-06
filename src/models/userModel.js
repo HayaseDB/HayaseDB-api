@@ -1,13 +1,19 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const {join} = require("node:path");
+const {readFileSync} = require("node:fs");
 const { Schema } = mongoose;
+
+const defaultProfilePicturePath = join(__dirname, '../assets/default_pfp.png');
+const defaultProfilePicture = readFileSync(defaultProfilePicturePath);
 
 const userSchema = new Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     roles: [{ type: String }],
-    profilePicture: { type: Buffer }
+    profilePicture: { type: Buffer, default: defaultProfilePicture },
+    isAdmin: { type: Boolean, default: false },
 });
 
 

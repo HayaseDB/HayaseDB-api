@@ -62,11 +62,17 @@ exports.check = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 };
-
 exports.editCredentials = async (req, res) => {
     try {
         const { _id } = req.user;
-        const { currentPassword, newPassword, newUsername, newEmail, roles } = req.body;
+        const { currentPassword, newPassword, newUsername, newEmail } = req.body;
+
+        let roles = req.body['roles[]'] || req.body.roles;
+
+        if (!Array.isArray(roles)) {
+            roles = [roles];
+        }
+
         const user = await userService.findUserById(_id);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -91,31 +97,24 @@ exports.editCredentials = async (req, res) => {
             user.username = newUsername;
         }
 
-        if (newEmail) {
-            if (newEmail !== user.email) {
-                const isEmailTaken = await userService.findUserByEmail(newEmail);
-                if (isEmailTaken) {
-                    return res.status(400).json({ message: 'Email already in use' });
-                }
-                user.email = newEmail;
+        if (newEmail && newEmail !== user.email) {
+            const isEmailTaken = await userService.findUserByEmail(newEmail);
+            if (isEmailTaken) {
+                return res.status(400).json({ message: 'Email already in use' });
             }
+            user.email = newEmail;
         }
 
-        if (roles) {
-            const existingRoles = new Set(user.roles);
-            const rolesToAdd = roles.filter(role => !existingRoles.has(role));
-            const rolesToRemove = user.roles.filter(role => !roles.includes(role));
-            for (const role of rolesToAdd) {
-                await userService.addRole(_id, role);
-            }
-            for (const role of rolesToRemove) {
-                await userService.removeRole(_id, role);
-            }
+        if (roles && user.isAdmin) {
+            const currentRoles = user.roles || [];
+            const rolesToAdd = roles.filter(role => !currentRoles.includes(role));
+            const rolesToRemove = currentRoles.filter(role => !roles.includes(role));
+
+            user.roles = roles;
         }
 
         if (req.file) {
-            const buffer = req.file.buffer;
-            user.profilePicture = buffer;
+            user.profilePicture = req.file.buffer;
         }
 
         await user.save();

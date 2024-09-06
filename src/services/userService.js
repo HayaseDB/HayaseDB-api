@@ -12,8 +12,7 @@ async function generateUsername() {
         const randomWord = USERNAME_LIST[Math.floor(Math.random() * USERNAME_LIST.length)];
         const randomSuffix = crypto.randomInt(1, 1000);
         username = `${randomWord}${randomSuffix}`;
-
-        isTaken = await this.isUsernameTaken(username);
+        isTaken = !!await User.findOne({ username: username });
     }
 
     return username;
