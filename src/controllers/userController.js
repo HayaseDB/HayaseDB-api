@@ -69,8 +69,8 @@ exports.editCredentials = async (req, res) => {
 
         let roles = req.body['roles[]'] || req.body.roles;
 
-        if (!Array.isArray(roles)) {
-            roles = [roles];
+        if (roles == null || roles.length === 0) {
+            roles = false;
         }
 
         const user = await userService.findUserById(_id);
