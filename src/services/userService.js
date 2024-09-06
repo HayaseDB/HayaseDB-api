@@ -19,7 +19,7 @@ async function generateUsername() {
     return username;
 }
 
-const isUsernameTaken = async (username) => {
+exports.isUsernameTaken = async (username) => {
     const user = await User.findOne({ username: username });
     return !!user;
 };

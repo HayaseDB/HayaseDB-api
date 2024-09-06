@@ -16,6 +16,9 @@ router.post('/login', userController.login);
 // /user/key routes
 router.use('/key', userAuth, keyRoutes)
 
-router.get('/check', userController.check);
+router.get('/check', userAuth, userController.check);
+
+
+router.post('/edit', userAuth, userController.editCredentials);
 
 module.exports = router;
