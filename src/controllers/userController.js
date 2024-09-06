@@ -50,7 +50,7 @@ exports.check = async (req, res) => {
 
                 return res.status(200).json({
                     isValid: true,
-                    user: { id: user._id, username: user.username, email: censoredEmail, profilePicture: `${process.env.BASE_URL}/user/pfp/${userId}`, roles: user.roles }
+                    user: { id: user._id, username: user.username, email: censoredEmail, profilePicture: `${process.env.API_URL}/user/pfp/${userId}`, roles: user.roles }
                 });
             } else {
                 return res.status(404).json({ message: 'User not found' });
