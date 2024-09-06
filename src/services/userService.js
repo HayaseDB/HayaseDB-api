@@ -13,7 +13,7 @@ async function generateUsername() {
         const randomSuffix = crypto.randomInt(1, 1000);
         username = `${randomWord}${randomSuffix}`;
 
-        isTaken = await isUsernameTaken(username);
+        isTaken = await this.isUsernameTaken(username);
     }
 
     return username;
@@ -23,6 +23,12 @@ exports.isUsernameTaken = async (username) => {
     const user = await User.findOne({ username: username });
     return !!user;
 };
+
+exports.isUsernameTakenExceptMe = async (username, userId) => {
+    const user = await User.findOne({ username: username, _id: { $ne: userId } });
+    return !!user;
+};
+
 
 exports.register = async (email, password) => {
     const username = await generateUsername();
@@ -68,4 +74,39 @@ exports.findUserByEmail = async (email) => {
     return User.findOne({ email });
 };
 
+
+exports.updateProfilePicture = async (userId, file) => {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    user.profilePicture = file.buffer;
+    await user.save();
+    return user;
+};
+
+exports.addRole = async (userId, role) => {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+    if (!user.roles.includes(role)) {
+        user.roles.push(role);
+        await user.save();
+    }
+    return user;
+};
+
+exports.removeRole = async (userId, role) => {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+    user.roles = user.roles.filter(r => r !== role);
+    await user.save();
+    return user;
+};
+
+exports.updateProfilePicture = async (userId, profilePictureUrl) => {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+    user.profilePicture = profilePictureUrl;
+    await user.save();
+    return user;
+};
 

@@ -4,6 +4,7 @@ const mediaController = require('../../controllers/mediaController');
 const characterController = require('../../controllers/characterController');
 const statsController = require("../../controllers/statsController");
 const requestLogger = require("../../middlewares/loggerMiddleware");
+const userController = require("../../controllers/userController");
 
 const router = express.Router();
 
@@ -14,5 +15,6 @@ router.get('/media/:id', requestLogger, mediaController.viewMediaById);
 
 
 router.get('/stats', statsController.getStats)
+
 
 module.exports = router;

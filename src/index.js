@@ -37,7 +37,7 @@ const {webAuth, corsOptions} = require("./middlewares/corsMiddleware");
 app.use(cors(corsOptions));
 
 
-app.use('/user', webAuth, userRoutes);
+app.use('/user', userRoutes);
 app.use('/api', apiRoutes);
 
 // Handlers
