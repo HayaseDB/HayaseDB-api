@@ -3,6 +3,7 @@ const myCache = new NodeCache({ stdTTL: 10 });
 
 const User = require('../models/userModel');
 const Character = require('../models/characterModel');
+const Media = require('../models/mediaModel');
 const Anime = require('../models/animeModel');
 const requestLog = require('../models/requestLogModel');
 
@@ -41,14 +42,16 @@ exports.getDatabaseEntries = async () => {
 
     if (entries === undefined) {
         try {
-            const [characterCount, animeCount] = await Promise.all([
+            const [characterCount, animeCount, mediaCount] = await Promise.all([
                 Character.countDocuments({}),
-                Anime.countDocuments({})
+                Anime.countDocuments({}),
+                Media.countDocuments({}),
             ]);
 
             entries = {
                 character: characterCount,
-                anime: animeCount
+                anime: animeCount,
+                media: mediaCount
             };
 
             myCache.set(cacheKey, entries);

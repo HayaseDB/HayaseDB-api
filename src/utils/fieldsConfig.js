@@ -10,7 +10,9 @@ module.exports = {
         genre: {
             type: 'string',
             trim: true,
-            default: null
+            default: null,
+            editable: true,
+
         },
         status: {
             type: 'string',

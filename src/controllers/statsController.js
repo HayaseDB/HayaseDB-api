@@ -10,6 +10,7 @@ exports.getStats = async (req, res) => {
             userCount,
             AnimeEntries: DatabaseEntries.anime,
             CharacterEntries: DatabaseEntries.character,
+            MediaEntries: DatabaseEntries.media,
             RequestsLast30Days
 
         });
