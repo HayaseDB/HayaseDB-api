@@ -156,6 +156,7 @@ exports.listAnime = async ({ filter, sort, page, limit, details }) => {
 
         if (!details) {
             animes = await Promise.all(animes.map(async (anime) => ({
+                id: anime.id,
                 title: anime.title,
                 cover: await convertMediaToUrl(anime.cover),
                 genre: anime.genre,
