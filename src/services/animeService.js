@@ -4,6 +4,8 @@ const { Types } = require('mongoose');
 const sanitizationUtil = require('../utils/sanitizationUtil');
 const uniqueCheckUtil = require('../utils/uniqueCheckUtil');
 const fieldsConfig = require('../utils/fieldsConfig');
+const {fetchAndNestDocument} = require("../utils/documentUtil");
+const {convertMediaToUrl} = require("../utils/mediaUtil");
 
 const isValidObjectId = (id) => Types.ObjectId.isValid(id);
 const getEditableFields = () => {
@@ -124,8 +126,7 @@ const buildFilterQuery = (filter) => {
             return {};
     }
 };
-
-exports.listAnime = async ({ filter, sort, page, limit }) => {
+exports.listAnime = async ({ filter, sort, page, limit, details }) => {
     if (!['date', 'alphabetic', 'popular'].includes(filter)) {
         return { error: AnimeErrorCodes.INVALID_BODY };
     }
@@ -146,10 +147,43 @@ exports.listAnime = async ({ filter, sort, page, limit }) => {
     try {
         const total = await Anime.countDocuments(filterQuery);
 
-        const animes = await Anime.find(filterQuery)
+        let animes = await Anime.find(filterQuery)
             .sort({ [sortField]: sort === 'desc' ? -1 : 1 })
             .skip((page - 1) * limit)
             .limit(limit);
+
+        if (!details) {
+            animes = animes.map(anime => ({
+                title: anime.title,
+                cover: anime.cover
+            }));
+        } else {
+            animes = await Promise.all(animes.map(async (anime) => {
+                let detailedAnime = anime.toObject();
+                const schemaConfig = fieldsConfig.anime;
+
+                for (const field in schemaConfig) {
+                    if (schemaConfig[field].media && detailedAnime[field]) {
+                        detailedAnime[field] = await convertMediaToUrl(detailedAnime[field]);
+                    }
+                    if (schemaConfig[field].nesting && detailedAnime[field]) {
+                        const nestedDocument = await fetchAndNestDocument(field, detailedAnime[field]);
+                        detailedAnime[field] = nestedDocument || null;
+                    }
+                }
+
+                if (Array.isArray(detailedAnime.characters)) {
+                    detailedAnime.characters = await Promise.all(detailedAnime.characters.map(async (character) => {
+                        if (character.image) {
+                            character.image = await convertMediaToUrl(character.image);
+                        }
+                        return character;
+                    }));
+                }
+
+                return detailedAnime;
+            }));
+        }
 
         return { data: { total, animes } };
     } catch (error) {

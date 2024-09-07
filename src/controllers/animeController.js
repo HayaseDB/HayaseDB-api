@@ -74,14 +74,17 @@ exports.getAnimeById = async (req, res) => {
         res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
 };
+
 exports.list = async (req, res) => {
-    const { filter = 'date', sort, page = 1, limit = 10 } = req.query;
+    const { filter = 'date', sort, page = 1, limit = 10, details = false } = req.query;
 
     const sortOrder = filter === 'alphabetic' ? 'asc' : 'desc';
     const finalSort = sort || sortOrder;
 
+
+
     try {
-        const result = await animeService.listAnime({ filter, sort: finalSort, page, limit });
+        const result = await animeService.listAnime({ filter, sort: finalSort, page, limit, details: details === 'true' });
 
         if (result.error) {
             return res.status(result.error.code === 'INVALID_BODY' ? 400 : 500).json({ error: result.error });
