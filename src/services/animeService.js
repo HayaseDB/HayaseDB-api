@@ -126,6 +126,8 @@ const buildFilterQuery = (filter) => {
             return {};
     }
 };
+
+
 exports.listAnime = async ({ filter, sort, page, limit, details }) => {
     if (!['date', 'alphabetic', 'popular'].includes(filter)) {
         return { error: AnimeErrorCodes.INVALID_BODY };
@@ -153,10 +155,13 @@ exports.listAnime = async ({ filter, sort, page, limit, details }) => {
             .limit(limit);
 
         if (!details) {
-            animes = animes.map(anime => ({
+            animes = await Promise.all(animes.map(async (anime) => ({
                 title: anime.title,
-                cover: anime.cover
-            }));
+                cover: await convertMediaToUrl(anime.cover),
+                genre: anime.genre,
+                releaseDate: anime.releaseDate,
+                studio: anime.studio,
+            })));
         } else {
             animes = await Promise.all(animes.map(async (anime) => {
                 let detailedAnime = anime.toObject();
