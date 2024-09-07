@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.use('/modify', webAuth, userAuth, modifyRoutes)
 
-router.use('/fetch', orAuth, fetchRoutes);
+router.use('/fetch', fetchRoutes);
 
 
 module.exports = router;

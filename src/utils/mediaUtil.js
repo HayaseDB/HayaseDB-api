@@ -6,7 +6,7 @@ const convertMediaToUrl = async (id) => {
             const mediaResult = await mediaService.getMediaById(id);
             if (mediaResult.media) {
                 return {
-                    url: `${process.env.BASE_URL}/api/fetch/media/${mediaResult.media._id}`,
+                    url: `${process.env.API_URL}/api/fetch/media/${mediaResult.media._id}`,
                     mediaId: mediaResult.media._id
                 };
             }

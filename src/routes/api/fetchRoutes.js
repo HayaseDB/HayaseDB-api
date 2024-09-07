@@ -5,17 +5,18 @@ const characterController = require('../../controllers/characterController');
 const statsController = require("../../controllers/statsController");
 const requestLogger = require("../../middlewares/loggerMiddleware");
 const userController = require("../../controllers/userController");
+const {orAuth} = require("../../middlewares/corsMiddleware");
 
 const router = express.Router();
 
-router.get('/anime/:id', requestLogger, animeController.getAnimeById);
-router.get('/character/:id', requestLogger, characterController.getCharacterById);
+router.get('/anime/:id', orAuth, requestLogger, animeController.getAnimeById);
+router.get('/character/:id', orAuth, requestLogger, characterController.getCharacterById);
 
 router.get('/media/:id', requestLogger, mediaController.viewMediaById);
 
-router.get('/list/anime', animeController.list);
+router.get('/list/anime', orAuth, animeController.list);
 
-router.get('/stats', statsController.getStats)
+router.get('/stats', orAuth, statsController.getStats)
 
 
 module.exports = router;
