@@ -8,7 +8,6 @@ const errorHandler = require('./middlewares/errorHandler');
 const notFoundHandler = require('./middlewares/notFoundHandler');
 
 
-
 // Define express as "app"
 const app = express();
 
@@ -33,6 +32,8 @@ const cors = require('cors')
 const userRoutes = require("./routes/userRoutes");
 const apiRoutes = require("./routes/apiRoutes");
 const {webAuth, corsOptions} = require("./middlewares/corsMiddleware");
+const {clearOrphanedMedia} = require("./utils/documentUtil");
+// clearOrphanedMedia()
 
 app.use(cors(corsOptions));
 

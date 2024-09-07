@@ -1,6 +1,10 @@
 const mediaUtil = require('./mediaUtil');
 const characterService = require('../services/characterService');
 const fieldsConfig = require('./fieldsConfig');
+const Media = require('../models/mediaModel'); // Import your media model
+const Character = require('../models/characterModel'); // Import your media model
+const Anime = require('../models/animeModel'); // Import your media model
+const { Types } = require('mongoose');
 
 const fetchAndNestDocument = async (field, ids) => {
     const serviceMap = {
@@ -41,4 +45,23 @@ const fetchAndNestDocument = async (field, ids) => {
     return null;
 };
 
-module.exports = { fetchAndNestDocument };
+
+
+const clearOrphanedMedia = async () => {
+    try {
+
+        const referencedInAnimes = await Anime.distinct('cover').exec();
+
+        const referencedInCharacters = await Character.distinct('media').exec();
+
+        const referencedMediaIds = new Set([...referencedInAnimes, ...referencedInCharacters]);
+
+        const result = await Media.deleteMany({ _id: { $nin: Array.from(referencedMediaIds).map(id => new Types.ObjectId(id)) } }).exec();
+
+        console.log(`${result.deletedCount} orphaned media documents deleted.`);
+    } catch (err) {
+        console.error('Error cleaning up orphaned media:', err);
+    }
+};
+
+module.exports = { fetchAndNestDocument, clearOrphanedMedia };

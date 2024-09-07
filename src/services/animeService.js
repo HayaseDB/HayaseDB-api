@@ -4,7 +4,7 @@ const { Types } = require('mongoose');
 const sanitizationUtil = require('../utils/sanitizationUtil');
 const uniqueCheckUtil = require('../utils/uniqueCheckUtil');
 const fieldsConfig = require('../utils/fieldsConfig');
-const {fetchAndNestDocument} = require("../utils/documentUtil");
+const {fetchAndNestDocument, clearOrphanedMedia} = require("../utils/documentUtil");
 const {convertMediaToUrl} = require("../utils/mediaUtil");
 
 const isValidObjectId = (id) => Types.ObjectId.isValid(id);
