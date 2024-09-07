@@ -8,9 +8,9 @@ module.exports = {
             editable: true,
         },
         genre: {
-            type: 'string',
+            type: 'array',
             trim: true,
-            default: null,
+            default: [],
             editable: true,
 
         },
