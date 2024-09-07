@@ -13,6 +13,7 @@ router.get('/character/:id', requestLogger, characterController.getCharacterById
 
 router.get('/media/:id', requestLogger, mediaController.viewMediaById);
 
+router.get('/list/anime', animeController.list);
 
 router.get('/stats', statsController.getStats)
 

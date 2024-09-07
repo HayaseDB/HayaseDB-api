@@ -111,3 +111,48 @@ exports.getById = async (animeId) => {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
+
+
+const buildFilterQuery = (filter) => {
+    switch (filter) {
+        case 'alphabetic':
+            return {};
+        case 'popular':
+            return {};
+        case 'date':
+        default:
+            return {};
+    }
+};
+
+exports.listAnime = async ({ filter, sort, page, limit }) => {
+    if (!['date', 'alphabetic', 'popular'].includes(filter)) {
+        return { error: AnimeErrorCodes.INVALID_BODY };
+    }
+
+    if (!['asc', 'desc'].includes(sort)) {
+        return { error: AnimeErrorCodes.INVALID_BODY };
+    }
+
+    const filterQuery = buildFilterQuery(filter);
+
+    let sortField = 'createdAt';
+    if (filter === 'alphabetic') {
+        sortField = 'title';
+    } else if (filter === 'popular') {
+        sortField = 'popularity';
+    }
+
+    try {
+        const total = await Anime.countDocuments(filterQuery);
+
+        const animes = await Anime.find(filterQuery)
+            .sort({ [sortField]: sort === 'desc' ? -1 : 1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        return { data: { total, animes } };
+    } catch (error) {
+        return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
+    }
+};

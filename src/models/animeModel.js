@@ -43,5 +43,6 @@ Object.keys(schemaConfig).forEach(field => {
 });
 
 const animeSchema = new mongoose.Schema(schemaFields, { timestamps: true });
-
+animeSchema.index({ createdAt: -1 });
+animeSchema.index({ popularity: -1 });
 module.exports = mongoose.model('Anime', animeSchema, 'Animes');
