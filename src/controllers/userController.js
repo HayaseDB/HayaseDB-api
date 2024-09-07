@@ -1,4 +1,5 @@
 const userService = require('../services/userService');
+const sharp = require('sharp');
 
 exports.register = async (req, res) => {
     try {
@@ -62,11 +63,12 @@ exports.check = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 };
+
+
 exports.editCredentials = async (req, res) => {
     try {
         const { _id } = req.user;
         const { currentPassword, newPassword, newUsername, newEmail } = req.body;
-
         let roles = req.body['roles[]'] || req.body.roles;
 
         if (roles == null || roles.length === 0) {
@@ -114,10 +116,14 @@ exports.editCredentials = async (req, res) => {
         }
 
         if (req.file) {
-            user.profilePicture = req.file.buffer;
+            const buffer = await sharp(req.file.buffer)
+                .resize({ width: 300, height: 300, fit: 'cover' })
+                .rotate()
+                .toBuffer();
+            user.profilePicture = buffer;
         }
-
         await user.save();
+
         return res.status(200).json({ message: 'Credentials updated successfully' });
     } catch (error) {
         return res.status(500).json({ message: error.message });
