@@ -57,6 +57,7 @@ module.exports = {
         },
         episodes: {
             type: 'array',
+            editable: true,
             default: []
         },
         characters: {
