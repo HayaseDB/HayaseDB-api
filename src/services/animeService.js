@@ -149,9 +149,6 @@ exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10
             let animes = await Anime.aggregate([
                 { $unwind: '$ratings' },
                 {
-                    $sort: { 'ratings.date': -1 }
-                },
-                {
                     $group: {
                         _id: '$_id',
                         title: { $first: '$title' },
@@ -160,10 +157,21 @@ exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10
                         releaseDate: { $first: '$releaseDate' },
                         studio: { $first: '$studio' },
                         averageRating: { $avg: '$ratings.rating' },
-                        latestRatingDate: { $max: '$ratings.date' }
+                        latestRatingDate: { $max: '$ratings.date' },
+                        ratingCount: { $sum: 1 }
                     }
                 },
-                { $sort: { averageRating: sortOrder, latestRatingDate: -1 } },
+                {
+                    $addFields: {
+                        popularityScore: {
+                            $add: [
+                                { $multiply: ['$averageRating', 0.7] },
+                                { $multiply: ['$ratingCount', 0.3] }
+                            ]
+                        }
+                    }
+                },
+                { $sort: { popularityScore: sortOrder, latestRatingDate: sortOrder } },
                 { $skip: (page - 1) * limit },
                 { $limit: limit }
             ]);
