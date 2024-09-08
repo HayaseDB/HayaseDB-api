@@ -106,11 +106,24 @@ exports.getById = async (animeId) => {
         if (!anime) {
             return { error: AnimeErrorCodes.ANIME_NOT_FOUND };
         }
-        return { data: anime };
+
+        const ratingCount = await Anime.aggregate([
+            { $match: { _id: anime._id } },
+            { $unwind: '$ratings' },
+            { $count: 'ratingCount' }
+        ]);
+
+        return {
+            data: {
+                ...anime.toObject(),
+                ratingCount: ratingCount.length > 0 ? ratingCount[0].ratingCount : 0
+            }
+        };
     } catch (error) {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
+
 const buildFilterQuery = (filter) => {
     switch (filter) {
         case 'alphabetic':
@@ -245,8 +258,6 @@ exports.listAnime = async ({ filter = 'date', sort = 'desc', page = 1, limit = 1
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
-
-
 exports.addRating = async (animeId, userId, rating) => {
     if (!Types.ObjectId.isValid(animeId) || !Types.ObjectId.isValid(userId)) {
         return { error: "Invalid anime or user ID" };
@@ -292,7 +303,18 @@ exports.addRating = async (animeId, userId, rating) => {
             updatedAt: new Date(),
         }, { new: true });
 
-        return { data: updatedAnime };
+        const ratingCount = await Anime.aggregate([
+            { $match: { _id: new Types.ObjectId(animeId) } },
+            { $unwind: '$ratings' },
+            { $group: { _id: '$_id', ratingCount: { $sum: 1 } } }
+        ]);
+
+        return {
+            data: {
+                ...updatedAnime.toObject(),
+                ratingCount: ratingCount.length > 0 ? ratingCount[0].ratingCount : 0
+            }
+        };
     } catch (error) {
         return { error: { message: "Database error", details: error.message } };
     }

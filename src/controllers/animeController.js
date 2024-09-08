@@ -39,7 +39,6 @@ exports.editAnime = async (req, res) => {
         res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
 };
-
 exports.getAnimeById = async (req, res) => {
     try {
         const result = await animeService.getById(req.params.id);
@@ -47,7 +46,7 @@ exports.getAnimeById = async (req, res) => {
             return res.status(404).json({ error: result.error });
         }
 
-        let anime = result.data.toObject();
+        let anime = result.data;
         const schemaConfig = fieldsConfig.anime;
 
         for (const field in schemaConfig) {
@@ -74,6 +73,7 @@ exports.getAnimeById = async (req, res) => {
         res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
 };
+
 
 exports.list = async (req, res) => {
     const { filter = 'date', sort, page = 1, limit = 10, details = false } = req.query;
@@ -112,7 +112,7 @@ exports.rateAnime = async (req, res) => {
         }
 
 
-        res.status(200).json({ success: true, ratings: result.data });
+        res.status(200).json({ success: true, UpdatedAnime: result.data });
     } catch (err) {
         res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
