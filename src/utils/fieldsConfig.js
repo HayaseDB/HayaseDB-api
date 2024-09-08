@@ -20,6 +20,12 @@ module.exports = {
             default: null,
             editable: true,
         },
+        description: {
+            type: 'string',
+            trim: true,
+            default: null,
+            editable: true,
+        },
         studio: {
             type: 'string',
             trim: true,
