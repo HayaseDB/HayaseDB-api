@@ -4,8 +4,8 @@ const { Types } = require('mongoose');
 const sanitizationUtil = require('../utils/sanitizationUtil');
 const uniqueCheckUtil = require('../utils/uniqueCheckUtil');
 const fieldsConfig = require('../utils/fieldsConfig');
-const {fetchAndNestDocument, clearOrphanedMedia} = require("../utils/documentUtil");
-const {convertMediaToUrl} = require("../utils/mediaUtil");
+const { fetchAndNestDocument, clearOrphanedMedia } = require("../utils/documentUtil");
+const { convertMediaToUrl } = require("../utils/mediaUtil");
 
 const isValidObjectId = (id) => Types.ObjectId.isValid(id);
 const getEditableFields = () => {
@@ -71,11 +71,9 @@ exports.editAnime = async (animeId, data) => {
         }
 
         const editableFields = getEditableFields();
-        const updateData = Object.keys(existingAnime.toObject()).reduce((acc, key) => {
-            if (editableFields.includes(key) && data[key] !== undefined) {
+        const updateData = Object.keys(data).reduce((acc, key) => {
+            if (editableFields.includes(key)) {
                 acc[key] = data[key];
-            } else {
-                acc[key] = existingAnime[key];
             }
             return acc;
         }, {});
@@ -104,7 +102,7 @@ exports.getById = async (animeId) => {
         return { error: AnimeErrorCodes.INVALID_ID };
     }
     try {
-        const anime = await Anime.findById(animeId);
+        const anime = await Anime.findById(animeId).exec();
         if (!anime) {
             return { error: AnimeErrorCodes.ANIME_NOT_FOUND };
         }
@@ -114,30 +112,21 @@ exports.getById = async (animeId) => {
     }
 };
 
-
-
 const buildFilterQuery = (filter) => {
     switch (filter) {
         case 'alphabetic':
             return {};
         case 'popular':
-            const fourteenDaysAgo = new Date();
-            fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
-            return {
-                'ratings.date': { $gte: fourteenDaysAgo }
-            };
+            return {};
         case 'date':
         default:
             return {};
     }
 };
+
 exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10, details = false }) => {
     try {
-        if (!['date', 'alphabetic', 'popular'].includes(filter)) {
-            return { error: AnimeErrorCodes.INVALID_BODY };
-        }
-
-        if (!['asc', 'desc'].includes(sort)) {
+        if (!['date', 'alphabetic', 'popular'].includes(filter) || !['asc', 'desc'].includes(sort)) {
             return { error: AnimeErrorCodes.INVALID_BODY };
         }
 
@@ -145,8 +134,10 @@ exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10
         const sortField = filter === 'alphabetic' ? 'title' : 'averageRating';
         const sortOrder = sort === 'desc' ? -1 : 1;
 
+        let animes, total;
+
         if (filter === 'popular') {
-            let animes = await Anime.aggregate([
+            animes = await Anime.aggregate([
                 { $unwind: '$ratings' },
                 {
                     $group: {
@@ -176,108 +167,80 @@ exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10
                 { $limit: limit }
             ]);
 
-            if (!details) {
-                animes = await Promise.all(animes.map(async (anime) => ({
+            total = animes.length;
+        } else {
+            total = await Anime.countDocuments(filterQuery);
+            animes = await Anime.find(filterQuery)
+                .sort({ [sortField]: sortOrder })
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .exec();
+        }
+
+        if (details) {
+            animes = await Promise.all(animes.map(async (anime) => {
+                if (anime instanceof Anime) {
+                    anime = anime.toObject();
+                }
+
+                const schemaConfig = fieldsConfig.anime;
+
+                for (const field in schemaConfig) {
+                    if (schemaConfig[field].media && anime[field]) {
+                        anime[field] = await convertMediaToUrl(anime[field]);
+                    }
+                    if (schemaConfig[field].nesting && anime[field]) {
+                        const nestedDocument = await fetchAndNestDocument(field, anime[field]);
+                        anime[field] = nestedDocument || null;
+                    }
+                }
+
+                if (Array.isArray(anime.characters)) {
+                    anime.characters = await Promise.all(anime.characters.map(async (character) => {
+                        if (character.image) {
+                            character.image = await convertMediaToUrl(character.image);
+                        }
+                        return character;
+                    }));
+                }
+
+                return anime;
+            }));
+        } else {
+            animes = await Promise.all(animes.map(async (anime) => {
+                if (anime instanceof Anime) {
+                    anime = anime.toObject();
+                }
+                return {
                     id: anime._id,
                     title: anime.title,
                     cover: await convertMediaToUrl(anime.cover),
                     genre: anime.genre,
                     releaseDate: anime.releaseDate,
                     studio: anime.studio,
-                })));
-            } else {
-                animes = await Promise.all(animes.map(async (anime) => {
-                    let detailedAnime = anime;
-                    const schemaConfig = fieldsConfig.anime;
-
-                    for (const field in schemaConfig) {
-                        if (schemaConfig[field].media && detailedAnime[field]) {
-                            detailedAnime[field] = await convertMediaToUrl(detailedAnime[field]);
-                        }
-                        if (schemaConfig[field].nesting && detailedAnime[field]) {
-                            const nestedDocument = await fetchAndNestDocument(field, detailedAnime[field]);
-                            detailedAnime[field] = nestedDocument || null;
-                        }
-                    }
-
-                    if (Array.isArray(detailedAnime.characters)) {
-                        detailedAnime.characters = await Promise.all(detailedAnime.characters.map(async (character) => {
-                            if (character.image) {
-                                character.image = await convertMediaToUrl(character.image);
-                            }
-                            return character;
-                        }));
-                    }
-
-                    return detailedAnime;
-                }));
-            }
-
-            return { data: { total: animes.length, animes } };
-        } else {
-            const total = await Anime.countDocuments(filterQuery);
-            let animes = await Anime.find(filterQuery)
-                .sort({ [sortField]: sortOrder })
-                .skip((page - 1) * limit)
-                .limit(limit);
-
-            if (!details) {
-                animes = await Promise.all(animes.map(async (anime) => ({
-                    id: anime.id,
-                    title: anime.title,
-                    cover: await convertMediaToUrl(anime.cover),
-                    genre: anime.genre,
-                    releaseDate: anime.releaseDate,
-                    studio: anime.studio,
-                })));
-            } else {
-                animes = await Promise.all(animes.map(async (anime) => {
-                    let detailedAnime = anime.toObject();
-                    const schemaConfig = fieldsConfig.anime;
-
-                    for (const field in schemaConfig) {
-                        if (schemaConfig[field].media && detailedAnime[field]) {
-                            detailedAnime[field] = await convertMediaToUrl(detailedAnime[field]);
-                        }
-                        if (schemaConfig[field].nesting && detailedAnime[field]) {
-                            const nestedDocument = await fetchAndNestDocument(field, detailedAnime[field]);
-                            detailedAnime[field] = nestedDocument || null;
-                        }
-                    }
-
-                    if (Array.isArray(detailedAnime.characters)) {
-                        detailedAnime.characters = await Promise.all(detailedAnime.characters.map(async (character) => {
-                            if (character.image) {
-                                character.image = await convertMediaToUrl(character.image);
-                            }
-                            return character;
-                        }));
-                    }
-
-                    return detailedAnime;
-                }));
-            }
-
-            return { data: { total, animes } };
+                };
+            }));
         }
+
+        return { data: { total, animes } };
     } catch (error) {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
 
 exports.addRating = async (animeId, userId, rating) => {
-    if (!Types.ObjectId.isValid(animeId)) {
-        return {error: "Invalid anime ID"};
+    if (!Types.ObjectId.isValid(animeId) || !Types.ObjectId.isValid(userId)) {
+        return { error: "Invalid anime or user ID" };
     }
 
     if (rating < 1 || rating > 5) {
-        return {error: "Invalid rating value"};
+        return { error: "Invalid rating value" };
     }
 
     try {
         const anime = await Anime.findById(animeId);
         if (!anime) {
-            return {error: "Anime not found"};
+            return { error: "Anime not found" };
         }
 
         const numericRating = parseFloat(rating);
@@ -302,19 +265,16 @@ exports.addRating = async (animeId, userId, rating) => {
         }
 
         const total = ratings.reduce((sum, rate) => sum + rate, 0);
-        const averageRating = total / ratings.length;
+        const averageRating = parseFloat((total / ratings.length).toFixed(1));
 
-        anime.averageRating = parseFloat(averageRating.toFixed(1));
-
-        await Anime.findByIdAndUpdate(animeId, {
+        const updatedAnime = await Anime.findByIdAndUpdate(animeId, {
             ratings: anime.ratings,
-            averageRating: anime.averageRating,
+            averageRating,
             updatedAt: new Date(),
-        });
+        }, { new: true });
 
-        return {data: anime};
+        return { data: updatedAnime };
     } catch (error) {
-
-        return {error: {message: "Database error", details: error.message}};
+        return { error: { message: "Database error", details: error.message } };
     }
 };
