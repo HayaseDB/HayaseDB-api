@@ -131,7 +131,6 @@ const buildFilterQuery = (filter) => {
             return {};
     }
 };
-
 exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10, details = false }) => {
     try {
         if (!['date', 'alphabetic', 'popular'].includes(filter)) {
@@ -147,12 +146,11 @@ exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10
         const sortOrder = sort === 'desc' ? -1 : 1;
 
         if (filter === 'popular') {
-            const fourteenDaysAgo = new Date();
-            fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
-
             let animes = await Anime.aggregate([
                 { $unwind: '$ratings' },
-                { $match: { 'ratings.date': { $gte: fourteenDaysAgo } } },
+                {
+                    $sort: { 'ratings.date': -1 }
+                },
                 {
                     $group: {
                         _id: '$_id',
@@ -161,10 +159,11 @@ exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10
                         genre: { $first: '$genre' },
                         releaseDate: { $first: '$releaseDate' },
                         studio: { $first: '$studio' },
-                        averageRating: { $avg: '$ratings.rating' }
+                        averageRating: { $avg: '$ratings.rating' },
+                        latestRatingDate: { $max: '$ratings.date' }
                     }
                 },
-                { $sort: { averageRating: sortOrder } },
+                { $sort: { averageRating: sortOrder, latestRatingDate: -1 } },
                 { $skip: (page - 1) * limit },
                 { $limit: limit }
             ]);
@@ -257,8 +256,6 @@ exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
-
-
 
 exports.addRating = async (animeId, userId, rating) => {
     if (!Types.ObjectId.isValid(animeId)) {
