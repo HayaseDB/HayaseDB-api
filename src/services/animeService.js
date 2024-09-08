@@ -193,29 +193,29 @@ exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
+
+
 exports.addRating = async (animeId, userId, rating) => {
     if (!Types.ObjectId.isValid(animeId)) {
-        return { error: AnimeErrorCodes.INVALID_ID };
+        return {error: "Invalid anime ID"};
     }
 
-    const numericRating = parseFloat(rating);
-    if (isNaN(numericRating) || numericRating < 1 || numericRating > 5) {
-        return { error: AnimeErrorCodes.INVALID_BODY };
+    if (rating < 1 || rating > 5) {
+        return {error: "Invalid rating value"};
     }
 
     try {
         const anime = await Anime.findById(animeId);
         if (!anime) {
-            return { error: AnimeErrorCodes.ANIME_NOT_FOUND };
+            return {error: "Anime not found"};
         }
 
+        const numericRating = parseFloat(rating);
         const userObjectId = new Types.ObjectId(userId);
+
         const existingRatingIndex = anime.ratings.findIndex(r => r.userId.equals(userObjectId));
 
         if (existingRatingIndex !== -1) {
-            if (anime.ratings[existingRatingIndex].rating === numericRating) {
-                return { data: anime };
-            }
             anime.ratings[existingRatingIndex].rating = numericRating;
             anime.ratings[existingRatingIndex].date = new Date();
         } else {
@@ -226,19 +226,25 @@ exports.addRating = async (animeId, userId, rating) => {
             });
         }
 
-        await anime.save();
+        const ratings = anime.ratings.map(r => parseFloat(r.rating));
+        if (ratings.length === 0) {
+            throw new Error("No ratings found.");
+        }
 
-        const updatedAnime = await Anime.findById(animeId);
+        const total = ratings.reduce((sum, rate) => sum + rate, 0);
+        const averageRating = total / ratings.length;
 
-        const totalRatings = updatedAnime.ratings.length;
-        const averageRating = updatedAnime.ratings.reduce((sum, r) => sum + r.rating, 0) / totalRatings;
+        anime.averageRating = parseFloat(averageRating.toFixed(1));
 
-        updatedAnime.averageRating = parseFloat(averageRating.toFixed(1));
+        await Anime.findByIdAndUpdate(animeId, {
+            ratings: anime.ratings,
+            averageRating: anime.averageRating,
+            updatedAt: new Date(),
+        });
 
-        await updatedAnime.save();
-
-        return { data: updatedAnime };
+        return {data: anime};
     } catch (error) {
-        return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
+
+        return {error: {message: "Database error", details: error.message}};
     }
 };
