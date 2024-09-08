@@ -120,7 +120,11 @@ const buildFilterQuery = (filter) => {
         case 'alphabetic':
             return {};
         case 'popular':
-            return {};
+            const fourteenDaysAgo = new Date();
+            fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+            return {
+                'ratings.date': { $gte: fourteenDaysAgo }
+            };
         case 'date':
         default:
             return {};
@@ -143,7 +147,7 @@ exports.listAnime = async ({ filter, sort, page, limit, details }) => {
     if (filter === 'alphabetic') {
         sortField = 'title';
     } else if (filter === 'popular') {
-        sortField = 'popularity';
+        sortField = 'averageRating';
     }
 
     try {
