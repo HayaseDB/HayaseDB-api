@@ -21,10 +21,15 @@ module.exports = {
             editable: true,
         },
 
+        averageRating: {
+            type: Number,
+            default: 0,
+            editable: false,
+        },
         ratings: {
-            type: 'array',
-            required: false,
+            type: Array,
             default: [],
+            editable: false,
         },
         description: {
             type: 'string',

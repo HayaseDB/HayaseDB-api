@@ -198,7 +198,6 @@ exports.listAnime = async ({ filter, sort, page, limit, details }) => {
 };
 
 
-
 exports.addRating = async (animeId, userId, rating) => {
     if (!Types.ObjectId.isValid(animeId)) {
         return { error: "Invalid anime ID" };
@@ -221,6 +220,11 @@ exports.addRating = async (animeId, userId, rating) => {
         } else {
             anime.ratings.push({ userId: new Types.ObjectId(userId), rating });
         }
+
+        const ratings = anime.ratings.map(r => r.rating);
+        const averageRating = ratings.reduce((sum, rate) => sum + rate, 0) / ratings.length;
+
+        anime.averageRating = parseFloat(averageRating.toFixed(1));
 
         await anime.save();
         return { data: anime };
