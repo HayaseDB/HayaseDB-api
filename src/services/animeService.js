@@ -130,8 +130,6 @@ const buildFilterQuery = (filter) => {
             return {};
     }
 };
-
-
 exports.listAnime = async ({ filter, sort, page, limit, details }) => {
     if (!['date', 'alphabetic', 'popular'].includes(filter)) {
         return { error: AnimeErrorCodes.INVALID_BODY };
@@ -216,16 +214,24 @@ exports.addRating = async (animeId, userId, rating) => {
             return { error: "Anime not found" };
         }
 
+        const numericRating = parseFloat(rating);
+        let updated = false;
+
         const existingRating = anime.ratings.find(r => r.userId.toString() === userId.toString());
 
         if (existingRating) {
-            existingRating.rating = rating;
+            existingRating.rating = numericRating;
+            existingRating.date = new Date();
+            updated = true;
         } else {
-            anime.ratings.push({ userId: new Types.ObjectId(userId), rating });
+            anime.ratings.push({
+                userId: new Types.ObjectId(userId),
+                rating: numericRating,
+                date: new Date()
+            });
         }
 
         const ratings = anime.ratings.map(r => parseFloat(r.rating));
-
         if (ratings.length === 0) {
             throw new Error("No ratings found.");
         }
