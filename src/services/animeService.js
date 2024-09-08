@@ -111,7 +111,6 @@ exports.getById = async (animeId) => {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
-
 const buildFilterQuery = (filter) => {
     switch (filter) {
         case 'alphabetic':
@@ -124,14 +123,16 @@ const buildFilterQuery = (filter) => {
     }
 };
 
-exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10, details = false }) => {
+exports.listAnime = async ({ filter = 'date', sort = 'desc', page = 1, limit = 10, details = false }) => {
     try {
         if (!['date', 'alphabetic', 'popular'].includes(filter) || !['asc', 'desc'].includes(sort)) {
             return { error: AnimeErrorCodes.INVALID_BODY };
         }
 
         const filterQuery = buildFilterQuery(filter);
-        const sortField = filter === 'alphabetic' ? 'title' : 'averageRating';
+
+        const sortField = filter === 'alphabetic' ? 'title' :
+            filter === 'date' ? 'createdAt' : 'createdAt';
         const sortOrder = sort === 'desc' ? -1 : 1;
 
         let animes, total;
@@ -170,6 +171,7 @@ exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10
             total = animes.length;
         } else {
             total = await Anime.countDocuments(filterQuery);
+
             animes = await Anime.find(filterQuery)
                 .sort({ [sortField]: sortOrder })
                 .skip((page - 1) * limit)
@@ -227,6 +229,7 @@ exports.listAnime = async ({ filter = 'date', sort = 'asc', page = 1, limit = 10
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
+
 
 exports.addRating = async (animeId, userId, rating) => {
     if (!Types.ObjectId.isValid(animeId) || !Types.ObjectId.isValid(userId)) {
