@@ -201,33 +201,32 @@ exports.listAnime = async ({ filter, sort, page, limit, details }) => {
 
 exports.addRating = async (animeId, userId, rating) => {
     if (!Types.ObjectId.isValid(animeId)) {
-        return { error: "Invalid anime ID" };
+        return {error: "Invalid anime ID"};
     }
 
     if (rating < 1 || rating > 5) {
-        return { error: "Invalid rating value" };
+        return {error: "Invalid rating value"};
     }
 
     try {
         const anime = await Anime.findById(animeId);
         if (!anime) {
-            return { error: "Anime not found" };
+            return {error: "Anime not found"};
         }
 
         const numericRating = parseFloat(rating);
-        let updated = false;
+        const userObjectId = new Types.ObjectId(userId);
 
-        const existingRating = anime.ratings.find(r => r.userId.toString() === userId.toString());
+        const existingRatingIndex = anime.ratings.findIndex(r => r.userId.equals(userObjectId));
 
-        if (existingRating) {
-            existingRating.rating = numericRating;
-            existingRating.date = new Date();
-            updated = true;
+        if (existingRatingIndex !== -1) {
+            anime.ratings[existingRatingIndex].rating = numericRating;
+            anime.ratings[existingRatingIndex].date = new Date();
         } else {
             anime.ratings.push({
-                userId: new Types.ObjectId(userId),
+                userId: userObjectId,
                 rating: numericRating,
-                date: new Date()
+                date: new Date(),
             });
         }
 
@@ -241,9 +240,16 @@ exports.addRating = async (animeId, userId, rating) => {
 
         anime.averageRating = parseFloat(averageRating.toFixed(1));
 
-        await anime.save();
-        return { data: anime };
+        await Anime.findByIdAndUpdate(animeId, {
+            ratings: anime.ratings,
+            averageRating: anime.averageRating,
+            updatedAt: new Date(),
+        });
+
+        return {data: anime};
     } catch (error) {
-        return { error: { message: "Database error", details: error.message } };
+        console.error('Error saving anime rating:', error.message);
+        // Handle any errors
+        return {error: {message: "Database error", details: error.message}};
     }
 };
