@@ -6,7 +6,7 @@ const schemaConfig = fieldsConfig.anime;
 const schemaFields = {};
 const mediaFields = [];
 Object.keys(schemaConfig).forEach(field => {
-    const { type, trim, required, default: defaultValue, ref } = schemaConfig[field];
+    const { type, trim, required, default: defaultValue, ref, min, max } = schemaConfig[field];
 
     let mongooseType;
     switch (type) {
@@ -38,7 +38,9 @@ Object.keys(schemaConfig).forEach(field => {
         trim: type === 'string' ? trim : undefined,
         required: required || undefined,
         default: defaultValue || undefined,
-        ...(type === 'objectId' && ref ? { ref } : {})
+        ...(type === 'objectId' && ref ? { ref } : {}),
+        min: min || undefined,
+        max: max || undefined,
     };
 });
 

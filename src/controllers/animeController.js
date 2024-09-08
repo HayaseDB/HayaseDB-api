@@ -94,3 +94,26 @@ exports.list = async (req, res) => {
         res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
 };
+
+
+
+exports.rateAnime = async (req, res) => {
+    const { animeId, rating } = req.query;
+    const userId = req.user._id;
+    const numericRating = parseFloat(rating);
+
+    if (isNaN(numericRating) || numericRating < 1 || numericRating > 5) {
+        return res.status(400).json({ error: AnimeErrorCodes.INVALID_RATING });
+    }
+    try {
+        const result = await animeService.addRating(animeId, userId, rating);
+        if (result.error) {
+            return res.status(404).json({ error: result.error });
+        }
+
+
+        res.status(200).json({ success: true, ratings: result.data });
+    } catch (err) {
+        res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
+    }
+};

@@ -19,6 +19,11 @@ exports.AnimeErrorCodes = {
         code: 'INVALID_BODY',
         message: 'The request body is not containing the required content or is invalid'
     },
+    INVALID_RATING: {
+        code: 'INVALID_RATING',
+        message: 'Rating must be between 1 and 5.'
+    },
+
 
 };
 

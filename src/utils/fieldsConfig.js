@@ -20,6 +20,12 @@ module.exports = {
             default: null,
             editable: true,
         },
+
+        ratings: {
+            type: 'array',
+            required: false,
+            default: [],
+        },
         description: {
             type: 'string',
             trim: true,

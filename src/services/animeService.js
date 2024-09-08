@@ -196,3 +196,35 @@ exports.listAnime = async ({ filter, sort, page, limit, details }) => {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
+
+
+
+exports.addRating = async (animeId, userId, rating) => {
+    if (!Types.ObjectId.isValid(animeId)) {
+        return { error: "Invalid anime ID" };
+    }
+
+    if (rating < 1 || rating > 5) {
+        return { error: "Invalid rating value" };
+    }
+
+    try {
+        const anime = await Anime.findById(animeId);
+        if (!anime) {
+            return { error: "Anime not found" };
+        }
+
+        const existingRating = anime.ratings.find(r => r.userId.toString() === userId.toString());
+
+        if (existingRating) {
+            existingRating.rating = rating;
+        } else {
+            anime.ratings.push({ userId: new Types.ObjectId(userId), rating });
+        }
+
+        await anime.save();
+        return { data: anime };
+    } catch (error) {
+        return { error: { message: "Database error", details: error.message } };
+    }
+};
