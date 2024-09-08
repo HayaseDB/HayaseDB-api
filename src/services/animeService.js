@@ -177,7 +177,22 @@ exports.listAnime = async ({ filter = 'date', sort = 'desc', page = 1, limit = 1
                 .skip((page - 1) * limit)
                 .limit(limit)
                 .exec();
-        }
+        } animes = await Promise.all(animes.map(async (anime) => {
+            if (anime instanceof Anime) {
+                anime = anime.toObject();
+            }
+            const ratingCount = await Anime.aggregate([
+                { $match: { _id: anime._id } },
+                { $unwind: '$ratings' },
+                { $count: 'ratingCount' }
+            ]);
+
+            return {
+                ...anime,
+                ratingCount: ratingCount.length > 0 ? ratingCount[0].ratingCount : 0
+            };
+        }));
+
 
         if (details) {
             animes = await Promise.all(animes.map(async (anime) => {
@@ -218,6 +233,7 @@ exports.listAnime = async ({ filter = 'date', sort = 'desc', page = 1, limit = 1
                     title: anime.title,
                     cover: await convertMediaToUrl(anime.cover),
                     genre: anime.genre,
+                    ratingCount: anime.ratingCount || 0,
                     releaseDate: anime.releaseDate,
                     studio: anime.studio,
                 };
