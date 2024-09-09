@@ -16,8 +16,6 @@ const createChangeRequest = async (req, res) => {
 
     return res.status(201).json(result.data);
 };
-
-
 const updateChangeRequestStatus = async (req, res) => {
     const { requestId } = req.params;
     const { status } = req.body;
@@ -35,6 +33,22 @@ const updateChangeRequestStatus = async (req, res) => {
 
     if (result.error) {
         return res.status(400).json(result.error);
+    }
+
+    if (status === 'approved') {
+        try {
+            const changeRequest = result.data;
+            const { animeId, changes } = changeRequest;
+            const updateResult = await changeRequestService.applyChangesToAnime(animeId, changes);
+
+            if (updateResult.error) {
+                return res.status(400).json(updateResult.error);
+            }
+
+            return res.status(200).json({ message: 'Change request approved and changes applied to anime', data: updateResult.data });
+        } catch (error) {
+            return res.status(500).json({ error: { message: "Failed to apply changes to anime", details: error.message } });
+        }
     }
 
     return res.status(200).json(result.data);

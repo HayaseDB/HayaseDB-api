@@ -1,8 +1,8 @@
 const ChangeRequest = require('../models/changeRequestsModel');
+const Anime = require('../models/animeModel');
 
 const createChangeRequest = async (userId, animeId, changes) => {
     try {
-        console.log(userId, animeId, changes);
         if (!animeId || !userId || !changes) {
             return { error: "Missing required fields" };
         }
@@ -19,6 +19,7 @@ const createChangeRequest = async (userId, animeId, changes) => {
         return { error: { message: "Database error", details: error.message } };
     }
 };
+
 const updateChangeRequestStatus = async (requestId, status) => {
     try {
         const validStatuses = ['pending', 'approved', 'declined'];
@@ -35,6 +36,37 @@ const updateChangeRequestStatus = async (requestId, status) => {
         if (!updatedRequest) {
             return { error: "Change request not found" };
         }
+
+        return { data: updatedRequest };
+    } catch (error) {
+        return { error: { message: "Database error", details: error.message } };
+    }
+};
+
+const applyChangesAndUpdateStatus = async (requestId, status) => {
+    try {
+        const validStatuses = ['pending', 'approved', 'declined'];
+        if (!validStatuses.includes(status)) {
+            return { error: "Invalid status value" };
+        }
+
+        const updatedRequest = await ChangeRequest.findByIdAndUpdate(
+            requestId,
+            { status },
+            { new: true }
+        );
+
+        if (!updatedRequest) {
+            return { error: "Change request not found" };
+        }
+
+        const anime = await Anime.findById(updatedRequest.animeId);
+        if (!anime) {
+            return { error: "Associated anime not found" };
+        }
+
+        Object.assign(anime, updatedRequest.changes);
+        await anime.save();
 
         return { data: updatedRequest };
     } catch (error) {
@@ -69,10 +101,29 @@ const getChangeRequestsByAnimeId = async (animeId) => {
     }
 };
 
+const applyChangesToAnime = async (animeId, changes) => {
+    try {
+        const updatedAnime = await Anime.findByIdAndUpdate(
+            animeId,
+            { $set: changes },
+            { new: true }
+        );
+
+        if (!updatedAnime) {
+            return { error: "Anime not found" };
+        }
+
+        return { data: updatedAnime };
+    } catch (error) {
+        return { error: { message: "Database error", details: error.message } };
+    }
+};
 
 module.exports = {
     createChangeRequest,
     updateChangeRequestStatus,
+    applyChangesAndUpdateStatus,
     getChangeRequestsByStatus,
-    getChangeRequestsByAnimeId
+    getChangeRequestsByAnimeId,
+    applyChangesToAnime
 };
