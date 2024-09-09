@@ -9,13 +9,13 @@ const createChangeRequest = async (req, res) => {
     }
 
     const result = await changeRequestService.createChangeRequest(userId, animeId, changes);
-
     if (result.error) {
         return res.status(400).json(result.error);
     }
 
     return res.status(201).json(result.data);
 };
+
 const updateChangeRequestStatus = async (req, res) => {
     const { requestId } = req.params;
     const { status } = req.body;
@@ -30,7 +30,6 @@ const updateChangeRequestStatus = async (req, res) => {
     }
 
     const result = await changeRequestService.updateChangeRequestStatus(requestId, status);
-
     if (result.error) {
         return res.status(400).json(result.error);
     }
@@ -56,14 +55,13 @@ const updateChangeRequestStatus = async (req, res) => {
 
 const getChangeRequestsByStatus = async (req, res) => {
     const { status } = req.params;
-
     const validStatuses = ['pending', 'approved', 'declined'];
+
     if (!validStatuses.includes(status)) {
         return res.status(400).json({ error: "Invalid status value" });
     }
 
     const result = await changeRequestService.getChangeRequestsByStatus(status);
-
     if (result.error) {
         return res.status(400).json(result.error);
     }
@@ -79,7 +77,6 @@ const getChangeRequestsByAnimeId = async (req, res) => {
     }
 
     const result = await changeRequestService.getChangeRequestsByAnimeId(animeId);
-
     if (result.error) {
         return res.status(400).json(result.error);
     }
