@@ -10,13 +10,23 @@ const createChangeRequest = async (req, res) => {
 
     const result = await changeRequestService.createChangeRequest(userId, animeId, changes);
     if (result.error) {
-        return res.status(400).json(result.error);
+        return res.status(result.status).json(result.error);
     }
 
-    return res.status(201).json(result.data);
+    return res.status(result.status).json(result.data);
 };
 
-const updateChangeRequestStatus = async (req, res) => {
+const listChangeRequests = async (req, res) => {
+    const filters = req.query;
+    const result = await changeRequestService.listChangeRequests(filters);
+    if (result.error) {
+        return res.status(result.status).json(result.error);
+    }
+
+    return res.status(result.status).json(result.data);
+};
+
+const setChangeRequestStatus = async (req, res) => {
     const { requestId } = req.params;
     const { status } = req.body;
 
@@ -24,69 +34,16 @@ const updateChangeRequestStatus = async (req, res) => {
         return res.status(400).json({ error: "Missing required fields: requestId or status" });
     }
 
-    const validStatuses = ['pending', 'approved', 'declined'];
-    if (!validStatuses.includes(status)) {
-        return res.status(400).json({ error: "Invalid status value" });
-    }
-
-    const result = await changeRequestService.updateChangeRequestStatus(requestId, status);
+    const result = await changeRequestService.setChangeRequestStatus(requestId, status);
     if (result.error) {
-        return res.status(400).json(result.error);
+        return res.status(result.status).json(result.error);
     }
 
-    if (status === 'approved') {
-        try {
-            const changeRequest = result.data;
-            const { animeId, changes } = changeRequest;
-            const updateResult = await changeRequestService.applyChangesToAnime(animeId, changes);
-
-            if (updateResult.error) {
-                return res.status(400).json(updateResult.error);
-            }
-
-            return res.status(200).json({ message: 'Change request approved and changes applied to anime', data: updateResult.data });
-        } catch (error) {
-            return res.status(500).json({ error: { message: "Failed to apply changes to anime", details: error.message } });
-        }
-    }
-
-    return res.status(200).json(result.data);
-};
-
-const getChangeRequestsByStatus = async (req, res) => {
-    const { status } = req.params;
-    const validStatuses = ['pending', 'approved', 'declined'];
-
-    if (!validStatuses.includes(status)) {
-        return res.status(400).json({ error: "Invalid status value" });
-    }
-
-    const result = await changeRequestService.getChangeRequestsByStatus(status);
-    if (result.error) {
-        return res.status(400).json(result.error);
-    }
-
-    return res.status(200).json(result.data);
-};
-
-const getChangeRequestsByAnimeId = async (req, res) => {
-    const { animeId } = req.params;
-
-    if (!animeId) {
-        return res.status(400).json({ error: "Missing required field: animeId" });
-    }
-
-    const result = await changeRequestService.getChangeRequestsByAnimeId(animeId);
-    if (result.error) {
-        return res.status(400).json(result.error);
-    }
-
-    return res.status(200).json(result.data);
+    return res.status(result.status).json(result.data);
 };
 
 module.exports = {
     createChangeRequest,
-    updateChangeRequestStatus,
-    getChangeRequestsByStatus,
-    getChangeRequestsByAnimeId
+    listChangeRequests,
+    setChangeRequestStatus
 };

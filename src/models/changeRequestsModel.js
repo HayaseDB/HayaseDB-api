@@ -1,15 +1,16 @@
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const { Schema, Types } = mongoose;
+const Anime = require('./animeModel');
 const fieldsConfig = require('../utils/fieldsConfig');
 
 const changeRequestSchema = new Schema({
     animeId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Anime',
         required: true
     },
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
@@ -23,55 +24,59 @@ const changeRequestSchema = new Schema({
         default: 'pending'
     },
     changes: {
-        type: Map,
-        of: Schema.Types.Mixed,
+        type: Schema.Types.Mixed,
         required: true,
+        default: {},
         validate: {
-            validator: function (changes) {
-                return validateChanges(changes, fieldsConfig.anime);
+            validator: async function (changes) {
+                const animeId = this.animeId;
+                return await validateChanges(changes, fieldsConfig.anime, animeId);
             },
-            message: 'Invalid changes, types, or non-editable fields.'
+            message: 'Invalid changes or non-editable fields.'
         }
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('ChangeRequest', changeRequestSchema, 'ChangeRequests');
+// Function to validate changes
+const validateChanges = async (changes, schemaConfig, animeId) => {
+    const validatedChanges = {};
+    const currentAnime = await Anime.findById(animeId).lean();
 
-function validateChanges(changes, schemaConfig) {
-    for (let [field, value] of changes.entries()) {
-        if (!schemaConfig.hasOwnProperty(field)) {
-            return false;
-        }
+    if (!currentAnime) {
+        throw new Error('Anime not found');
+    }
 
+    for (let [field, value] of Object.entries(changes)) {
         const fieldConfig = schemaConfig[field];
-        const expectedType = fieldConfig.type;
-
-        if (!fieldConfig.editable) {
-            return false;
-        }
-
-        if (!validateType(value, expectedType)) {
-            return false;
+        if (fieldConfig?.editable && validateType(value, fieldConfig.type)) {
+            const currentValue = currentAnime[field];
+            if (JSON.stringify(value) !== JSON.stringify(currentValue)) {
+                validatedChanges[field] = value;
+            }
         }
     }
-    return true;
-}
 
-function validateType(value, expectedType) {
+    return Object.keys(validatedChanges).length > 0 ? validatedChanges : null;
+};
+
+// Function to validate field types
+const validateType = (value, expectedType) => {
     switch (expectedType) {
         case 'string':
             return typeof value === 'string';
         case 'number':
-            return typeof value === 'number';
+            return typeof value === 'number' && !isNaN(value);
         case 'date':
             return value instanceof Date || !isNaN(Date.parse(value));
         case 'array':
             return Array.isArray(value);
         case 'objectId':
-            return mongoose.Types.ObjectId.isValid(value);
+            return Types.ObjectId.isValid(value);
         case 'objectIds':
-            return Array.isArray(value) && value.every(mongoose.Types.ObjectId.isValid);
+            return Array.isArray(value) && value.every(id => Types.ObjectId.isValid(id));
         default:
             return false;
     }
-}
+};
+
+module.exports = mongoose.model('ChangeRequest', changeRequestSchema, 'ChangeRequests');
