@@ -11,7 +11,7 @@ const createChangeRequest = async (userId, animeId, changes) => {
     try {
         const validChanges = await validateChanges(changes, fieldsConfig.anime, animeId);
         if (!validChanges) {
-            return { status: 400, error: "No valid changes detected" };
+            return { status: 201, error: "No valid changes detected" };
         }
 
         const changeRequest = new ChangeRequest({ animeId, userId, changes: validChanges });
