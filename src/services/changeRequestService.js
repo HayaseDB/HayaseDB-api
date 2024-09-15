@@ -86,13 +86,19 @@ const setChangeRequestStatus = async (requestId, status) => {
         if (status === 'approved') {
             try {
                 const { animeId, changes } = updateResult;
-                const updateAnimeResult = await Anime.findByIdAndUpdate(animeId, { $set: changes }, { new: true });
 
-                if (!updateAnimeResult) {
+                const anime = await Anime.findById(animeId);
+                if (!anime) {
                     return { status: 404, error: "Anime not found" };
                 }
 
-                return { status: 200, data: { message: 'Change request approved and changes applied to anime', anime: updateAnimeResult } };
+                const updatedData = { ...anime.data, ...changes };
+
+                anime.data = updatedData;
+                anime.updatedAt = Date.now();
+                await anime.save();
+
+                return { status: 200, data: { message: 'Change request approved and changes applied to anime', anime } };
             } catch (error) {
                 return { status: 500, error: { message: "Failed to apply changes to anime", details: error.message } };
             }
