@@ -29,16 +29,14 @@ const changeRequestSchema = new Schema({
         default: {},
         validate: {
             validator: async function (changes) {
-                const animeId = this.animeId;
-                return await validateChanges(changes, fieldsConfig.anime, animeId);
+                const validChanges = await this.constructor.validateChanges(changes, fieldsConfig.anime, this.animeId);
+                return validChanges !== null;
             },
             message: 'Invalid changes or non-editable fields.'
         }
     }
 }, { timestamps: true });
-
-// Function to validate changes
-const validateChanges = async (changes, schemaConfig, animeId) => {
+changeRequestSchema.statics.validateChanges = async function (changes, schemaConfig, animeId) {
     const validatedChanges = {};
     const currentAnime = await Anime.findById(animeId).lean();
 
@@ -46,20 +44,46 @@ const validateChanges = async (changes, schemaConfig, animeId) => {
         throw new Error('Anime not found');
     }
 
-    for (let [field, value] of Object.entries(changes)) {
+    for (const [field, newValue] of Object.entries(changes)) {
         const fieldConfig = schemaConfig[field];
-        if (fieldConfig?.editable && validateType(value, fieldConfig.type)) {
-            const currentValue = currentAnime[field];
-            if (JSON.stringify(value) !== JSON.stringify(currentValue)) {
-                validatedChanges[field] = value;
+        if (fieldConfig && fieldConfig.editable && validateType(newValue, fieldConfig.type)) {
+            const currentValue = currentAnime.data[field];
+
+            if (JSON.stringify(newValue) !== JSON.stringify(currentValue)) {
+                validatedChanges[field] = newValue;
             }
         }
     }
 
-    return Object.keys(validatedChanges).length > 0 ? validatedChanges : null;
+    const filteredChanges = Object.keys(validatedChanges).reduce((acc, key) => {
+        const fieldConfig = schemaConfig[key];
+        if (fieldConfig) {
+            const currentValue = currentAnime.data[key];
+            if (JSON.stringify(validatedChanges[key]) !== JSON.stringify(currentValue)) {
+                acc[key] = validatedChanges[key];
+            }
+        }
+        return acc;
+    }, {});
+
+    return Object.keys(filteredChanges).length > 0 ? filteredChanges : null;
 };
 
-// Function to validate field types
+
+changeRequestSchema.pre('save', async function (next) {
+    try {
+        const validChanges = await this.constructor.validateChanges(this.changes, fieldsConfig.anime, this.animeId);
+        if (validChanges === null) {
+            this.changes = {};
+        } else {
+            this.changes = validChanges;
+        }
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
+
 const validateType = (value, expectedType) => {
     switch (expectedType) {
         case 'string':
