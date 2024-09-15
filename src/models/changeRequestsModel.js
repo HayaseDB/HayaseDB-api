@@ -33,7 +33,7 @@ const changeRequestSchema = new Schema({
     }
 }, { timestamps: true });
 changeRequestSchema.statics.validateChanges = async function (changes, schemaConfig, animeId) {
-    console.log(changes);
+
     const validatedChanges = {};
     const currentAnime = await Anime.findById(animeId).lean();
 
@@ -54,6 +54,8 @@ changeRequestSchema.statics.validateChanges = async function (changes, schemaCon
                 if (JSON.stringify(newValue) !== JSON.stringify(currentValue)) {
                     validatedChanges[field] = newValue;
                 }
+            } else if (fieldConfig.media) {
+                validatedChanges[field] = newValue;
             }
         }
     }
@@ -71,6 +73,7 @@ changeRequestSchema.statics.validateChanges = async function (changes, schemaCon
 
     return Object.keys(filteredChanges).length > 0 ? filteredChanges : null;
 };
+
 
 
 changeRequestSchema.pre('save', async function (next) {

@@ -12,9 +12,7 @@ const fieldsConfig = require("../utils/fieldsConfig");
 const createChangeRequest = async (data, files, animeId, userId) => {
     try {
         const editableFields = getEditableFields();
-        console.log("Editable Fields:", editableFields);
 
-        // Process and sanitize data
         const createData = Object.keys(data).reduce((acc, key) => {
             if (editableFields.includes(key)) {
                 acc[key] = data[key];
@@ -25,23 +23,36 @@ const createChangeRequest = async (data, files, animeId, userId) => {
         const sanitizedData = sanitizationUtil.sanitizeData(createData, 'anime');
 
         if (!animeId) {
-            return { error: errorCodes.ChangeRequestErrorCodes.INVALID_BODY };
+            return { error: ChangeRequestErrorCodes.INVALID_BODY };
         }
 
         const { animeId: _animeId, userId: _userId, ...changes } = sanitizedData;
 
+        const filteredChanges = Object.keys(changes).reduce((acc, key) => {
+            const value = changes[key];
+            if (value && !(Array.isArray(value) && value.length === 0)) {
+                acc[key] = value;
+            }
+            return acc;
+        }, {});
+
+        if (files && files.length > 0) {
+            const mediaFields = editableFields.filter(field => files.some(file => file.fieldname === field));
+            mediaFields.forEach(field => {
+                filteredChanges[field] = 'Media File(s) Attached';
+            });
+        }
+
         const changeRequest = new ChangeRequest({
-            changes: changes,
+            changes: filteredChanges,
             animeId,
             userId
         });
-        console.log(changeRequest)
 
         await changeRequest.save();
-        console.log('Change Request saved with ID:', changeRequest._id);
 
-        const filesByField = {};
         if (files && files.length > 0) {
+            const filesByField = {};
             files.forEach(file => {
                 const field = file.fieldname;
                 if (!filesByField[field]) {
@@ -49,21 +60,13 @@ const createChangeRequest = async (data, files, animeId, userId) => {
                 }
                 filesByField[field].push(file);
             });
-        }
 
-
-        const mediaFields = [];
-        for (const field of editableFields) {
-            if (filesByField[field]) {
-                mediaFields.push(field);
-            }
-        }
-
-        for (const field of mediaFields) {
-            const file = filesByField[field][0];
-            const mediaResult = await addMedia(ChangeRequest, changeRequest._id, field, file);
-            if (mediaResult.error) {
-                return mediaResult;
+            for (const field of Object.keys(filesByField)) {
+                const file = filesByField[field][0];
+                const mediaResult = await addMedia(ChangeRequest, changeRequest._id, field, file);
+                if (mediaResult.error) {
+                    return mediaResult;
+                }
             }
         }
 
@@ -77,6 +80,8 @@ const createChangeRequest = async (data, files, animeId, userId) => {
         return { error: { ...ChangeRequestErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
+
+
 
 
 const listChangeRequests = async (filters = {}) => {

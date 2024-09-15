@@ -75,6 +75,7 @@ module.exports = {
             media: true,
             editable: true,
         },
+
         tags: {
             type: 'array',
             default: [],
