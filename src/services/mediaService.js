@@ -21,7 +21,6 @@ const createMediaDocument = async (file) => {
         return { error: { ...MediaErrorCodes.DATABASE_ERROR, message: 'Error saving media document.', details: error.message } };
     }
 };
-
 const deleteMediaDocument = async (mediaId) => {
     if (!isValidObjectId(mediaId)) {
         return { error: { ...MediaErrorCodes.INVALID_ID, message: 'Invalid media ID.' } };
@@ -46,18 +45,21 @@ const updateDocumentFieldWithMedia = async (model, documentId, field, mediaId) =
             return { error: { ...MediaErrorCodes.DOCUMENT_NOT_FOUND, message: 'Document not found.' } };
         }
 
-        if (!(field in document.toObject())) {
+        const data = document.data || {};
+        if (!(field in data)) {
             return { error: { ...MediaErrorCodes.INVALID_BODY, message: 'Field does not exist in document.' } };
         }
 
-        if (document[field]) {
-            const removeResult = await deleteMediaDocument(document[field]);
+        if (data[field]) {
+            const removeResult = await deleteMediaDocument(data[field]);
             if (removeResult.error) {
                 return removeResult;
             }
         }
 
-        const updatedDocument = await model.findByIdAndUpdate(documentId, { [field]: mediaId }, { new: true });
+        data[field] = mediaId;
+
+        const updatedDocument = await model.findByIdAndUpdate(documentId, { data }, { new: true });
         if (!updatedDocument) {
             return { error: { ...MediaErrorCodes.DATABASE_ERROR, message: 'Error updating document.' } };
         }
@@ -67,7 +69,6 @@ const updateDocumentFieldWithMedia = async (model, documentId, field, mediaId) =
         return { error: { ...MediaErrorCodes.DATABASE_ERROR, message: 'Error updating document field.', details: error.message } };
     }
 };
-
 const addMedia = async (model, documentId, field, file) => {
     const session = await startSession();
     session.startTransaction();
@@ -111,7 +112,6 @@ const addMedia = async (model, documentId, field, file) => {
         return { error: { ...MediaErrorCodes.DATABASE_ERROR, message: 'Error adding media.', details: error.message } };
     }
 };
-
 const getMediaById = async (id) => {
     if (!isValidObjectId(id)) {
         return { error: MediaErrorCodes.INVALID_ID };
@@ -129,7 +129,6 @@ const getMediaById = async (id) => {
         return { error: { ...MediaErrorCodes.DATABASE_ERROR, message: 'Error retrieving media.', details: error.message } };
     }
 };
-
 
 
 module.exports = {
