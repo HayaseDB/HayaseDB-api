@@ -14,10 +14,6 @@ const changeRequestSchema = new Schema({
         ref: 'User',
         required: true
     },
-    submitDate: {
-        type: Date,
-        default: Date.now
-    },
     status: {
         type: String,
         enum: ['pending', 'approved', 'declined'],
