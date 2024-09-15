@@ -4,7 +4,6 @@ const fieldsConfig = require('../utils/fieldsConfig');
 const schemaConfig = fieldsConfig.anime;
 
 const schemaFields = {};
-const mediaFields = [];
 Object.keys(schemaConfig).forEach(field => {
     const { type, trim, required, default: defaultValue, ref, min, max } = schemaConfig[field];
 
@@ -20,7 +19,7 @@ Object.keys(schemaConfig).forEach(field => {
             mongooseType = Date;
             break;
         case 'array':
-            mongooseType = Array;
+            mongooseType = [mongoose.Schema.Types.Mixed];
             break;
         case 'objectIds':
             mongooseType = [mongoose.Schema.Types.ObjectId];
@@ -44,7 +43,16 @@ Object.keys(schemaConfig).forEach(field => {
     };
 });
 
-const animeSchema = new mongoose.Schema(schemaFields, { timestamps: true });
-animeSchema.index({ createdAt: -1 });
-animeSchema.index({ popularity: -1 });
+const dataSchema = new mongoose.Schema(schemaFields, { _id: false });
+
+const animeSchema = new mongoose.Schema({
+    data: {
+        type: dataSchema,
+        required: true
+    }
+}, { timestamps: true });
+
+animeSchema.index({ 'data.createdAt': -1 });
+animeSchema.index({ 'data.popularity': -1 });
+
 module.exports = mongoose.model('Anime', animeSchema, 'Animes');

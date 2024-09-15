@@ -37,13 +37,16 @@ exports.createAnime = async (data) => {
             }
         }
 
-        const anime = new Anime(sanitizedData);
+        const anime = new Anime({
+            data: sanitizedData
+        });
         await anime.save();
         return { data: anime };
     } catch (error) {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
+
 
 exports.deleteAnime = async (animeId) => {
     if (!isValidObjectId(animeId)) {
@@ -59,7 +62,6 @@ exports.deleteAnime = async (animeId) => {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
-
 exports.editAnime = async (animeId, data) => {
     if (!isValidObjectId(animeId)) {
         return { error: AnimeErrorCodes.INVALID_ID };
@@ -82,7 +84,7 @@ exports.editAnime = async (animeId, data) => {
 
         const uniqueFields = uniqueCheckUtil.getUniqueFields('anime');
         for (const field of uniqueFields) {
-            if (sanitizedData[field] && sanitizedData[field] !== existingAnime[field]) {
+            if (sanitizedData[field] && sanitizedData[field] !== existingAnime.data[field]) {
                 const existingDocument = await uniqueCheckUtil.checkUniqueField(Anime, field, sanitizedData[field], animeId);
                 if (existingDocument) {
                     return { error: AnimeErrorCodes.DUPLICATE };
@@ -90,13 +92,14 @@ exports.editAnime = async (animeId, data) => {
             }
         }
 
-        const updatedAnime = await Anime.findByIdAndUpdate(animeId, sanitizedData, { new: true });
+        const updatedAnime = await Anime.findByIdAndUpdate(animeId, {
+            $set: { 'data': sanitizedData }
+        }, { new: true });
         return { data: updatedAnime };
     } catch (error) {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
-
 exports.getById = async (animeId) => {
     if (!isValidObjectId(animeId)) {
         return { error: AnimeErrorCodes.INVALID_ID };
@@ -109,13 +112,13 @@ exports.getById = async (animeId) => {
 
         const ratingCount = await Anime.aggregate([
             { $match: { _id: anime._id } },
-            { $unwind: '$ratings' },
+            { $unwind: '$data.ratings' },
             { $count: 'ratingCount' }
         ]);
 
         return {
             data: {
-                ...anime.toObject(),
+                ...anime.toObject().data,
                 ratingCount: ratingCount.length > 0 ? ratingCount[0].ratingCount : 0
             }
         };
@@ -135,34 +138,32 @@ const buildFilterQuery = (filter) => {
             return {};
     }
 };
-
 exports.listAnime = async ({ filter = 'date', sort = 'desc', page = 1, limit = 10, details = false }) => {
     try {
+        // Validate filter and sort inputs
         if (!['date', 'alphabetic', 'popular'].includes(filter) || !['asc', 'desc'].includes(sort)) {
             return { error: AnimeErrorCodes.INVALID_BODY };
         }
 
         const filterQuery = buildFilterQuery(filter);
-
-        const sortField = filter === 'alphabetic' ? 'title' :
-            filter === 'date' ? 'createdAt' : 'createdAt';
+        const sortField = filter === 'alphabetic' ? 'data.title' : 'createdAt';
         const sortOrder = sort === 'desc' ? -1 : 1;
 
         let animes, total;
 
+        // Handling popular filter logic
         if (filter === 'popular') {
             animes = await Anime.aggregate([
-                { $unwind: '$ratings' },
+                { $unwind: '$data.ratings' },
                 {
                     $group: {
                         _id: '$_id',
-                        title: { $first: '$title' },
+                        data: { $first: '$data' },
                         cover: { $first: '$cover' },
-                        genre: { $first: '$genre' },
                         releaseDate: { $first: '$releaseDate' },
                         studio: { $first: '$studio' },
-                        averageRating: { $avg: '$ratings.rating' },
-                        latestRatingDate: { $max: '$ratings.date' },
+                        averageRating: { $avg: '$data.ratings.rating' },
+                        latestRatingDate: { $max: '$data.ratings.date' },
                         ratingCount: { $sum: 1 }
                     }
                 },
@@ -181,31 +182,41 @@ exports.listAnime = async ({ filter = 'date', sort = 'desc', page = 1, limit = 1
                 { $limit: limit }
             ]);
 
-            total = animes.length;
+            total = await Anime.countDocuments();
         } else {
-            total = await Anime.countDocuments(filterQuery);
-
+            total = await Anime.countDocuments(filterQuery); // Total based on filter
             animes = await Anime.find(filterQuery)
                 .sort({ [sortField]: sortOrder })
                 .skip((page - 1) * limit)
                 .limit(limit)
                 .exec();
-        } animes = await Promise.all(animes.map(async (anime) => {
+        }
+
+        animes = await Promise.all(animes.map(async (anime) => {
             if (anime instanceof Anime) {
                 anime = anime.toObject();
             }
+
             const ratingCount = await Anime.aggregate([
                 { $match: { _id: anime._id } },
-                { $unwind: '$ratings' },
+                { $unwind: '$data.ratings' },
                 { $count: 'ratingCount' }
             ]);
 
+            if (anime.data.cover) {
+                anime.data.cover = await convertMediaToUrl(anime.data.cover);
+            }
+
             return {
-                ...anime,
-                ratingCount: ratingCount.length > 0 ? ratingCount[0].ratingCount : 0
+                id: anime._id,
+                createdAt: anime.createdAt,
+                updatedAt: anime.updatedAt,
+                data: {
+                    ...anime.data,
+                    ratingCount: ratingCount.length > 0 ? ratingCount[0].ratingCount : 0
+                }
             };
         }));
-
 
         if (details) {
             animes = await Promise.all(animes.map(async (anime) => {
@@ -216,17 +227,17 @@ exports.listAnime = async ({ filter = 'date', sort = 'desc', page = 1, limit = 1
                 const schemaConfig = fieldsConfig.anime;
 
                 for (const field in schemaConfig) {
-                    if (schemaConfig[field].media && anime[field]) {
-                        anime[field] = await convertMediaToUrl(anime[field]);
+                    if (schemaConfig[field].media && anime.data[field]) {
+                        anime.data[field] = await convertMediaToUrl(anime.data[field]);
                     }
-                    if (schemaConfig[field].nesting && anime[field]) {
-                        const nestedDocument = await fetchAndNestDocument(field, anime[field]);
-                        anime[field] = nestedDocument || null;
+                    if (schemaConfig[field].nesting && anime.data[field]) {
+                        const nestedDocument = await fetchAndNestDocument(field, anime.data[field]);
+                        anime.data[field] = nestedDocument || null;
                     }
                 }
 
-                if (Array.isArray(anime.characters)) {
-                    anime.characters = await Promise.all(anime.characters.map(async (character) => {
+                if (Array.isArray(anime.data.characters)) {
+                    anime.data.characters = await Promise.all(anime.data.characters.map(async (character) => {
                         if (character.image) {
                             character.image = await convertMediaToUrl(character.image);
                         }
@@ -236,28 +247,19 @@ exports.listAnime = async ({ filter = 'date', sort = 'desc', page = 1, limit = 1
 
                 return anime;
             }));
-        } else {
-            animes = await Promise.all(animes.map(async (anime) => {
-                if (anime instanceof Anime) {
-                    anime = anime.toObject();
-                }
-                return {
-                    id: anime._id,
-                    title: anime.title,
-                    cover: await convertMediaToUrl(anime.cover),
-                    genre: anime.genre,
-                    ratingCount: anime.ratingCount || 0,
-                    releaseDate: anime.releaseDate,
-                    studio: anime.studio,
-                };
-            }));
         }
 
-        return { data: { total, animes } };
+        return {
+            data: {
+                total,
+                animes
+            }
+        };
     } catch (error) {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
+
 exports.addRating = async (animeId, userId, rating) => {
     if (!Types.ObjectId.isValid(animeId) || !Types.ObjectId.isValid(userId)) {
         return { error: "Invalid anime or user ID" };
@@ -276,20 +278,20 @@ exports.addRating = async (animeId, userId, rating) => {
         const numericRating = parseFloat(rating);
         const userObjectId = new Types.ObjectId(userId);
 
-        const existingRatingIndex = anime.ratings.findIndex(r => r.userId.equals(userObjectId));
+        const existingRatingIndex = anime.data.ratings.findIndex(r => r.userId.equals(userObjectId));
 
         if (existingRatingIndex !== -1) {
-            anime.ratings[existingRatingIndex].rating = numericRating;
-            anime.ratings[existingRatingIndex].date = new Date();
+            anime.data.ratings[existingRatingIndex].rating = numericRating;
+            anime.data.ratings[existingRatingIndex].date = new Date();
         } else {
-            anime.ratings.push({
+            anime.data.ratings.push({
                 userId: userObjectId,
                 rating: numericRating,
                 date: new Date(),
             });
         }
 
-        const ratings = anime.ratings.map(r => parseFloat(r.rating));
+        const ratings = anime.data.ratings.map(r => parseFloat(r.rating));
         if (ratings.length === 0) {
             throw new Error("No ratings found.");
         }
@@ -297,15 +299,20 @@ exports.addRating = async (animeId, userId, rating) => {
         const total = ratings.reduce((sum, rate) => sum + rate, 0);
         const averageRating = parseFloat((total / ratings.length).toFixed(1));
 
-        const updatedAnime = await Anime.findByIdAndUpdate(animeId, {
-            ratings: anime.ratings,
-            averageRating,
-            updatedAt: new Date(),
-        }, { new: true });
+        const updatedAnime = await Anime.findByIdAndUpdate(
+            animeId,
+            {
+                'data.ratings': anime.data.ratings,
+                'data.averageRating': averageRating,
+                updatedAt: new Date(),
+            },
+            { new: true }
+        );
+
 
         const ratingCount = await Anime.aggregate([
             { $match: { _id: new Types.ObjectId(animeId) } },
-            { $unwind: '$ratings' },
+            { $unwind: '$data.ratings' },
             { $group: { _id: '$_id', ratingCount: { $sum: 1 } } }
         ]);
 
