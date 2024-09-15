@@ -2,19 +2,22 @@ const changeRequestService = require('../services/changeRequestService');
 
 const createChangeRequest = async (req, res) => {
     const { _id: userId } = req.user;
-    const { animeId, changes } = req.body;
+    const animeId = req.params.animeId;
+    const data = { ...req.body };
+    const files = req.files;
 
-    if (!animeId || !changes) {
-        return res.status(400).json({ error: "Missing required fields: animeId or changes" });
+    if (!animeId) {
+        return res.status(400).json({ error: "Missing required query parameter: animeId" });
     }
 
-    const result = await changeRequestService.createChangeRequest(userId, animeId, changes);
+    const result = await changeRequestService.createChangeRequest(data, files, animeId, userId);
     if (result.error) {
-        return res.status(result.status).json(result.error);
+        return res.status(result.error.status || 500).json(result.error);
     }
 
-    return res.status(result.status).json(result.data);
+    return res.status(201).json(result.data);
 };
+
 
 const listChangeRequests = async (req, res) => {
     const filters = req.query;

@@ -112,3 +112,41 @@ exports.KeyErrorCodes = {
         message: 'Internal server error'
     },
 };
+exports.ChangeRequestErrorCodes = {
+    DUPLICATE: {
+        code: 'DUPLICATE',
+        message: 'Change request with the same unique field already exists'
+    },
+    INVALID_BODY: {
+        code: 'INVALID_BODY',
+        message: 'The request body is missing required fields or contains invalid content'
+    },
+    NOT_FOUND: {
+        code: 'NOT_FOUND',
+        message: 'Change request not found'
+    },
+    DATABASE_ERROR: {
+        code: 'DATABASE_ERROR',
+        message: 'An error occurred with the database operation'
+    },
+    UNAUTHORIZED: {
+        code: 'UNAUTHORIZED',
+        message: 'Unauthorized access to this change request'
+    },
+    INVALID_STATUS: {
+        code: 'INVALID_STATUS',
+        message: 'The provided status value is not valid'
+    },
+    FILE_PROCESSING_ERROR: {
+        code: 'FILE_PROCESSING_ERROR',
+        message: 'An error occurred while processing files'
+    },
+    MEDIA_NOT_FOUND: {
+        code: 'MEDIA_NOT_FOUND',
+        message: 'Associated media for the change request not found'
+    },
+    INVALID_FILE_TYPE: {
+        code: 'INVALID_FILE_TYPE',
+        message: 'The provided file type is not supported'
+    }
+}
