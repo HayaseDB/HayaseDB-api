@@ -33,6 +33,7 @@ const changeRequestSchema = new Schema({
     }
 }, { timestamps: true });
 changeRequestSchema.statics.validateChanges = async function (changes, schemaConfig, animeId) {
+    console.log(changes);
     const validatedChanges = {};
     const currentAnime = await Anime.findById(animeId).lean();
 
@@ -40,13 +41,19 @@ changeRequestSchema.statics.validateChanges = async function (changes, schemaCon
         throw new Error('Anime not found');
     }
 
-    for (const [field, newValue] of Object.entries(changes)) {
+    for (let [field, newValue] of Object.entries(changes)) {
         const fieldConfig = schemaConfig[field];
-        if (fieldConfig && fieldConfig.editable && validateType(newValue, fieldConfig.type)) {
-            const currentValue = currentAnime.data[field];
+        if (fieldConfig) {
+            if (fieldConfig.type === 'array' && !Array.isArray(newValue)) {
+                newValue = [newValue];
+            }
 
-            if (JSON.stringify(newValue) !== JSON.stringify(currentValue)) {
-                validatedChanges[field] = newValue;
+            if (fieldConfig.editable && validateType(newValue, fieldConfig.type)) {
+                const currentValue = currentAnime.data[field];
+
+                if (JSON.stringify(newValue) !== JSON.stringify(currentValue)) {
+                    validatedChanges[field] = newValue;
+                }
             }
         }
     }

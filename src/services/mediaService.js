@@ -1,4 +1,5 @@
 const MediaModel = require('../models/mediaModel');
+const changeRequestsModel = require('../models/changeRequestsModel');
 const { MediaErrorCodes } = require('../utils/errorCodes');
 const { Types, startSession} = require('mongoose');
 const fieldsConfig = require('../utils/fieldsConfig');
@@ -76,43 +77,53 @@ const addMedia = async (model, documentId, field, file) => {
     let mediaResult;
 
     try {
-        const schemaConfig = fieldsConfig[model.modelName.toLowerCase()];
+        if (model.modelName.toLowerCase() === 'changerequest') {
+            mediaResult = await createMediaDocument(file);
+            if (mediaResult.error) {
+                throw new Error(mediaResult.error.message);
+            }
 
-        if (!schemaConfig[field]) {
-            return { error: { ...MediaErrorCodes.INVALID_BODY, message: 'Field is not configured.' } };
+            const updatedDocumentResult = await changeRequestsModel.findByIdAndUpdate(
+                documentId,
+                { $set: { [`changes.${field}`]: mediaResult.data._id } },
+                { new: true }
+            );
+            if (!updatedDocumentResult) {
+                throw new Error('Error updating ChangeRequest with media.');
+            }
+
+            await session.commitTransaction();
+            return { data: updatedDocumentResult };
         }
 
-        if (!schemaConfig[field].media) {
-            return { error: { ...MediaErrorCodes.INVALID_BODY, message: 'Field is not configured as media.' } };
+        const schemaConfig = fieldsConfig[model.modelName.toLowerCase()];
+        if (!schemaConfig[field] || !schemaConfig[field].media) {
+            throw new Error('Field is not configured as media.');
         }
 
         mediaResult = await createMediaDocument(file);
         if (mediaResult.error) {
-            await session.abortTransaction();
-            await session.endSession();
-            return mediaResult;
+            throw new Error(mediaResult.error.message);
         }
 
         const updatedDocumentResult = await updateDocumentFieldWithMedia(model, documentId, field, mediaResult.data._id);
         if (updatedDocumentResult.error) {
-            await deleteMediaDocument(mediaResult.data._id);
-            await session.abortTransaction();
-            await session.endSession();
-            return updatedDocumentResult;
+            throw new Error(updatedDocumentResult.error.message);
         }
 
         await session.commitTransaction();
-        await session.endSession();
         return { data: updatedDocumentResult.data };
     } catch (error) {
         if (mediaResult && mediaResult.data && mediaResult.data._id) {
             await deleteMediaDocument(mediaResult.data._id);
         }
         await session.abortTransaction();
-        await session.endSession();
-        return { error: { ...MediaErrorCodes.DATABASE_ERROR, message: 'Error adding media.', details: error.message } };
+        return { error: { message: error.message } };
+    } finally {
+        session.endSession();
     }
 };
+
 const getMediaById = async (id) => {
     if (!isValidObjectId(id)) {
         return { error: MediaErrorCodes.INVALID_ID };
