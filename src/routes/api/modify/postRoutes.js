@@ -11,7 +11,7 @@ const userAuth = require("../../../middlewares/userAuth");
 
 const router = express.Router();
 
-router.post('/anime', animeController.createAnime);
+router.post('/anime', upload.any(), animeController.createAnime);
 router.post('/media/:model', upload.single('file'), mediaController.postMedia);
 router.post('/character/:id', characterController.createCharacter);
 

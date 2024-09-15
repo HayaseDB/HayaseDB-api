@@ -69,6 +69,7 @@ const updateDocumentFieldWithMedia = async (model, documentId, field, mediaId) =
         return { error: { ...MediaErrorCodes.DATABASE_ERROR, message: 'Error updating document field.', details: error.message } };
     }
 };
+
 const addMedia = async (model, documentId, field, file) => {
     const session = await startSession();
     session.startTransaction();

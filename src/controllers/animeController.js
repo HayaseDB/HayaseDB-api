@@ -6,10 +6,12 @@ const fieldsConfig = require('../utils/fieldsConfig');
 
 exports.createAnime = async (req, res) => {
     try {
-        const result = await animeService.createAnime(req.body);
+        const result = await animeService.createAnime(req.body, req.files);
+
         if (result.error) {
-            return res.status(400).json({ error: result.error });
+            return res.status(result.error.code === 'INVALID_BODY' ? 400 : 500).json({ error: result.error });
         }
+
         res.status(201).json(result.data);
     } catch (err) {
         res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });

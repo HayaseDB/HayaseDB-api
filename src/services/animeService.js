@@ -9,12 +9,16 @@ const { convertMediaToUrl } = require("../utils/mediaUtil");
 
 const isValidObjectId = (id) => Types.ObjectId.isValid(id);
 const getEditableFields = () => {
-    return Object.keys(fieldsConfig.anime).filter(field => fieldsConfig.anime[field].editable);
+    return Object.keys(fieldsConfig.anime).filter(field => fieldsConfig.anime[field].editable || fieldsConfig.anime[field].media);
 };
 
-exports.createAnime = async (data) => {
+const { addMedia } = require('../services/mediaService');
+
+exports.createAnime = async (data, files) => {
     try {
         const editableFields = getEditableFields();
+        console.log("Editable Fields:", editableFields);
+
         const createData = Object.keys(data).reduce((acc, key) => {
             if (editableFields.includes(key)) {
                 acc[key] = data[key];
@@ -41,11 +45,57 @@ exports.createAnime = async (data) => {
             data: sanitizedData
         });
         await anime.save();
-        return { data: anime };
+        console.log('Anime saved with ID:', anime._id);
+
+        const filesByField = {};
+        if (files && files.length > 0) {
+            files.forEach(file => {
+                const field = file.fieldname;
+                if (!filesByField[field]) {
+                    filesByField[field] = [];
+                }
+                filesByField[field].push(file);
+            });
+        }
+
+        const mediaFields = [];
+        for (const field of editableFields) {
+            console.log(`Checking field: ${field}`);
+
+            const isEditable = editableFields.includes(field);
+            const isMedia = fieldsConfig.anime[field] ? fieldsConfig.anime[field].media === true : false;
+            console.log(`Field: ${field}, Editable: ${isEditable}, Media: ${isMedia}`);
+
+            if (isEditable && isMedia && filesByField[field]) {
+                console.log(`File found for field: ${field}`);
+                mediaFields.push(field);
+            } else {
+                console.log(`No file found for field: ${field}`);
+            }
+        }
+
+        console.log("Media Fields:", mediaFields);
+
+        for (const field of mediaFields) {
+            const file = filesByField[field][0];
+            const mediaResult = await addMedia(Anime, anime._id, field, file);
+            if (mediaResult.error) {
+                return mediaResult;
+            }
+        }
+
+        const updatedAnime = await Anime.findById(anime._id).exec();
+        if (!updatedAnime) {
+            return { error: AnimeErrorCodes.NOT_FOUND };
+        }
+
+        return { data: updatedAnime };
     } catch (error) {
         return { error: { ...AnimeErrorCodes.DATABASE_ERROR, details: error.message } };
     }
 };
+
+
 
 
 exports.deleteAnime = async (animeId) => {

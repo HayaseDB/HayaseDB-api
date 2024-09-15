@@ -72,7 +72,8 @@ module.exports = {
             trim: true,
             default: null,
             ref: 'Media',
-            media: true
+            media: true,
+            editable: true,
         },
         tags: {
             type: 'array',
