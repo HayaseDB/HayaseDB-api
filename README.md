@@ -4,7 +4,7 @@
 
 HayaseDB is an open-source anime database designed for fans and developers alike. It offers comprehensive information on anime titles, characters, episode summaries, and more, all in one easy-to-navigate platform.
 
-This repository houses the core project, which includes the API and database system for HayaseDB. It focuses exclusively on backend functionality, without any frontend or user interface components. This repository is intended primarily for developers who want to interact directly with the API. If you're not a developer or prefer to access the database without coding knowledge, we recommend using our [frontend website](https://hayasedb.com), which offers an easy-to-use interface for exploring the database.
+This repository houses the core project, which includes the API and database system for HayaseDB. It focuses exclusively on backend functionality, without any frontend or user interface components. This repository is intended primarily for developers who want to interact directly with the API. If you're not a developer or prefer to access the database without coding knowledge, we recommend using our [frontend website](https://web.hayasedb.com), which offers an easy-to-use interface for exploring the database.
 
 Please note that HayaseDB is still in early development, so some features may not yet be functional. Stay tuned as we continue to enhance our project!
 
