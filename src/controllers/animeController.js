@@ -119,3 +119,23 @@ exports.rateAnime = async (req, res) => {
         res.status(500).json({ error: { ...AnimeErrorCodes.DATABASE_ERROR, details: err.message } });
     }
 };
+
+
+exports.searchAnime = async (req, res) => {
+    try {
+        const { keywords = '', sort = 'desc', page = 1, limit = 10 } = req.query;
+
+        const searchOptions = {
+            keywords: keywords,
+            sort: sort,
+            page: parseInt(page),
+            limit: parseInt(limit)
+        };
+
+        const result = await animeService.searchAnime(searchOptions);
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error('Error in searchAnime controller:', error);
+        return res.status(500).json({ message: 'Failed to search for anime' });
+    }
+};

@@ -18,6 +18,7 @@ router.get('/list/anime', orAuth, animeController.list);
 
 router.get('/stats', orAuth, statsController.getStats)
 
+router.get('/search', orAuth, animeController.searchAnime);
 
 
 module.exports = router;

@@ -376,3 +376,27 @@ exports.addRating = async (animeId, userId, rating) => {
         return { error: { message: "Database error", details: error.message } };
     }
 };
+
+
+exports.searchAnime = async ({ keywords = '', sort = 'desc', page = 1, limit = 10 }) => {
+    try {
+        const searchQuery = keywords ? { $text: { $search: keywords.trim() } } : {};
+
+        const sortField = 'createdAt';
+        const sortOrder = sort === 'desc' ? -1 : 1;
+
+        const skip = (page - 1) * limit;
+        
+        const total = await Anime.countDocuments(searchQuery);
+        const animes = await Anime.find(searchQuery)
+            .sort({ [sortField]: sortOrder })
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        return { animes, total };
+    } catch (error) {
+        console.error('Error in searchAnime:', error);
+        throw new Error('Error retrieving anime list');
+    }
+};
