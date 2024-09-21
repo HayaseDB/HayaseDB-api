@@ -31,7 +31,6 @@ const cors = require('cors')
 // Routes
 const userRoutes = require("./routes/userRoutes");
 const apiRoutes = require("./routes/apiRoutes");
-const {getSystemHealth} = require("./services/healthService");
 const {webAuth, corsOptions} = require("./middlewares/corsMiddleware");
 const {clearOrphanedMedia} = require("./utils/documentUtil");
 // clearOrphanedMedia()
@@ -41,7 +40,6 @@ app.use(cors(corsOptions));
 
 app.use('/user', userRoutes);
 app.use('/api', apiRoutes);
-app.get('/health', getSystemHealth);
 
 // Handlers
 app.use(errorHandler);
