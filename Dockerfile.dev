@@ -7,10 +7,8 @@ COPY package*.json ./
 ARG NODE_ENV=development
 RUN npm install
 
-RUN npm install -g nodemon
+COPY . .
 
-COPY ./src ./src
+EXPOSE ${API_PORT}
 
-EXPOSE 3000
-
-CMD ["nodemon", "--legacy-watch", "src/index.js"]
+CMD ["npm", "run", "start:dev"]

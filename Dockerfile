@@ -7,8 +7,9 @@ COPY package*.json ./
 ARG NODE_ENV=production
 RUN npm install
 
-COPY ./src ./src
+COPY . .
+RUN npm run build
 
-EXPOSE 3000
+EXPOSE ${API_PORT}
 
-CMD ["node", "src/index.js"]
+CMD ["npm", "run", "start:prod"]
