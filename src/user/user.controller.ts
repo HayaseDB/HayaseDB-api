@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Patch } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { createUserDto } from './dto/createUser.dto';
@@ -33,7 +33,7 @@ export class UserController {
     return this.userService.create(userData);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Update a user by ID' })
   @ApiResponse({ status: 200, description: 'User updated successfully.', type: User })
   @ApiResponse({ status: 404, description: 'User not found.' })
