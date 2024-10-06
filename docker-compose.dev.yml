@@ -8,8 +8,7 @@ services:
         NODE_ENV: development
       dockerfile: Dockerfile.dev
     volumes:
-      - ./src:/usr/src/app/src
-      - /usr/src/app/node_modules
+      - .:/usr/src/app
     ports:
       - "${API_PORT}:${API_PORT}"
     environment:
@@ -20,6 +19,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
+      JWT_SECRET: ${JWT_SECRET}
     depends_on:
       - database
     pull_policy: build
