@@ -1,14 +1,15 @@
 FROM node:20-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 
-ARG NODE_ENV=development
 RUN npm install
 
-COPY . .
+RUN npm install -g nodemon
 
-EXPOSE ${API_PORT}
+COPY ./src ./src
 
-CMD ["npm", "run", "start:dev"]
+EXPOSE ${PORT}
+
+CMD ["nodemon", "--legacy-watch", "src/app.js"]

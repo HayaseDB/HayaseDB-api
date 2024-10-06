@@ -1,40 +1,39 @@
 
 services:
   hayasedb:
-    container_name: HayaseDB-prod
-    restart: always
     build:
       context: .
-      args:
-        NODE_ENV: production
       dockerfile: Dockerfile
-    ports:
-      - "${API_PORT}:${API_PORT}"
+    container_name: HayaseDB-prod
     environment:
-      NODE_ENV: production
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      JWT_SECRET: ${JWT_SECRET}
+      - NODE_ENV=development
+      - PORT=${PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - API_URL=${API_URL}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_NAME=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${PORT}:${PORT}"
     depends_on:
-      - database
+      - postgres
     pull_policy: build
 
-  database:
-    container_name: HayaseDB-database
+  postgres:
     image: postgres:latest
+    container_name: HayaseDB-db
     restart: always
-    ports:
-      - "${POSTGRES_PORT}:5432"
-    volumes:
-      - database:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - hayasedb-db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    attach: false
 
 volumes:
-  database:
+  hayasedb-db:

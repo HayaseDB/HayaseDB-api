@@ -1,5 +1,5 @@
+
 /node_modules
-.env
-package-lock.json
-.DS_Store
 /.idea
+.env
+.DS_Store

@@ -1,15 +1,14 @@
+
 FROM node:20-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 
-ARG NODE_ENV=production
 RUN npm install
 
-COPY . .
-RUN npm run build
+COPY ./src ./src
 
-EXPOSE ${API_PORT}
+EXPOSE ${PORT}
 
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "prod"]

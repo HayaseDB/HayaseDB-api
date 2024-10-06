@@ -1,58 +1,42 @@
+
 services:
   hayasedb:
-    container_name: HayaseDB-dev
-    restart: always
     build:
       context: .
-      args:
-        NODE_ENV: development
       dockerfile: Dockerfile.dev
-    volumes:
-      - .:/usr/src/app
-    ports:
-      - "${API_PORT}:${API_PORT}"
+    container_name: HayaseDB-dev
     environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      JWT_SECRET: ${JWT_SECRET}
+      - NODE_ENV=development
+      - PORT=${PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - API_URL=${API_URL}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${PORT}:${PORT}"
     depends_on:
-      - database
+      - postgres
+    volumes:
+      - ./src:/app/src
+      - /app/node_modules
     pull_policy: build
 
-  database:
-    container_name: HayaseDB-database
-    image: postgres
+  postgres:
+    image: postgres:latest
+    container_name: HayaseDB-db
     restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - hayasedb-db:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_PORT}:5432"
-    volumes:
-      - database_data:/var/lib/postgresql/data
     attach: false
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    container_name: pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: pgadmin@hayasedb.com
-      PGADMIN_DEFAULT_PASSWORD: pgadmin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
-    ports:
-      - '5050:80'
-    depends_on:
-      - database
-    attach: false
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
+
 volumes:
-  database_data:
-  pgadmin-data:
+  hayasedb-db:
