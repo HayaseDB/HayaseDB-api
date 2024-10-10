@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const { sequelize } = require('../config/config');
-
+const { errorCreator } = require('../utils/errorHandler');
 /**
  * @swagger
  * components:
@@ -8,9 +8,6 @@ const { sequelize } = require('../config/config');
  *     Anime:
  *       type: object
  *       properties:
- *         id:
- *           type: integer
- *           example: 1
  *         title:
  *           type: string
  *           example: "My Hero Academia"
@@ -43,22 +40,29 @@ Anime.init({
     title: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
+        validate: {
+            notNull: {
+                msg: 'Title is required',
+            },
+
+        },
     },
     genre: {
         type: DataTypes.ARRAY(DataTypes.STRING),
-        allowNull: false,
+        allowNull: true,
     },
     releaseDate: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
     },
     description: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
     },
     coverImage: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
 }, {
     sequelize,

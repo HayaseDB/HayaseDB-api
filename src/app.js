@@ -2,8 +2,8 @@
 const express = require('express');
 const { connectDB } = require('./config/config');
 const authRoutes = require('./routes/authRoutes');
+const animeRoutes = require('./routes/animeRoutes');
 const setupSwagger = require("./swagger/swagger");
-const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 app.use('/auth', authRoutes);
+app.use('/anime', animeRoutes);
 
 setupSwagger(app);
 

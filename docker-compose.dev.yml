@@ -6,7 +6,6 @@ services:
       dockerfile: Dockerfile.dev
     container_name: HayaseDB-dev
     environment:
-      - NODE_ENV=development
       - PORT=${PORT}
       - JWT_SECRET=${JWT_SECRET}
       - API_URL=${API_URL}

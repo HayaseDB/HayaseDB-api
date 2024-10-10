@@ -23,6 +23,7 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
+
 const setupSwagger = (app) => {
     app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, {
         swaggerOptions: {

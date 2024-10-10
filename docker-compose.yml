@@ -6,14 +6,13 @@ services:
       dockerfile: Dockerfile
     container_name: HayaseDB-prod
     environment:
-      - NODE_ENV=development
       - PORT=${PORT}
       - JWT_SECRET=${JWT_SECRET}
       - API_URL=${API_URL}
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_NAME=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "${PORT}:${PORT}"

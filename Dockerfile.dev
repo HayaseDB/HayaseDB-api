@@ -12,4 +12,4 @@ COPY ./src ./src
 
 EXPOSE ${PORT}
 
-CMD ["nodemon", "--legacy-watch", "src/app.js"]
+CMD ["npm", "run", "dev"]

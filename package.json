@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "prod": "node src/app.js",
-    "dev": "nodemon src/app.js",
+    "dev": "nodemon --legacy-watch src/app.js",
     "docker:prod": "docker-compose -f docker-compose.yml up --build",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build"
   },
