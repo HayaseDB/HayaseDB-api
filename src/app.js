@@ -20,7 +20,10 @@ setupSwagger(app);
 const startServer = async () => {
     await connectDB();
     app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
+        console.log(`------------------------------------------------------`);
+        console.log(`API:   http://localhost:${PORT}`);
+        console.log(`DOCS:  http://localhost:${PORT}/docs`);
+        console.log(`------------------------------------------------------`);
     });
 };
 
