@@ -1,6 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const { sequelize } = require('../config/config');
-const { errorCreator } = require('../utils/errorHandler');
+const { sequelize } = require('../config/database');
 /**
  * @swagger
  * components:
@@ -10,30 +9,32 @@ const { errorCreator } = require('../utils/errorHandler');
  *       properties:
  *         title:
  *           type: string
- *           example: "My Hero Academia"
+ *           description: "The title of the anime."
+ *           example: ""
  *         genre:
  *           type: array
+ *           nullable: true
  *           items:
  *             type: string
- *           example: ["Action", "Adventure"]
+ *           description: "An array of genres associated with the anime."
+ *           example: []
  *         releaseDate:
  *           type: string
  *           format: date
- *           example: "2016-04-03"
+ *           description: "The release date of the anime in YYYY-MM-DD format."
+ *           example: ""
  *         description:
  *           type: string
- *           example: "In a world where nearly every human has superpowers, a boy without them strives to become a hero."
+ *           description: "A brief summary of the anime."
+ *           example: ""
  *         coverImage:
  *           type: string
- *           format: uri
- *           example: "https://example.com/my-hero-academia-cover.jpg"
+ *           format: binary
+ *           description: "The cover image for the anime."
  *       required:
  *         - title
- *         - genre
- *         - releaseDate
- *         - description
- *         - coverImage
  */
+
 class Anime extends Model {}
 
 Anime.init({
@@ -61,7 +62,7 @@ Anime.init({
         allowNull: true,
     },
     coverImage: {
-        type: DataTypes.STRING,
+        type: DataTypes.BLOB("long"),
         allowNull: true,
     },
 }, {

@@ -1,20 +1,42 @@
 const Anime = require('../models/anime');
-const bcrypt = require('bcrypt');
+
+
+
 
 const animeService = {
     createAnime: async (data) => {
         try {
-
-
-
-
             return await Anime.create(data);
         } catch (error) {
-            throw error
+            throw error;
         }
     },
 
+    deleteAnime: async (id) => {
+        try {
+            const anime = await Anime.destroy({ where: { id } });
+            return anime;
+        } catch (error) {
+            throw error;
+        }
+    },
 
+    listAnimes: async (page, limit) => {
+        try {
+            const offset = (page - 1) * limit;
+
+            const { rows: animes, count: totalItems } = await Anime.findAndCountAll({
+                offset,
+                limit: parseInt(limit),
+            });
+
+            const totalPages = Math.ceil(totalItems / limit);
+
+            return { animes, totalItems, totalPages };
+        } catch (error) {
+            throw error;
+        }
+    },
 };
 
 module.exports = animeService;
