@@ -7,6 +7,11 @@ const { sequelize } = require('../config/database');
  *     Anime:
  *       type: object
  *       properties:
+ *         id:
+ *           type: string
+ *           readOnly: true
+ *           format: uuid
+ *           description: "The unique identifier for the anime."
  *         title:
  *           type: string
  *           description: "The title of the anime."
@@ -39,6 +44,12 @@ const { sequelize } = require('../config/database');
 class Anime extends Model {}
 
 Anime.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+    },
     title: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -47,7 +58,6 @@ Anime.init({
             notNull: {
                 msg: 'Title is required',
             },
-
         },
     },
     genre: {
