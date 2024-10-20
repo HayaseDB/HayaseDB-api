@@ -2,7 +2,7 @@
 const express = require('express');
 const animeController = require('../controllers/animeController');
 const router = express.Router();
-const upload = require('../utils/multerConfig');
+const upload = require('../middlewares/multerMiddleware');
 const cutOutEmpty = require('../middlewares/cutOutEmpty');
 /**
  * @swagger
