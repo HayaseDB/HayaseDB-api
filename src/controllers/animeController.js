@@ -8,14 +8,17 @@ const AnimeCreate = async (req, res) => {
 
     try {
         const mediaEntries = {};
+        const mediaFields = fieldsUtils.getMediaFields(Anime);
 
         if (files && files.length > 0) {
             for (const file of files) {
-                const mediaEntry = await mediaService.createMedia({
-                    media: file.buffer,
-                });
+                if (mediaFields.includes(file.fieldname)) {
+                    const mediaEntry = await mediaService.createMedia({
+                        media: file.buffer,
+                    });
 
-                mediaEntries[file.fieldname] = mediaEntry.id;
+                    mediaEntries[file.fieldname] = mediaEntry.id;
+                }
             }
         }
 
@@ -32,12 +35,12 @@ const AnimeCreate = async (req, res) => {
             },
         });
     } catch (error) {
-
         const errorMessage = error.errors && error.errors.length > 0
             ? error.errors[0].message
             : 'Server error';
 
-        res.status(500).json({ success: false, message: errorMessage });    }
+        res.status(500).json({ success: false, message: errorMessage });
+    }
 };
 
 const AnimeDelete = async (req, res) => {
