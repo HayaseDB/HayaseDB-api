@@ -38,6 +38,14 @@ const animeService = {
             throw error;
         }
     },
+
+    getAnimeById: async (id) => {
+        try {
+            return await Anime.findByPk(id);
+        } catch (error) {
+            throw error;
+        }
+    },
 };
 
 module.exports = animeService;

@@ -2,10 +2,9 @@ const Media = require('../models/media');
 
 const createMedia = async ({ media }) => {
     try {
-        const mediaEntry = await Media.create({
+        return await Media.create({
             media,
         });
-        return mediaEntry;
     } catch (error) {
         console.error('Error creating media entry:', error);
         throw new Error('Failed to create media entry');

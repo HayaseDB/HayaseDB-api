@@ -2,6 +2,25 @@
 const { Model, DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: User's email address
+ *         password:
+ *           type: string
+ *           description: User's password, which is stored as a hash
+ */
+
+
+
 class User extends Model {}
 
 User.init({

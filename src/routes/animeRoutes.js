@@ -111,4 +111,33 @@ router.delete('/delete/:id', animeController.AnimeDelete);
  */
 router.get('/list', animeController.AnimeList);
 
+
+/**
+ * @swagger
+ * /anime/{id}:
+ *   get:
+ *     tags: [Anime]
+ *     summary: Get Anime
+ *     description: Retrieve a specific anime via ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the anime to retrieve
+ *       - in: query
+ *         name: translateMedia
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *         description: Enable or disable media translation to accessible URLs
+ *     responses:
+ *       200:
+ *         description: Animes retrieved successfully
+ *       500:
+ *         description: Server error
+ */
+router.get('/:id', animeController.AnimeGet);
+
 module.exports = router;

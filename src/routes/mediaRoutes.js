@@ -5,6 +5,14 @@ const mediaController = require('../controllers/mediaController');
 
 /**
  * @swagger
+ * tags:
+ *   name: Media
+ *   description: Media API
+ */
+
+
+/**
+ * @swagger
  * /media/{id}:
  *   get:
  *     tags: [Media]

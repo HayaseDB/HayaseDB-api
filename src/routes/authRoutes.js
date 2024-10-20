@@ -16,7 +16,6 @@ const router = express.Router();
  * @swagger
  * /auth/register:
  *   post:
- *     deprecated: true
  *     tags: [Auth]
  *     summary: Register a new user
  *     description: Creates a new user account.
@@ -55,7 +54,6 @@ router.post('/register', register);
  *
  * /auth/login:
  *   post:
- *     deprecated: true
  *     tags: [Auth]
  *     summary: Log in a user
  *     description: Authenticates a user and returns a JWT token.

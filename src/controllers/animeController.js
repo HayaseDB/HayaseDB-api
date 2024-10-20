@@ -2,9 +2,11 @@ const animeService = require('../services/animeService');
 const mediaService = require('../services/mediaService');
 const fieldsUtils = require('../utils/fieldsUtils');
 const Anime = require('../models/anime');
-
+const {sequelize} = require('../config/database');
 const AnimeCreate = async (req, res) => {
     const files = req.files;
+
+    const transaction = await sequelize.transaction();
 
     try {
         const mediaEntries = {};
@@ -15,7 +17,7 @@ const AnimeCreate = async (req, res) => {
                 if (mediaFields.includes(file.fieldname)) {
                     const mediaEntry = await mediaService.createMedia({
                         media: file.buffer,
-                    });
+                    }, { transaction });
 
                     mediaEntries[file.fieldname] = mediaEntry.id;
                 }
@@ -25,7 +27,9 @@ const AnimeCreate = async (req, res) => {
         const animeEntry = await animeService.createAnime({
             ...req.body,
             ...mediaEntries,
-        });
+        }, { transaction });
+
+        await transaction.commit();
 
         res.status(201).json({
             success: true,
@@ -35,6 +39,8 @@ const AnimeCreate = async (req, res) => {
             },
         });
     } catch (error) {
+        await transaction.rollback();
+
         const errorMessage = error.errors && error.errors.length > 0
             ? error.errors[0].message
             : 'Server error';
@@ -42,6 +48,7 @@ const AnimeCreate = async (req, res) => {
         res.status(500).json({ success: false, message: errorMessage });
     }
 };
+
 
 const AnimeDelete = async (req, res) => {
     const { id } = req.params;
@@ -99,7 +106,37 @@ const AnimeList = async (req, res) => {
     }
 };
 
+const AnimeGet = async (req, res) => {
+    const { id } = req.params;
+    const translateMedia = req.query.translateMedia === 'true';
+
+    try {
+        const anime = await animeService.getAnimeById(id);
+
+        if (!anime) {
+            return res.status(404).json({ success: false, message: 'Anime not found' });
+        }
+
+        if (translateMedia) {
+            const mediaFields = fieldsUtils.getMediaFields(Anime);
+            mediaFields.forEach(field => {
+                if (anime[field]) {
+                    anime[field] = fieldsUtils.convertToMediaUrl(anime[field]);
+                }
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: {
+                anime,
+            },
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
 
 
 
-module.exports = { AnimeCreate, AnimeDelete, AnimeList };
+module.exports = { AnimeCreate, AnimeDelete, AnimeList, AnimeGet };
