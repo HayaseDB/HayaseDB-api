@@ -13,7 +13,7 @@ const getMediaFields = (model) => {
 };
 
 const convertToMediaUrl = (mediaId) => {
-    return `http://localhost:3000/media/${mediaId}`;
+    return `${process.env.API_URL}/media/${mediaId}`;
 };
 
 module.exports = {getMediaFields, convertToMediaUrl};
