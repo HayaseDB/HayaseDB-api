@@ -1,6 +1,6 @@
 const chalk = require('chalk');
 chalk.level = 3;
-
+const logger = require('../utils/logger')
 const { connectDB } = require('../config/database');
 const figlet = require('figlet');
 const { createGradient } = require('../utils/colorUtils');
@@ -15,6 +15,11 @@ const startServer = async (app) => {
         const gradientLogo = createGradient(logo, '#435ed6', '#b396e9');
 
         console.log(gradientLogo);
+
+        if (process.env.NODE_ENV === 'development') {
+            logger.custom("grey", "black", "DEV MODE", "You are running in development mode!");
+        }        
+
         const apiInfo = await getUrl(process.env.API_URL, `http://localhost:${PORT}`);
         const webInfo = await getUrl(process.env.FRONTEND_URL, `http://localhost:8080`);
         const docsInfo = await getUrl(`${process.env.API_URL}/docs`, `http://localhost:${PORT}/docs`);

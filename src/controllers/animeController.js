@@ -32,8 +32,12 @@ const AnimeCreate = async (req, res) => {
             },
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.errors[0].message });
-    }
+
+        const errorMessage = error.errors && error.errors.length > 0
+            ? error.errors[0].message
+            : 'Server error';
+
+        res.status(500).json({ success: false, message: errorMessage });    }
 };
 
 const AnimeDelete = async (req, res) => {
