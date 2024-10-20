@@ -21,7 +21,7 @@ const startServer = async (app) => {
         }        
 
         const apiInfo = await getUrl(process.env.API_URL, `http://localhost:${PORT}`);
-        const webInfo = await getUrl(process.env.FRONTEND_URL, `http://localhost:8080`);
+        const webInfo = await getUrl(process.env.WEB_URL, `http://localhost:8080`);
         const docsInfo = await getUrl(`${process.env.API_URL}/docs`, `http://localhost:${PORT}/docs`);
         const dbInfo = await getUrl(`postgres://${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`, `no connection`);
 
