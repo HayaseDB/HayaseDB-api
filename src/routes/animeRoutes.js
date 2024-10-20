@@ -2,8 +2,8 @@
 const express = require('express');
 const animeController = require('../controllers/animeController');
 const router = express.Router();
-const upload = require('../middlewares/multerMiddleware');
-const cutOutEmpty = require('../middlewares/cutOutEmpty');
+const multerMiddleware = require('../middlewares/multerMiddleware');
+const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
 /**
  * @swagger
  * tags:
@@ -39,7 +39,7 @@ const cutOutEmpty = require('../middlewares/cutOutEmpty');
  *         description: Server error
  */
 
-router.post('/create', upload.any(), cutOutEmpty, animeController.AnimeCreate);
+router.post('/create', multerMiddleware, sanitizeMiddleware, animeController.AnimeCreate);
 
 
 

@@ -62,8 +62,12 @@ Anime.init({
         allowNull: true,
     },
     coverImage: {
-        type: DataTypes.BLOB,
+        type: DataTypes.UUID,
         allowNull: true,
+        references: {
+            model: 'Media',
+            key: 'id',
+        },
     },
 }, {
     sequelize,
