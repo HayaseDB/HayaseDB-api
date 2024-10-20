@@ -62,7 +62,7 @@ Anime.init({
         allowNull: true,
     },
     coverImage: {
-        type: DataTypes.BLOB("long"),
+        type: DataTypes.BLOB,
         allowNull: true,
     },
 }, {

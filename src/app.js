@@ -1,30 +1,9 @@
-
-const express = require('express');
-const { connectDB } = require('./config/database');
-const authRoutes = require('./routes/authRoutes');
-const animeRoutes = require('./routes/animeRoutes');
+const initApp = require('./utils/initApp');
+const startServer = require('./utils/server');
 const setupSwagger = require("./swagger/swagger");
-const cors = require("./config/cors")
-const app = express();
-const PORT = process.env.PORT || 3000;
 
-
-app.use(cors);
-app.use(express.json());
-
-app.use('/auth', authRoutes);
-app.use('/anime', animeRoutes);
+const app = initApp();
 
 setupSwagger(app);
 
-const startServer = async () => {
-    await connectDB();
-    app.listen(PORT, () => {
-        console.log(`------------------------------------------------------`);
-        console.log(`API:   http://localhost:${PORT}`);
-        console.log(`DOCS:  http://localhost:${PORT}/docs`);
-        console.log(`------------------------------------------------------`);
-    });
-};
-
-startServer();
+startServer(app);

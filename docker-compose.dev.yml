@@ -5,22 +5,14 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: HayaseDB-dev
-    environment:
-      - PORT=${PORT}
-      - JWT_SECRET=${JWT_SECRET}
-      - API_URL=${API_URL}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    env_file:
+      - .env
     ports:
       - "${PORT}:${PORT}"
     depends_on:
       - postgres
     volumes:
       - ./src:/app/src
-      - /app/node_modules
     pull_policy: build
 
   postgres:

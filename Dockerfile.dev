@@ -6,6 +6,8 @@ COPY package*.json ./
 
 RUN npm install
 
+ENV FORCE_COLOR=1
+
 RUN npm install -g nodemon
 
 COPY ./src ./src
