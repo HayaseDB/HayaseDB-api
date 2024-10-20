@@ -11,15 +11,19 @@ const connectDB = async (retries = 5, delay = 2000) => {
     const models = {
         Media: require('../models/media'),
         Anime: require('../models/anime'),
+        User: require('../models/user'),
     };
 
     const syncModels = async () => {
         try {
             await models.Media.sync();
-            logger.info('Media table synchronized successfully.');
+            logger.custom("cyan", "black", "MODEL", 'Media table synchronized successfully.');
+
+            await models.User.sync();
+            logger.custom("cyan", "black", "MODEL", 'User table synchronized successfully.');
 
             await models.Anime.sync();
-            logger.info('Anime table synchronized successfully.');
+            logger.custom("cyan", "black", "MODEL", 'Anime table synchronized successfully.');
         } catch (error) {
             logger.error('Model synchronization error: ', error);
             throw error;
