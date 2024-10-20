@@ -30,7 +30,7 @@ Media.init({
         primaryKey: true,
     },
     media: {
-        type: DataTypes.BLOB('long'),
+        type: DataTypes.BLOB,
         allowNull: false,
     },
 }, {
