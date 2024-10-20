@@ -3,7 +3,6 @@ const mediaService = require('../services/mediaService');
 
 
 const AnimeCreate = async (req, res) => {
-    const { title, description } = req.body;
     const files = req.files;
 
     try {
@@ -11,19 +10,16 @@ const AnimeCreate = async (req, res) => {
 
         if (files && files.length > 0) {
             for (const file of files) {
-                if (file.mimetype.startsWith('image/')) {
-                    const mediaEntry = await mediaService.createMedia({
-                        media: file.buffer,
-                    });
+                const mediaEntry = await mediaService.createMedia({
+                    media: file.buffer,
+                });
 
-                    mediaEntries[file.fieldname] = mediaEntry.id;
-                }
+                mediaEntries[file.fieldname] = mediaEntry.id;
             }
         }
 
         const animeEntry = await animeService.createAnime({
-            title,
-            description,
+            ...req.body,
             ...mediaEntries,
         });
 
@@ -38,6 +34,7 @@ const AnimeCreate = async (req, res) => {
         res.status(500).json({ success: false, error: error.errors[0].message });
     }
 };
+
 
 
 const AnimeDelete = async (req, res) => {

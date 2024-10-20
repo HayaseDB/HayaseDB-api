@@ -16,6 +16,7 @@ const { sequelize } = require('../config/database');
  *           nullable: true
  *           items:
  *             type: string
+ *             example: ""
  *           description: "An array of genres associated with the anime."
  *           example: []
  *         releaseDate:
