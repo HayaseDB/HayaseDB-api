@@ -124,7 +124,8 @@ router.get('/list', animeController.AnimeList);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: The ID of the anime to retrieve
  *       - in: query
  *         name: translateMedia
