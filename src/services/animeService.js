@@ -21,13 +21,14 @@ const animeService = {
         }
     },
 
-    listAnimes: async (page, limit) => {
+    listAnimes: async (page, limit, order = "DESC") => {
         try {
             const offset = (page - 1) * limit;
 
             const { rows: animes, count: totalItems } = await Anime.findAndCountAll({
                 offset,
                 limit: parseInt(limit),
+                order: [['createdAt', order]],
             });
 
             const totalPages = Math.ceil(totalItems / limit);

@@ -70,8 +70,6 @@ router.post('/create', multerMiddleware, sanitizeMiddleware, animeController.Ani
  */
 router.delete('/delete/:id', animeController.AnimeDelete);
 
-
-
 /**
  * @swagger
  * /anime/list:
@@ -92,6 +90,19 @@ router.delete('/delete/:id', animeController.AnimeDelete);
  *           type: integer
  *           default: 10
  *         description: Number of animes to retrieve per page
+ *       - in: query
+ *         name: translateMedia
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *         description: Enable or disable media translation to accessible URLs
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *           default: ASC
+ *         description: Order of the results, either ascending (ASC) or descending (DESC)
  *     responses:
  *       200:
  *         description: Animes retrieved successfully
