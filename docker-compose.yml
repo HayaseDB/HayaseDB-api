@@ -23,7 +23,7 @@ services:
       - mongo
     pull_policy: build
   mongo:
-    container_name: HayaseDB-mongo
+    container_name: HayaseDB-db
     image: mongo:latest
     restart: always
     ports:
