@@ -1,7 +1,7 @@
 
 services:
   hayasedb:
-    container_name: HayaseDB-dev
+    container_name: HayaseDB-api
     restart: always
     build:
       context: .
