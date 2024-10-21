@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: HayaseDB-dev
+    container_name: HayaseDB-api
     env_file:
       - .env
     environment:
