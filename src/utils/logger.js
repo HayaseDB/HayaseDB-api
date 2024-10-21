@@ -21,8 +21,8 @@ const log = (level, message) => {
     }
 };
 
-const customLog = (bgColor, textColor, tag, message) => {
-    const formattedLevel = chalk[`bg${bgColor.charAt(0).toUpperCase() + bgColor.slice(1)}`][textColor](` ${tag} `);
+const customLog = (bgColor, tag, message) => {
+    const formattedLevel = chalk[`bg${bgColor.charAt(0).toUpperCase() + bgColor.slice(1)}`](` ${tag} `);
     console.log(`${formattedLevel} ${message}`);
 };
 

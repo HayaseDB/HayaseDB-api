@@ -17,7 +17,7 @@ const startServer = async (app) => {
         console.log(gradientLogo);
 
         if (process.env.NODE_ENV === 'development') {
-            logger.custom("grey", "black", "DEV MODE", "You are running in development mode!");
+            logger.custom("grey", "DEV MODE", "You are running in development mode!");
         }        
 
         const apiInfo = await getUrl(process.env.API_URL, `http://localhost:${PORT}`);

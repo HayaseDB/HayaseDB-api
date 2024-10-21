@@ -19,13 +19,13 @@ const connectDB = async (retries = 5, delay = 2000) => {
 
         try {
             await models.Media.sync({ force: forceSync });
-            logger.custom("cyan", "black", "MODEL", 'Media table synchronized successfully.');
+            logger.custom("cyan", "MODEL", 'Media table synchronized successfully.');
 
             await models.User.sync({ force: forceSync });
-            logger.custom("cyan", "black", "MODEL", 'User table synchronized successfully.');
+            logger.custom("cyan", "MODEL", 'User table synchronized successfully.');
 
             await models.Anime.sync({ force: forceSync });
-            logger.custom("cyan", "black", "MODEL", 'Anime table synchronized successfully.');
+            logger.custom("cyan", "MODEL", 'Anime table synchronized successfully.');
         } catch (error) {
             logger.error('Model synchronization error: ', error);
             throw error;
