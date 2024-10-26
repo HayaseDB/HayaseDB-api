@@ -1,6 +1,6 @@
-const initApp = require('./utils/initApp');
-const startServer = require('./utils/server');
-const setupSwagger = require("./config/swagger");
+const initApp = require('./utils/initAppUtil');
+const startServer = require('./utils/serverUtil');
+const setupSwagger = require("./config/swaggerConfig");
 
 const app = initApp();
 

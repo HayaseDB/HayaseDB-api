@@ -1,4 +1,4 @@
-const Anime = require('../models/anime');
+const Anime = require('../models/animeModel');
 
 
 

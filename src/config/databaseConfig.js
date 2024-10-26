@@ -1,5 +1,5 @@
 const { Sequelize } = require('sequelize');
-const logger = require('../utils/logger');
+const logger = require('../utils/loggerUtil');
 
 const sequelize = new Sequelize(process.env.POSTGRES_DB, process.env.POSTGRES_USER, process.env.POSTGRES_PASSWORD, {
     host: process.env.POSTGRES_HOST,
@@ -9,9 +9,9 @@ const sequelize = new Sequelize(process.env.POSTGRES_DB, process.env.POSTGRES_US
 
 const connectDB = async (retries = 5, delay = 2000) => {
     const models = {
-        Media: require('../models/media'),
-        Anime: require('../models/anime'),
-        User: require('../models/user'),
+        Media: require('../models/mediaModel'),
+        Anime: require('../models/animeModel'),
+        User: require('../models/userModel'),
     };
 
     const syncModels = async () => {

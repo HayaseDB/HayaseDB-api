@@ -1,4 +1,4 @@
-const Media = require('../models/media');
+const Media = require('../models/mediaModel');
 
 const getMediaById = async (req, res) => {
     const { id } = req.params;

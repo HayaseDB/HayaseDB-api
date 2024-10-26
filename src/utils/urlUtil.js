@@ -1,6 +1,6 @@
 const dns = require('dns').promises;
 const net = require('net'); 
-const logger = require('./logger');
+const logger = require('./loggerUtil');
 
 const checkUrl = async (url) => {
     try {

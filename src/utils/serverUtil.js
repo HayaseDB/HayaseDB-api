@@ -1,10 +1,10 @@
 const chalk = require('chalk');
 chalk.level = 3;
-const logger = require('../utils/logger')
-const { connectDB } = require('../config/database');
+const logger = require('./loggerUtil')
+const { connectDB } = require('../config/databaseConfig');
 const figlet = require('figlet');
-const { createGradient } = require('../utils/colorUtils');
-const { getUrl } = require('../utils/urlUtils');
+const { createGradient } = require('./colorUtil');
+const { getUrl } = require('./urlUtil');
 const PORT = process.env.PORT || 3000;
 
 const startServer = async (app) => {

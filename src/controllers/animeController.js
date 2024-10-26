@@ -1,8 +1,8 @@
 const animeService = require('../services/animeService');
 const mediaService = require('../services/mediaService');
-const fieldsUtils = require('../utils/fieldsUtils');
-const Anime = require('../models/anime');
-const {sequelize} = require('../config/database');
+const fieldsUtils = require('../utils/fieldsUtil');
+const Anime = require('../models/animeModel');
+const {sequelize} = require('../config/databaseConfig');
 const AnimeCreate = async (req, res) => {
     const files = req.files;
 
