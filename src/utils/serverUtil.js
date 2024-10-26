@@ -18,7 +18,7 @@ const startServer = async (app) => {
 
         if (process.env.NODE_ENV === 'development') {
             logger.custom("grey", "DEV MODE", "You are running in development mode!");
-        }        
+        }
 
         const apiInfo = await getUrl(process.env.API_URL, `http://localhost:${PORT}`);
         const webInfo = await getUrl(process.env.WEB_URL, `http://localhost:8080`);
