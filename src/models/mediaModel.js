@@ -1,6 +1,3 @@
-const { Model, DataTypes } = require('sequelize');
-const { sequelize } = require('../config/databaseConfig');
-
 /**
  * @swagger
  * components:
@@ -18,6 +15,11 @@ const { sequelize } = require('../config/databaseConfig');
  *           format: binary
  *           description: The binary data for the media file (image).
  */
+
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../config/databaseConfig');
+
+
 class Media extends Model {}
 
 Media.init({

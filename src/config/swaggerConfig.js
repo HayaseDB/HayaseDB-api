@@ -33,7 +33,6 @@ const setupSwagger = (app) => {
         customCss: `
             .topbar { display: none; }
             .swagger-ui .topbar { display: none; }
-            .swagger-ui .scheme-container { display: none; }
             .swagger-ui .link { font-size: 24px; color: #333; }
             .swagger-ui .info { font-size: 28px; font-weight: bold; }
             .swagger-ui .info h1 { content: "HayaseDB"; }

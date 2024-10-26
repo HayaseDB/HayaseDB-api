@@ -1,5 +1,3 @@
-const { Model, DataTypes } = require('sequelize');
-const { sequelize } = require('../config/databaseConfig');
 /**
  * @swagger
  * components:
@@ -40,6 +38,10 @@ const { sequelize } = require('../config/databaseConfig');
  *       required:
  *         - title
  */
+
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../config/databaseConfig');
+
 
 class Anime extends Model {}
 

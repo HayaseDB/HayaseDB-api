@@ -1,8 +1,5 @@
 const Anime = require('../models/animeModel');
 
-
-
-
 const animeService = {
     createAnime: async (data) => {
         try {

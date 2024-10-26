@@ -1,8 +1,3 @@
-
-const { Model, DataTypes } = require('sequelize');
-const { sequelize } = require('../config/databaseConfig');
-
-
 /**
  * @swagger
  * components:
@@ -19,6 +14,8 @@ const { sequelize } = require('../config/databaseConfig');
  *           description: User's password, which is stored as a hash
  */
 
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../config/databaseConfig');
 
 
 class User extends Model {}

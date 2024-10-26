@@ -5,7 +5,6 @@ const cleanData = (data) => {
     );
 };
 
-
 const sanitize = (req, res, next) => {
     req.body = cleanData(req.body);
     next();

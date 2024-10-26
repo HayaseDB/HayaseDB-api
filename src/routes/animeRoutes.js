@@ -4,13 +4,14 @@ const animeController = require('../controllers/animeController');
 const router = express.Router();
 const multerMiddleware = require('../middlewares/multerMiddleware');
 const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
+
+
 /**
  * @swagger
  * tags:
  *   name: Anime
  *   description: Anime API
  */
-
 
 
 /**
@@ -20,6 +21,8 @@ const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
  *     tags: [Anime]
  *     summary: Creates Anime
  *     description: Create a new Anime entry on Database.
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -38,10 +41,7 @@ const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
  *       500:
  *         description: Server error
  */
-
 router.post('/create', multerMiddleware, sanitizeMiddleware, animeController.AnimeCreate);
-
-
 
 
 /**
@@ -51,6 +51,8 @@ router.post('/create', multerMiddleware, sanitizeMiddleware, animeController.Ani
  *     tags: [Anime]
  *     summary: Delete Anime
  *     description: Delete an Anime entry from the Database by its ID.
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -69,6 +71,7 @@ router.post('/create', multerMiddleware, sanitizeMiddleware, animeController.Ani
  *         description: Server error
  */
 router.delete('/delete/:id', animeController.AnimeDelete);
+
 
 /**
  * @swagger
@@ -139,6 +142,9 @@ router.get('/list', animeController.AnimeList);
  *       500:
  *         description: Server error
  */
+
+
 router.get('/:id', animeController.AnimeGet);
+
 
 module.exports = router;

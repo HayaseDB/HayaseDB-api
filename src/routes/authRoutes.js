@@ -10,6 +10,14 @@ const router = express.Router();
  *   description: Authentication API
  */
 
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ */
 
 
 /**
