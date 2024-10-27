@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 
 const authService = {
-    createUser: async (email, password) => {
+    createUser: async (email, password, username) => {
         try {
             const existingUser = await User.findOne({ where: { email } });
             if (existingUser) {
@@ -11,7 +11,7 @@ const authService = {
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
-            const user = await User.create({ email, password: hashedPassword });
+            const user = await User.create({ email, password: hashedPassword, username });
             return user;
         } catch (error) {
             if (error.name === 'SequelizeValidationError') {

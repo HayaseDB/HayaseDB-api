@@ -1,6 +1,7 @@
 
 const express = require('express');
 const animeController = require('../controllers/animeController');
+const authMiddleware = require('../middlewares/authMiddleware')
 const router = express.Router();
 const multerMiddleware = require('../middlewares/multerMiddleware');
 const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
@@ -41,7 +42,7 @@ const Anime = require('../models/animeModel')
  *       500:
  *         description: Server error
  */
-router.post('/create', multerMiddleware, sanitizeMiddleware(Anime), animeController.createAnime);
+router.post('/create', authMiddleware, multerMiddleware, sanitizeMiddleware(Anime), animeController.createAnime);
 
 
 /**
@@ -70,7 +71,7 @@ router.post('/create', multerMiddleware, sanitizeMiddleware(Anime), animeControl
  *       500:
  *         description: Server error
  */
-router.delete('/delete/:id', animeController.deleteAnime);
+router.delete('/delete/:id', authMiddleware, animeController.deleteAnime);
 
 
 /**

@@ -4,7 +4,11 @@ const fieldsUtil = require('../utils/fieldsUtil')
 const animeService = {
     createAnime: async (data) => {
         try {
-            return await Anime.create(data);
+            const animeEntry = await Anime.create(data);
+            
+            const translatedAnimeEntry = mediaHandler.translateMediaUrls(Anime, [animeEntry])[0];
+            
+            return translatedAnimeEntry;
         } catch (error) {
             throw error;
         }
@@ -19,7 +23,7 @@ const animeService = {
         }
     },
 
-    async listAnimes(page, limit, order = "DESC", translateMedia = false) {
+    async listAnimes(page, limit, order = "DESC", translateMedia = true) {
         try {
             const offset = (page - 1) * limit;
 
@@ -32,7 +36,6 @@ const animeService = {
             const totalPages = Math.ceil(totalItems / limit);
 
             if (translateMedia) {
-                const mediaFields = fieldsUtil.getMediaFields(Anime);
                 const translatedAnimes = mediaHandler.translateMediaUrls(Anime, animes);
                 return { animes: translatedAnimes, totalItems, totalPages };
             }
@@ -43,9 +46,14 @@ const animeService = {
         }
     },
 
-    getAnimeById: async (id) => {
+    getAnimeById: async (id, translateMedia = true) => {
         try {
-            return await Anime.findByPk(id);
+            const anime = await Anime.findByPk(id);
+            if (translateMedia && anime) {
+                return mediaHandler.translateMediaUrls(Anime, [anime])[0];
+            }
+    
+            return anime;
         } catch (error) {
             throw error;
         }

@@ -1,23 +1,21 @@
 const userService = require('../services/authService');
+const responseHandler = require('../handlers/responseHandler');
 
 /**
  * Register a new user entry
  */
 const register = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, username } = req.body;
 
     try {
-        const user = await userService.createUser(email, password);
-        res.status(201).json({
-            success: true,
-            message: 'User registered successfully',
-            user: {
-                id: user.id,
-                email: user.email,
-            },
-        });
+        const user = await userService.createUser(email, password, username);
+        responseHandler.success(res, {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+        }, 'User registered successfully', 201);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        responseHandler.error(res, error);
     }
 };
 
@@ -28,18 +26,16 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const {user, token} = await userService.loginUser(email, password);
-        res.status(200).json({
-            success: true,
-            message: 'Login successful',
-            token: token,
+        const { user, token } = await userService.loginUser(email, password);
+        responseHandler.success(res, {
+            token,
             user: {
                 id: user.id,
                 email: user.email,
             },
-        });
+        }, 'Login successful');
     } catch (error) {
-        res.status(401).json({ error: error.message });
+        responseHandler.error(res, error, 401);
     }
 };
 

@@ -9,16 +9,21 @@ const Anime = require('../models/animeModel');
  */
 const createAnime = async (req, res) => {
     try {
+
+
         const mediaFields = fieldsUtils.getMediaFields(Anime);
         const mediaEntries = await mediaHandler.processMediaFiles(
             req.files,
             mediaFields
         );
 
+        
+
         const result = await animeService.createAnime({
             ...req.body,
             ...mediaEntries,
         });
+
 
         return responseHandler.success(res, { anime: result }, 'Anime created successfully', 201);
     } catch (error) {
@@ -76,24 +81,29 @@ const listAnimes = async (req, res) => {
     }
 };
 
+
 /**
  * Retrieves a single anime entry by ID
  */
 const getAnime = async (req, res) => {
     try {
-        const anime = await animeService.getAnimeById(req.params.id);
+
+        const {
+            translateMedia = 'true',
+        } = req.query;
+
+        const isTranslateMedia = translateMedia === 'true'; 
+        const anime = await animeService.getAnimeById(req.params.id, isTranslateMedia); 
         
         if (!anime) {
             return responseHandler.notFound(res, 'Anime not found');
         }
 
-        const processedAnime = processAnimeMedia(anime, req.query.translateMedia === 'true');
-        return responseHandler.success(res, { anime: processedAnime });
+        return responseHandler.success(res, { anime });
     } catch (error) {
         return responseHandler.error(res, error);
     }
 };
-
 module.exports = {
     createAnime,
     deleteAnime,
