@@ -10,9 +10,20 @@ const responseHandler = {
     },
     
     error(res, error, statusCode = 500) {
-
         if (error instanceof Sequelize.UniqueConstraintError) {
-            statusCode = 400
+            statusCode = 400; // Bad Request
+        } else if (error instanceof Sequelize.ValidationError) {
+            statusCode = 400; // Bad Request
+        } else if (error instanceof Sequelize.ForeignKeyConstraintError) {
+            statusCode = 409; // Conflict
+        } else if (error instanceof Sequelize.DatabaseError) {
+            statusCode = 500; // Internal Server Error
+        } else if (error instanceof Sequelize.TimeoutError) {
+            statusCode = 504; // Gateway Timeout
+        } else if (error instanceof Sequelize.EmptyResultError) {
+            statusCode = 404; // Not Found
+        } else if (error instanceof Sequelize.ConnectionError) {
+            statusCode = 503; // Service Unavailable
         }
 
         const message = error.errors?.[0]?.message || error.message || 'Server error';

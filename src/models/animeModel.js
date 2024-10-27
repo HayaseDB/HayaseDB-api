@@ -69,6 +69,11 @@ Anime.init({
     releaseDate: {
         type: DataTypes.DATE,
         allowNull: true,
+        validate: {
+            isDate: {
+                msg: 'Release date must be a valid date',
+            },
+        },
     },
     description: {
         type: DataTypes.TEXT,
