@@ -70,17 +70,12 @@ const listAnimes = async (req, res) => {
         const { animes, totalItems, totalPages } = await animeService.listAnimes(
             Number(page),
             Number(limit),
-            orderDirection
+            orderDirection,
+            isTranslateMedia
         );
-        
-        let processedAnimes =  animes
-        if (isTranslateMedia){
-            processedAnimes = mediaHandler.translateMediaUrls(Anime, animes);
-
-        }
 
         return responseHandler.success(res, {
-            animes: processedAnimes,
+            animes,
             currentPage: Number(page),
             totalPages,
             totalItems,
@@ -89,6 +84,7 @@ const listAnimes = async (req, res) => {
         return responseHandler.error(res, error);
     }
 };
+
 
 /**
  * Retrieves a single anime entry by ID

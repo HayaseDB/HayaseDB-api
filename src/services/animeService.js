@@ -1,5 +1,6 @@
 const Anime = require('../models/animeModel');
-
+const mediaHandler = require('../handlers/mediaHandler');
+const fieldsUtil = require('../utils/fieldsUtil')
 const animeService = {
     createAnime: async (data) => {
         try {
@@ -18,7 +19,7 @@ const animeService = {
         }
     },
 
-    listAnimes: async (page, limit, order = "DESC") => {
+    async listAnimes(page, limit, order = "DESC", translateMedia = false) {
         try {
             const offset = (page - 1) * limit;
 
@@ -29,6 +30,12 @@ const animeService = {
             });
 
             const totalPages = Math.ceil(totalItems / limit);
+
+            if (translateMedia) {
+                const mediaFields = fieldsUtil.getMediaFields(Anime);
+                const translatedAnimes = mediaHandler.translateMediaUrls(Anime, animes);
+                return { animes: translatedAnimes, totalItems, totalPages };
+            }
 
             return { animes, totalItems, totalPages };
         } catch (error) {
