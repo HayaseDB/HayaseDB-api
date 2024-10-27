@@ -2,7 +2,7 @@ const animeService = require('../services/animeService');
 const mediaHandler = require('../handlers/mediaHandler');
 const fieldsUtils = require('../utils/fieldsUtil');
 const responseHandler = require('../handlers/responseHandler');
-const Anime = require('../models/animeModel');
+const { model: Anime } = require('../models/animeModel');
 
 /**
  * Creates a new anime entry

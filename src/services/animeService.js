@@ -1,6 +1,8 @@
-const Anime = require('../models/animeModel');
+const { model: Anime } = require('../models/animeModel');
+
 const mediaHandler = require('../handlers/mediaHandler');
-const fieldsUtil = require('../utils/fieldsUtil')
+
+
 const animeService = {
     createAnime: async (data, transaction) => {
         try {

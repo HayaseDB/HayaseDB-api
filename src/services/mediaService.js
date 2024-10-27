@@ -1,4 +1,4 @@
-const Media = require('../models/mediaModel');
+const { model: Media } = require('../models/mediaModel');
 
 const createMedia = async ({ media }, transaction) => {
     try {

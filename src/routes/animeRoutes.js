@@ -5,7 +5,7 @@ const authMiddleware = require('../middlewares/authMiddleware')
 const router = express.Router();
 const multerMiddleware = require('../middlewares/multerMiddleware');
 const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
-const Anime = require('../models/animeModel');
+const { model: Anime } = require('../models/animeModel');
 const transactionMiddleware = require('../middlewares/transactionMiddleware');
 
 /**
