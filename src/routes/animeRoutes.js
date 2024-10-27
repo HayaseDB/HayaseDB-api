@@ -72,7 +72,7 @@ router.post('/create', authMiddleware, multerMiddleware, sanitizeMiddleware(Anim
  *       500:
  *         description: Server error
  */
-router.delete('/delete/:id', authMiddleware, animeController.deleteAnime);
+router.delete('/delete/:id', authMiddleware, transactionMiddleware, animeController.deleteAnime);
 
 
 /**

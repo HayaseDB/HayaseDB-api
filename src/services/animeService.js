@@ -12,9 +12,9 @@ const animeService = {
         }
     },
 
-    deleteAnime: async (id) => {
+    deleteAnime: async (id, transaction) => {
         try {
-            const anime = await Anime.destroy({ where: { id } });
+            const anime = await Anime.destroy({ where: { id }, transaction });
             return anime;
         } catch (error) {
             throw error;

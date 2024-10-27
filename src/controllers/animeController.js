@@ -32,7 +32,7 @@ const createAnime = async (req, res) => {
  */
 const deleteAnime = async (req, res) => {
     try {
-        const anime = await animeService.deleteAnime(req.params.id);
+        const anime = await animeService.deleteAnime(req.params.id, req.transaction);
         if (!anime) throw new Error('Anime not found');
         
         return responseHandler.success(res, null, 'Anime deleted successfully');
