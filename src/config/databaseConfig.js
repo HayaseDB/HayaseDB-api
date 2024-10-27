@@ -15,16 +15,16 @@ const connectDB = async (retries = 5, delay = 2000) => {
     };
 
     const syncModels = async () => {
-        const forceSync = process.env.NODE_ENV === 'development';
+        const alterSync = process.env.NODE_ENV === 'development';
 
         try {
-            await models.Media.sync({ force: forceSync });
+            await models.Media.sync({ alter: alterSync });
             logger.custom("cyan", "MODEL", 'Media table synchronized successfully.');
 
-            await models.User.sync({ force: forceSync });
+            await models.User.sync({ alter: alterSync });
             logger.custom("cyan", "MODEL", 'User table synchronized successfully.');
 
-            await models.Anime.sync({ force: forceSync });
+            await models.Anime.sync({ alter: alterSync });
             logger.custom("cyan", "MODEL", 'Anime table synchronized successfully.');
         } catch (error) {
             logger.error('Model synchronization error: ', error);

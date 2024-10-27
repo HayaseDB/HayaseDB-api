@@ -1,14 +1,27 @@
+const { getArrayFields } = require('../utils/fieldsUtil');
 
-const cleanData = (data) => {
+const cleanData = (data, arrayFields) => {
     return Object.fromEntries(
-        Object.entries(data).filter(([_, value]) => value !== null && value !== '' && (!Array.isArray(value) || value.length > 0))
+        Object.entries(data).map(([key, value]) => {
+            if (arrayFields.includes(key)) {
+                if (!Array.isArray(value)) {
+                    return value !== null && value !== '' ? [key, [value]] : null;
+                } else {
+                    const filteredArray = value.filter(item => item !== '');
+                    return filteredArray.length > 0 ? [key, filteredArray] : null;
+                }
+            }
+            return (value !== null && value !== '') ? [key, value] : null;
+        }).filter((entry) => entry !== null)
     );
 };
 
-const sanitize = (req, res, next) => {
-    req.body = cleanData(req.body);
-    next();
+const sanitizeMiddleware = (model) => {
+    return (req, res, next) => {
+        const arrayFields = getArrayFields(model);
+        req.body = cleanData(req.body, arrayFields);
+        next();
+    };
+};
 
-}
-
-module.exports = sanitize
+module.exports = sanitizeMiddleware;

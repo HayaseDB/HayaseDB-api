@@ -1,5 +1,8 @@
 const Media = require('../models/mediaModel');
 
+/**
+ * Fetch the media image file by its ID
+ */
 const getMediaById = async (req, res) => {
     const { id } = req.params;
 

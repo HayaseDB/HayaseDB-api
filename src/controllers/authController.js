@@ -1,5 +1,8 @@
 const userService = require('../services/authService');
 
+/**
+ * Register a new user entry
+ */
 const register = async (req, res) => {
     const { email, password } = req.body;
 
@@ -18,6 +21,9 @@ const register = async (req, res) => {
     }
 };
 
+/**
+ * Request a new token for user
+ */
 const login = async (req, res) => {
     const { email, password } = req.body;
 
