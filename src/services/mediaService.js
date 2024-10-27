@@ -21,10 +21,10 @@ const getMediaById = async (id) => {
     }
 };
 
-const deleteMedia = async (id) => {
+const deleteMedia = async (id, transaction) => {
     try {
         const result = await Media.destroy({
-            where: { id },
+            where: { id }, transaction,
         });
         return result;
     } catch (error) {
