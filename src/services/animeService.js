@@ -2,12 +2,10 @@ const Anime = require('../models/animeModel');
 const mediaHandler = require('../handlers/mediaHandler');
 const fieldsUtil = require('../utils/fieldsUtil')
 const animeService = {
-    createAnime: async (data) => {
+    createAnime: async (data, transaction) => {
         try {
-            const animeEntry = await Anime.create(data);
-            
+            const animeEntry = await Anime.create(data, { transaction });
             const translatedAnimeEntry = mediaHandler.translateMediaUrls(Anime, [animeEntry])[0];
-            
             return translatedAnimeEntry;
         } catch (error) {
             throw error;

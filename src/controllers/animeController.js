@@ -9,21 +9,17 @@ const Anime = require('../models/animeModel');
  */
 const createAnime = async (req, res) => {
     try {
-
-
         const mediaFields = fieldsUtils.getMediaFields(Anime);
         const mediaEntries = await mediaHandler.processMediaFiles(
             req.files,
-            mediaFields
+            mediaFields,
+            req.transaction
         );
-
-        
 
         const result = await animeService.createAnime({
             ...req.body,
             ...mediaEntries,
-        });
-
+        }, req.transaction);
 
         return responseHandler.success(res, { anime: result }, 'Anime created successfully', 201);
     } catch (error) {

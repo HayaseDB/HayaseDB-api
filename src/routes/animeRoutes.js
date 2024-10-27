@@ -5,7 +5,8 @@ const authMiddleware = require('../middlewares/authMiddleware')
 const router = express.Router();
 const multerMiddleware = require('../middlewares/multerMiddleware');
 const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
-const Anime = require('../models/animeModel')
+const Anime = require('../models/animeModel');
+const transactionMiddleware = require('../middlewares/transactionMiddleware');
 
 /**
  * @swagger
@@ -42,7 +43,7 @@ const Anime = require('../models/animeModel')
  *       500:
  *         description: Server error
  */
-router.post('/create', authMiddleware, multerMiddleware, sanitizeMiddleware(Anime), animeController.createAnime);
+router.post('/create', authMiddleware, multerMiddleware, sanitizeMiddleware(Anime), transactionMiddleware, animeController.createAnime);
 
 
 /**
