@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize } = require('sequelize');
 
 const responseHandler = {
     success(res, data, message = 'Operation successful', statusCode = 200) {
@@ -14,7 +14,7 @@ const responseHandler = {
         if (error instanceof Sequelize.UniqueConstraintError) {
             statusCode = 400
         }
-        
+
         const message = error.errors?.[0]?.message || error.message || 'Server error';
         res.status(statusCode).json({
             success: false,
