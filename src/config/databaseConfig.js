@@ -1,4 +1,6 @@
 const { Sequelize } = require('sequelize');
+const fs = require('fs');
+const path = require('path');
 const logger = require('../utils/loggerUtil');
 
 const sequelize = new Sequelize(process.env.POSTGRES_DB, process.env.POSTGRES_USER, process.env.POSTGRES_PASSWORD, {
@@ -8,24 +10,25 @@ const sequelize = new Sequelize(process.env.POSTGRES_DB, process.env.POSTGRES_US
 });
 
 const connectDB = async (retries = 5, delay = 2000) => {
-    const models = {
-        Media: require('../models/mediaModel'),
-        Anime: require('../models/animeModel'),
-        User: require('../models/userModel'),
-    };
+    const models = {};
+    
+    const modelsDirectory = path.join(__dirname, '../models');
+    
+    fs.readdirSync(modelsDirectory).forEach(file => {
+        const model = require(path.join(modelsDirectory, file));
+        models[model.name] = model;
+    });
 
     const syncModels = async () => {
-        const alterSync = process.env.NODE_ENV === 'development';
+        const isDevelopment = process.env.NODE_ENV === 'development';
+
+        const syncOptions = isDevelopment ? { alter: true } : { force: false };
 
         try {
-            await models.Media.sync({ alter: alterSync });
-            logger.custom("cyan", "MODEL", 'Media table synchronized successfully.');
-
-            await models.User.sync({ alter: alterSync });
-            logger.custom("cyan", "MODEL", 'User table synchronized successfully.');
-
-            await models.Anime.sync({ alter: alterSync });
-            logger.custom("cyan", "MODEL", 'Anime table synchronized successfully.');
+            for (const modelName in models) {
+                await models[modelName].sync(syncOptions);
+                logger.custom("cyan", "MODEL", `${modelName} table synchronized successfully.`);
+            }
         } catch (error) {
             logger.error('Model synchronization error: ', error);
             throw error;
