@@ -39,4 +39,7 @@ User.init({
     modelName: 'User',
 });
 
-module.exports = User;
+module.exports = {
+    model: User,
+    priority: 3
+};
