@@ -1,19 +1,17 @@
 const fs = require('fs');
 const path = require('path');
 const { sequelize } = require('../config/databaseConfig');
+const logger = require('../utils/loggerUtil');
 
 const transactionMiddleware = async (req, res, next) => {
     let transaction;
 
     try {
         transaction = await sequelize.transaction();
-
         req.transaction = transaction;
-
         req.models = {};
 
         const modelsDirectory = path.join(__dirname, '../models');
-
         fs.readdirSync(modelsDirectory).forEach(file => {
             const model = require(path.join(modelsDirectory, file));
             req.models[model.name] = model;
@@ -43,15 +41,13 @@ const transactionMiddleware = async (req, res, next) => {
             if (code >= 200 && code < 300) {
                 transaction.commit()
                     .then(() => {
-                        console.log('Transaction committed successfully.');
                     })
                     .catch(err => {
-                        console.error('Error committing transaction:', err);
+                        logger.error(`Error committing transaction: ${err.message}`);
                         return transaction.rollback();
                     });
             } else {
-
-                transaction.rollback().catch(err => console.error('Error rolling back transaction:', err));
+                transaction.rollback().catch(err => logger.error(`Error rolling back transaction: ${err.message}`));
             }
 
             return response;
@@ -59,22 +55,21 @@ const transactionMiddleware = async (req, res, next) => {
 
         res.on('finish', () => {
             if (req.transaction && res.statusCode >= 400) {
-
-                transaction.rollback().catch(err => console.error('Error rolling back transaction:', err));
+                transaction.rollback().catch(err => logger.error(`Error rolling back transaction: ${err.message}`));
                 delete req.transaction;
             }
         });
 
         res.on('error', () => {
             if (req.transaction) {
-                transaction.rollback().catch(err => console.error('Error rolling back transaction:', err));
+                transaction.rollback().catch(err => logger.error(`Error rolling back transaction: ${err.message}`));
                 delete req.transaction;
             }
         });
 
         next();
     } catch (error) {
-        console.error('Transaction middleware error:', error);
+        logger.error(`Transaction middleware error: ${error.message}`);
         if (transaction) {
             await transaction.rollback();
         }

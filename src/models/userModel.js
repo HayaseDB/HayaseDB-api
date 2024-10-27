@@ -34,6 +34,18 @@ User.init({
         type: DataTypes.STRING,
         allowNull: false
     },
+    isAdmin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    isBanned: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    isActivated: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
 }, {
     sequelize,
     modelName: 'User',
