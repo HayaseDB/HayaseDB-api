@@ -2,7 +2,7 @@ const mediaService = require('../services/mediaService');
 const fieldsUtils = require('../utils/fieldsUtil');
 
 const mediaHandler = {
-    async processMediaFiles(files, mediaFields, transaction) {
+    async processMediaFiles(files, mediaFields) {
         const mediaEntries = {};
         
         if (!files?.length) return mediaEntries;
@@ -11,7 +11,7 @@ const mediaHandler = {
             if (mediaFields.includes(file.fieldname)) {
                 const mediaEntry = await mediaService.createMedia({
                     media: file.buffer,
-                }, { transaction });
+                });
                 
                 mediaEntries[file.fieldname] = mediaEntry.id;
             }
@@ -34,8 +34,6 @@ const mediaHandler = {
     
         return updatedFields;
     }
-    
-    
 };
 
 module.exports = mediaHandler;

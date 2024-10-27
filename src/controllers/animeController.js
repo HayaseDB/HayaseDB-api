@@ -1,28 +1,23 @@
 const animeService = require('../services/animeService');
 const mediaHandler = require('../handlers/mediaHandler');
 const fieldsUtils = require('../utils/fieldsUtil');
-const responseHandler = require('../handlers/responseHandler')
-const transactionManager = require('../handlers/transactionHandler')
-const Anime = require('../models/animeModel')
-
+const responseHandler = require('../handlers/responseHandler');
+const Anime = require('../models/animeModel');
 
 /**
  * Creates a new anime entry
  */
 const createAnime = async (req, res) => {
     try {
-        const result = await transactionManager.executeInTransaction(async (transaction) => {
-            const mediaFields = fieldsUtils.getMediaFields(Anime);
-            const mediaEntries = await mediaHandler.processMediaFiles(
-                req.files,
-                mediaFields,
-                transaction
-            );
+        const mediaFields = fieldsUtils.getMediaFields(Anime);
+        const mediaEntries = await mediaHandler.processMediaFiles(
+            req.files,
+            mediaFields
+        );
 
-            return await animeService.createAnime({
-                ...req.body,
-                ...mediaEntries,
-            }, { transaction });
+        const result = await animeService.createAnime({
+            ...req.body,
+            ...mediaEntries,
         });
 
         return responseHandler.success(res, { anime: result }, 'Anime created successfully', 201);
@@ -36,12 +31,9 @@ const createAnime = async (req, res) => {
  */
 const deleteAnime = async (req, res) => {
     try {
-        const result = await transactionManager.executeInTransaction(async (transaction) => {
-            const anime = await animeService.deleteAnime(req.params.id, { transaction });
-            if (!anime) throw new Error('Anime not found');
-            return anime;
-        });
-
+        const anime = await animeService.deleteAnime(req.params.id);
+        if (!anime) throw new Error('Anime not found');
+        
         return responseHandler.success(res, null, 'Anime deleted successfully');
     } catch (error) {
         if (error.message === 'Anime not found') {
@@ -64,7 +56,6 @@ const listAnimes = async (req, res) => {
         } = req.query;
 
         const isTranslateMedia = translateMedia === 'true'; 
-
         const orderDirection = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
         
         const { animes, totalItems, totalPages } = await animeService.listAnimes(
@@ -84,7 +75,6 @@ const listAnimes = async (req, res) => {
         return responseHandler.error(res, error);
     }
 };
-
 
 /**
  * Retrieves a single anime entry by ID
