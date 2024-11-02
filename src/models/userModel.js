@@ -14,41 +14,37 @@
  *           description: User's password, which is stored as a hash
  */
 
-const { Model, DataTypes } = require('sequelize');
+
+const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
 
-
-class User extends Model {}
-
-User.init({
+const User = sequelize.define('User', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
     },
     password: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
     username: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
     isAdmin: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false
+        defaultValue: false,
     },
     isBanned: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false
+        defaultValue: false,
     },
     isActivated: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false
-    }
+        defaultValue: false,
+    },
 }, {
-    sequelize,
-    modelName: 'User',
 });
 
 module.exports = {

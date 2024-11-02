@@ -16,13 +16,10 @@
  *           description: The binary data for the media file (image).
  */
 
-const { Model, DataTypes } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
 
-
-class Media extends Model {}
-
-Media.init({
+const Media = sequelize.define('Media', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -33,8 +30,6 @@ Media.init({
         allowNull: false,
     },
 }, {
-    sequelize,
-    modelName: 'Media',
 });
 
 module.exports = {

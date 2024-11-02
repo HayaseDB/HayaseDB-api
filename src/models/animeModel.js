@@ -39,13 +39,11 @@
  *         - title
  */
 
-const { Model, DataTypes } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
+const { model: Media } = require('../models/mediaModel');
 
-
-class Anime extends Model {}
-
-Anime.init({
+const Anime = sequelize.define('Anime', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -88,9 +86,10 @@ Anime.init({
         },
     },
 }, {
-    sequelize,
-    modelName: 'Anime',
+
 });
+
+Anime.belongsTo(Media, { foreignKey: 'coverImage', onDelete: "cascade", hooks: true });
 
 module.exports = {
     model: Anime,

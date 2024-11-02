@@ -16,8 +16,12 @@ const animeService = {
 
     deleteAnime: async (id, transaction) => {
         try {
-            const anime = await Anime.destroy({ where: { id }, transaction });
-            return anime;
+            const anime = await Anime.findByPk(id);
+            if (!anime) {
+                throw new Error('Anime not found');
+            }
+            await anime.destroy({transaction});
+           return anime;
         } catch (error) {
             throw error;
         }
