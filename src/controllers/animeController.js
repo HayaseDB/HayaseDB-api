@@ -2,28 +2,24 @@ const animeService = require('../services/animeService');
 const mediaHandler = require('../handlers/mediaHandler');
 const fieldsUtils = require('../utils/fieldsUtil');
 const responseHandler = require('../handlers/responseHandler');
-const Anime = require('../models/animeModel');
+const { model: Anime } = require('../models/animeModel');
 
 /**
  * Creates a new anime entry
  */
 const createAnime = async (req, res) => {
     try {
-
-
         const mediaFields = fieldsUtils.getMediaFields(Anime);
         const mediaEntries = await mediaHandler.processMediaFiles(
             req.files,
-            mediaFields
+            mediaFields,
+            req.transaction
         );
-
-        
 
         const result = await animeService.createAnime({
             ...req.body,
             ...mediaEntries,
-        });
-
+        }, req.transaction);
 
         return responseHandler.success(res, { anime: result }, 'Anime created successfully', 201);
     } catch (error) {
@@ -36,7 +32,7 @@ const createAnime = async (req, res) => {
  */
 const deleteAnime = async (req, res) => {
     try {
-        const anime = await animeService.deleteAnime(req.params.id);
+        const anime = await animeService.deleteAnime(req.params.id, req.transaction);
         if (!anime) throw new Error('Anime not found');
         
         return responseHandler.success(res, null, 'Anime deleted successfully');

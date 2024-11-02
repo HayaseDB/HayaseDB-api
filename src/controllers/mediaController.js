@@ -1,4 +1,4 @@
-const Media = require('../models/mediaModel');
+const { model: Media } = require('../models/mediaModel');
 
 /**
  * Fetch the media image file by its ID

@@ -29,6 +29,7 @@ const setupSwagger = (app) => {
         swaggerOptions: {
             docExpansion: 'none',
         },
+        customfavIcon: '/assets/favicon-16x16.ico',
         customSiteTitle: "HayaseDB API",
         customCss: `
             .topbar { display: none; }

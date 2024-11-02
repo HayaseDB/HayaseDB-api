@@ -37,4 +37,7 @@ Media.init({
     modelName: 'Media',
 });
 
-module.exports = Media;
+module.exports = {
+    model: Media,
+    priority: 1
+};

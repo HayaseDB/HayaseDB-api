@@ -92,4 +92,7 @@ Anime.init({
     modelName: 'Anime',
 });
 
-module.exports = Anime;
+module.exports = {
+    model: Anime,
+    priority: 2
+};

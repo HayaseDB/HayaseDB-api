@@ -8,7 +8,7 @@ const responseHandler = {
             data
         });
     },
-    
+
     error(res, error, statusCode = 500) {
         if (error instanceof Sequelize.UniqueConstraintError) {
             statusCode = 400; // Bad Request
@@ -27,20 +27,22 @@ const responseHandler = {
         }
 
         const message = error.errors?.[0]?.message || error.message || 'Server error';
+        const stack = process.env.NODE_ENV === 'development' ? error.stack?.split('\n') : undefined;
+
         res.status(statusCode).json({
             success: false,
             message,
-            ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+            ...(stack && { stack })
         });
     },
-    
+
     notFound(res, message = 'Resource not found') {
         res.status(404).json({
             success: false,
             message
         });
     },
-    
+
     validationError(res, message = 'Validation failed') {
         res.status(400).json({
             success: false,

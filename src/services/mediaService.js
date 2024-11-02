@@ -1,10 +1,10 @@
-const Media = require('../models/mediaModel');
+const { model: Media } = require('../models/mediaModel');
 
-const createMedia = async ({ media }) => {
+const createMedia = async ({ media }, transaction) => {
     try {
         return await Media.create({
             media,
-        });
+        }, { transaction });
     } catch (error) {
         console.error('Error creating media entry:', error);
         throw new Error('Failed to create media entry');
@@ -21,10 +21,10 @@ const getMediaById = async (id) => {
     }
 };
 
-const deleteMedia = async (id) => {
+const deleteMedia = async (id, transaction) => {
     try {
         const result = await Media.destroy({
-            where: { id },
+            where: { id }, transaction,
         });
         return result;
     } catch (error) {

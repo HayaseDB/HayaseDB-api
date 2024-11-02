@@ -5,7 +5,8 @@ const authMiddleware = require('../middlewares/authMiddleware')
 const router = express.Router();
 const multerMiddleware = require('../middlewares/multerMiddleware');
 const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
-const Anime = require('../models/animeModel')
+const { model: Anime } = require('../models/animeModel');
+const transactionMiddleware = require('../middlewares/transactionMiddleware');
 
 /**
  * @swagger
@@ -42,7 +43,7 @@ const Anime = require('../models/animeModel')
  *       500:
  *         description: Server error
  */
-router.post('/create', authMiddleware, multerMiddleware, sanitizeMiddleware(Anime), animeController.createAnime);
+router.post('/create', authMiddleware.user, multerMiddleware, sanitizeMiddleware(Anime), transactionMiddleware, animeController.createAnime);
 
 
 /**
@@ -71,7 +72,7 @@ router.post('/create', authMiddleware, multerMiddleware, sanitizeMiddleware(Anim
  *       500:
  *         description: Server error
  */
-router.delete('/delete/:id', authMiddleware, animeController.deleteAnime);
+router.delete('/delete/:id', authMiddleware.admin, transactionMiddleware, animeController.deleteAnime);
 
 
 /**

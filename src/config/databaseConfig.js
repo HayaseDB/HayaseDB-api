@@ -8,26 +8,27 @@ const sequelize = new Sequelize(process.env.POSTGRES_DB, process.env.POSTGRES_US
     dialect: 'postgres',
     logging: false,
 });
-
 const connectDB = async (retries = 5, delay = 2000) => {
-    const models = {};
+    const models = [];
     
     const modelsDirectory = path.join(__dirname, '../models');
-    
-    fs.readdirSync(modelsDirectory).forEach(file => {
-        const model = require(path.join(modelsDirectory, file));
-        models[model.name] = model;
-    });
+    const modelFiles = fs.readdirSync(modelsDirectory).filter(file => file.endsWith('.js'));
+
+    for (const file of modelFiles) {
+        const { model, priority } = require(path.join(modelsDirectory, file));
+        models.push({ model, priority });
+    }
 
     const syncModels = async () => {
         const isDevelopment = process.env.NODE_ENV === 'development';
-
         const syncOptions = isDevelopment ? { alter: true } : { force: false };
 
         try {
-            for (const modelName in models) {
-                await models[modelName].sync(syncOptions);
-                logger.custom("cyan", "MODEL", `${modelName} table synchronized successfully.`);
+            const sortedModels = models.sort((a, b) => a.priority - b.priority);
+            
+            for (const { model } of sortedModels) {
+                await model.sync(syncOptions);
+                logger.custom("cyan", "MODEL", `${model.name} table synchronized successfully.`);
             }
         } catch (error) {
             logger.error('Model synchronization error: ', error);
@@ -42,7 +43,7 @@ const connectDB = async (retries = 5, delay = 2000) => {
             await syncModels();
             return;
         } catch (error) {
-            logger.error('Database connection error: ', error);
+            logger.error('Database connection error: ' + error);
             await new Promise(res => setTimeout(res, delay));
         }
     }
