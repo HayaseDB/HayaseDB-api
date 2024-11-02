@@ -19,6 +19,7 @@ if (process.env.LOG_LEVEL === "normal" || process.env.LOG_LEVEL === "debug") {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/', (req, res) => res.sendStatus(200));
 
 // MongoDB
 connectToMongoDB().then(r =>
