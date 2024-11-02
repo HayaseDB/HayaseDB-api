@@ -10,12 +10,13 @@ const initApp = () => {
     const app = express();
     app.use(cors);
     app.use(express.json());
-    
+
     app.use('/assets', express.static(path.join(__dirname, '../assets')));
     loadRoute(app, '/auth', authRoutes);
     loadRoute(app, '/anime', animeRoutes);
     loadRoute(app, '/media', mediaRoutes);
-    
+    app.get('/', (req, res) => res.sendStatus(200));
+
     return app;
 };
 
