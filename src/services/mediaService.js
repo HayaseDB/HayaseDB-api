@@ -2,9 +2,9 @@ const { model: Media } = require('../models/mediaModel');
 const customErrors = require("../utils/customErrorsUtil");
 
 const mediaService = {
-    createMedia: async ({ media }, transaction) => {
+    createMedia: async ({ media, createdBy }, transaction) => {
         return await Media.create(
-            { media },
+            { media, createdBy },
             { transaction }
         );
     },

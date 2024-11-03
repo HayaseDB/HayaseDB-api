@@ -10,21 +10,23 @@ const translateReferenceFields = require("../utils/translateReferenceFields");
  */
 const createAnime = async (req, res) => {
     try {
+        const userId = req.user.id;
         const mediaFields = fieldsUtils.getMediaFields(Anime);
+
         const mediaEntries = await mediaHandler.processMediaFiles(
             req.files,
+            userId,
             mediaFields,
             req.transaction
         );
 
         let createdAnime = await animeService.createAnime({
             ...req.body,
-            createdBy: req.user.id,
+            createdBy: userId,
             ...mediaEntries,
         }, req.transaction);
 
-
-        createdAnime = await transformMediaFields([createdAnime]);
+        createdAnime = await translateReferenceFields([createdAnime]);
 
         return responseHandler.success(res, { anime: createdAnime }, 'Anime created successfully', 201);
     } catch (error) {
