@@ -3,7 +3,7 @@ const mediaHandler = require('../handlers/mediaHandler');
 const fieldsUtils = require('../utils/fieldsUtil');
 const responseHandler = require('../handlers/responseHandler');
 const { model: Anime } = require('../models/animeModel');
-const transformMediaFields = require("../utils/transformMediaFieldsUtil");
+const translateReferenceFields = require("../utils/translateReferenceFields");
 
 /**
  * Creates a new anime entry
@@ -17,14 +17,14 @@ const createAnime = async (req, res) => {
             req.transaction
         );
 
-
         let createdAnime = await animeService.createAnime({
             ...req.body,
+            createdBy: req.user.id,
             ...mediaEntries,
         }, req.transaction);
 
 
-        createdAnime = transformMediaFields([createdAnime]);
+        createdAnime = await transformMediaFields([createdAnime]);
 
         return responseHandler.success(res, { anime: createdAnime }, 'Anime created successfully', 201);
     } catch (error) {
@@ -57,7 +57,7 @@ const listAnimes = async (req, res) => {
             page = 1,
             limit = 10,
             order = 'DESC',
-            translateMedia = 'true'
+            translateFields = 'true'
         } = req.query;
 
         const orderDirection = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
@@ -67,8 +67,8 @@ const listAnimes = async (req, res) => {
             Number(limit),
             orderDirection,
         );
-        if (translateMedia !== 'false' ) {
-             animes = transformMediaFields(animes);
+        if (translateFields !== 'false' ) {
+             animes = await translateReferenceFields(animes);
         }
 
         return responseHandler.success(res, {
@@ -88,7 +88,7 @@ const listAnimes = async (req, res) => {
 const getAnime = async (req, res) => {
     try {
         const {
-            translateMedia = 'true'
+            translateFields = 'true'
         } = req.query;
 
         let anime = await animeService.getAnimeById(req.params.id);
@@ -97,8 +97,8 @@ const getAnime = async (req, res) => {
             return responseHandler.notFound(res, 'Anime not found');
         }
 
-        if (translateMedia !== 'false' ) {
-            anime = transformMediaFields(anime);
+        if (translateFields !== 'false' ) {
+            anime = await translateReferenceFields(anime);
         }
         return responseHandler.success(res, { anime }, 'Anime retrieved successfully');
     } catch (error) {

@@ -46,6 +46,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
 const { model: Media } = require('../models/mediaModel');
+const { model: User } = require('../models/userModel');
 
 const Anime = sequelize.define('Anime', {
     id: {
@@ -78,7 +79,7 @@ const Anime = sequelize.define('Anime', {
         },
     },
     description: {
-        type: DataTypes.TEXT('long'),
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     coverImage: {
@@ -97,6 +98,14 @@ const Anime = sequelize.define('Anime', {
             key: 'id',
         },
     },
+    createdBy: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'Users',
+            key: 'id',
+        },
+    },
 }, {
 
 });
@@ -105,6 +114,7 @@ const Anime = sequelize.define('Anime', {
 
 Anime.belongsTo(Media, { foreignKey: 'coverImage', as: 'coverMedia', onDelete: "cascade", hooks: true });
 Anime.belongsTo(Media, { foreignKey: 'bannerImage', as: 'bannerMedia', onDelete: "cascade", hooks: true });
+Anime.belongsTo(User, { foreignKey: 'createdBy', as: 'authorUser', onDelete: "SET NULL", hooks: true });
 
 module.exports = {
     model: Anime,

@@ -96,10 +96,9 @@ router.delete('/delete/:id', authMiddleware.admin, transactionMiddleware, animeC
  *           default: 10
  *         description: Number of animes to retrieve per page
  *       - in: query
- *         name: translateMedia
+ *         name: translateFields
  *         schema:
  *           type: boolean
- *           default: false
  *         description: Enable or disable media translation to accessible URLs
  *       - in: query
  *         name: order
@@ -133,10 +132,9 @@ router.get('/list', animeController.listAnimes);
  *           format: uuid
  *         description: The ID of the anime to retrieve
  *       - in: query
- *         name: translateMedia
+ *         name: translateFields
  *         schema:
  *           type: boolean
- *           default: false
  *         description: Enable or disable media translation to accessible URLs
  *     responses:
  *       200:

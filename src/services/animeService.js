@@ -14,15 +14,26 @@ const animeService = {
         const queryInterface = sequelize.getQueryInterface();
         const description = await queryInterface.describeTable(Anime.getTableName());
         const foreignKeys = await queryInterface.getForeignKeyReferencesForTable(Anime.getTableName());
-        let animeData = anime.toJSON();
 
-        const mediaFieldNames = new Set(foreignKeys.map(fk => fk.columnName));
+        const mediaFieldNames = new Set(
+            foreignKeys
+                .filter(fk => fk.referencedTableName === 'Media')
+                .map(fk => fk.columnName)
+        );
+
+        const userFieldNames = new Set(
+            foreignKeys
+                .filter(fk => fk.referencedTableName === 'Users')
+                .map(fk => fk.columnName)
+        );
+
+        let animeData = anime.toJSON();
 
         return Object.keys(description).map(key => {
             return {
                 name: key,
                 value: animeData[key],
-                type: mediaFieldNames.has(key) ? 'MEDIA' : description[key].type,
+                type: mediaFieldNames.has(key) ? 'MEDIA' : userFieldNames.has(key) ? 'USER ID' : description[key].type,
             };
         });
     },
@@ -38,6 +49,7 @@ const animeService = {
         return anime;
     },
 
+
     getAnimeById: async (id) => {
         const anime = await Anime.findByPk(id);
         if (!anime) {
@@ -47,18 +59,30 @@ const animeService = {
         const queryInterface = sequelize.getQueryInterface();
         const description = await queryInterface.describeTable(Anime.getTableName());
         const foreignKeys = await queryInterface.getForeignKeyReferencesForTable(Anime.getTableName());
-        let animeData = anime.toJSON();
 
-        const mediaFieldNames = new Set(foreignKeys.map(fk => fk.columnName));
+        const mediaFieldNames = new Set(
+            foreignKeys
+                .filter(fk => fk.referencedTableName === 'Media')
+                .map(fk => fk.columnName)
+        );
+
+        const userFieldNames = new Set(
+            foreignKeys
+                .filter(fk => fk.referencedTableName === 'Users')
+                .map(fk => fk.columnName)
+        );
+
+        let animeData = anime.toJSON();
 
         return Object.keys(description).map(key => {
             return {
                 name: key,
                 value: animeData[key],
-                type: mediaFieldNames.has(key) ? 'MEDIA' : description[key].type,
+                type: mediaFieldNames.has(key) ? 'MEDIA' : userFieldNames.has(key) ? 'USER ID' : description[key].type,
             };
         });
     },
+
     listAnimes: async (page = 1, limit = 10, orderDirection = 'DESC') => {
         const offset = (page - 1) * limit;
 
@@ -76,7 +100,17 @@ const animeService = {
         const description = await queryInterface.describeTable(Anime.getTableName());
         const foreignKeys = await queryInterface.getForeignKeyReferencesForTable(Anime.getTableName());
 
-        const mediaFieldNames = new Set(foreignKeys.map(fk => fk.columnName));
+        const mediaFieldNames = new Set(
+            foreignKeys
+                .filter(fk => fk.referencedTableName === 'Media')
+                .map(fk => fk.columnName)
+        );
+
+        const userFieldNames = new Set(
+            foreignKeys
+                .filter(fk => fk.referencedTableName === 'Users')
+                .map(fk => fk.columnName)
+        );
 
         const formattedAnimes = animes.map(anime => {
             const animeData = anime.toJSON();
@@ -85,7 +119,7 @@ const animeService = {
                 return {
                     name: key,
                     value: animeData[key],
-                    type: mediaFieldNames.has(key) ? 'MEDIA' : description[key].type,
+                    type: mediaFieldNames.has(key) ? 'MEDIA' : userFieldNames.has(key) ? 'USER ID' : description[key].type,
                 };
             });
         });

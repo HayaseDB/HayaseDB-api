@@ -19,6 +19,12 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
 
 const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+    },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -49,5 +55,5 @@ const User = sequelize.define('User', {
 
 module.exports = {
     model: User,
-    priority: 3
+    priority: 1
 };
