@@ -4,6 +4,7 @@ const loadRoute = require('./routeLoaderUtil');
 const authRoutes = require('../routes/authRoutes');
 const animeRoutes = require('../routes/animeRoutes');
 const mediaRoutes = require('../routes/mediaRoutes');
+const metricsRoutes = require('../routes/metricsRoutes');
 const path = require("node:path");
 
 const initApp = () => {
@@ -15,6 +16,7 @@ const initApp = () => {
     loadRoute(app, '/auth', authRoutes);
     loadRoute(app, '/anime', animeRoutes);
     loadRoute(app, '/media', mediaRoutes);
+    loadRoute(app, '/metrics', metricsRoutes);
     app.get('/', (req, res) => res.sendStatus(200));
 
     return app;

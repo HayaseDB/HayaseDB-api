@@ -3,14 +3,10 @@ const customErrors = require("../utils/customErrorsUtil");
 
 const mediaService = {
     createMedia: async ({ media }, transaction) => {
-        try {
-            return await Media.create(
-                { media },
-                { transaction }
-            );
-        } catch (error) {
-            throw new Error('Failed to create media entry');
-        }
+        return await Media.create(
+            { media },
+            { transaction }
+        );
     },
 
     getMediaById: async (id) => {
@@ -22,15 +18,11 @@ const mediaService = {
     },
 
     deleteMedia: async (id, transaction) => {
-        try {
-            return await Media.destroy({
-                where: {id},
-                transaction,
-            });
-        } catch (error) {
-            console.error('Error deleting media entry:', error);
-            throw new Error('Failed to delete media entry');
-        }
+        return await Media.destroy({
+            where: {id},
+            transaction,
+        });
+
     },
 };
 

@@ -33,10 +33,18 @@ class ForbiddenError extends Error {
     }
 }
 
+class DatabaseError extends Error {
+    constructor(message = 'Database error occurred') {
+        super(message);
+        this.name = 'DatabaseError';
+    }
+}
+
 module.exports = {
     NotFoundError,
     ConflictError,
     ValidationError,
     UnauthorizedError,
     ForbiddenError,
+    DatabaseError
 };
