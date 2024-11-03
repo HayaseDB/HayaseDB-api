@@ -1,7 +1,7 @@
 {
   "name": "hayasedb-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/app.js",
   "scripts": {
     "prod": "node src/app.js",
     "dev": "nodemon --legacy-watch src/app.js",
@@ -13,11 +13,11 @@
     "url": "git+https://github.com/AIO-Develope/HayaseDB-api.git"
   },
   "author": "Sebastian Felix-Alexander Stepper",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/AIO-Develope/HayaseDB-api/issues"
   },
-  "homepage": "https://github.com/AIO-Develope/HayaseDB-api#readme",
+  "homepage": "https://github.com/HayaseDB/",
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",

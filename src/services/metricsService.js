@@ -1,6 +1,7 @@
 const { sequelize } = require('../config/databaseConfig');
 const customErrors = require("../utils/customErrorsUtil");
 const os = require("node:os");
+const { version, author, license, homepage } = require('../../package.json');
 
 
 const metricsService = {
@@ -24,7 +25,6 @@ const metricsService = {
                 mediaSize: mediaSizeResult[0].size,
             };
         } catch (error) {
-            console.error("Database Error Details:", error);
 
             if (error.original && error.original.code === 'ENOTFOUND') {
                 throw new customErrors.DatabaseError(`Database connection error`);
@@ -50,6 +50,19 @@ const metricsService = {
             },
             environment: process.env.NODE_ENV || 'development',
 
+        };
+    },
+    getHayaseDBMetrics: async () => {
+        return {
+            version: version,
+            environment: process.env.NODE_ENV || 'development',
+            copyright: `© HayaseDB`,
+            license: license || 'MIT',
+            repository: homepage || 'https://github.com/HayaseDB',
+            author: author || 'Unknown Author',
+            homepage: 'https://hayasedb.com',
+            supportEmail: 'info@hayasedb.com',
+            documentationUrl: `${process.env.API_URL}/docs`,
         };
     },
 };

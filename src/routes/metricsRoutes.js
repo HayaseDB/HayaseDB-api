@@ -149,5 +149,65 @@ router.get('/database', metricsController.getDatabaseStats);
  */
 router.get('/instance', metricsController.getInstanceInfo);
 
+/**
+ * @swagger
+ * /metrics/hayasedb:
+ *   get:
+ *     tags: [Metrics]
+ *     summary: Retrieve HayaseDB metrics
+ *     description: Get the current version and metrics of the HayaseDB application.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved HayaseDB metrics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Operation successful"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     hayaseDB:
+ *                       type: object
+ *                       properties:
+ *                         version:
+ *                           type: string
+ *                           example: "1.0.0"
+ *                         environment:
+ *                           type: string
+ *                           example: "development"
+ *                         copyright:
+ *                           type: string
+ *                           example: "© HayaseDB"
+ *                         license:
+ *                           type: string
+ *                           example: "MIT"
+ *                         repository:
+ *                           type: string
+ *                           example: "https://github.com/HayaseDB/"
+ *                         author:
+ *                           type: string
+ *                           example: "Sebastian Felix-Alexander Stepper"
+ *                         homepage:
+ *                           type: string
+ *                           example: "https://hayasedb.com"
+ *                         supportEmail:
+ *                           type: string
+ *                           example: "info@hayasedb.com"
+ *                         documentationUrl:
+ *                           type: string
+ *                           example: "https://hayasedb.com/docs"
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Server error
+ */
+router.get('/hayasedb', metricsController.getHayaseDBMetrics);
 
 module.exports = router;

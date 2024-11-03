@@ -1,7 +1,6 @@
 const { model: Media } = require('../models/mediaModel');
 const metricsService = require("../services/metricsService");
 const responseHandler = require("../handlers/responseHandler");
-const os = require("node:os");
 
 
 /**
@@ -27,9 +26,27 @@ const getInstanceInfo = async (req, res) => {
  */
 const getDatabaseStats = async (req, res) => {
     try {
-        const stats = await metricsService.getDatabaseStats();
+        const databaseInfo = await metricsService.getDatabaseStats();
+        const response = {
+            databaseInfo,
+        };
+        return responseHandler.success(res, response);
+    } catch (error) {
+        return responseHandler.error(res, error);
+    }
+};
 
-        return responseHandler.success(res, stats);
+/**
+ * Get HayaseDB metrics
+ */
+const getHayaseDBMetrics = async (req, res) => {
+    try {
+        const HayaseDB = await metricsService.getHayaseDBMetrics();
+        const response = {
+            HayaseDB
+        };
+
+        return responseHandler.success(res, response);
     } catch (error) {
         return responseHandler.error(res, error);
     }
@@ -37,5 +54,6 @@ const getDatabaseStats = async (req, res) => {
 
 module.exports = {
     getDatabaseStats,
-    getInstanceInfo
+    getInstanceInfo,
+    getHayaseDBMetrics
 };
