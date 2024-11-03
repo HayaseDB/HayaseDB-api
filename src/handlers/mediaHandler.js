@@ -1,5 +1,6 @@
 const mediaService = require('../services/mediaService');
 const fieldsUtils = require('../utils/fieldsUtil');
+const {sequelize} = require("../config/databaseConfig");
 
 const mediaHandler = {
     async processMediaFiles(files, mediaFields, transaction) {
@@ -19,21 +20,8 @@ const mediaHandler = {
         
         return mediaEntries;
     },
-    
-    translateMediaUrls(model, fields) {
-        const mediaFields = fieldsUtils.getMediaFields(model);
-    
-        const updatedFields = fields.map(item => {
-            mediaFields.forEach(field => {
-                if (item[field]) {
-                    item[field] = fieldsUtils.convertToMediaUrl(item[field]);
-                }
-            });
-            return item;
-        });
-    
-        return updatedFields;
-    }
+
+
 };
 
 module.exports = mediaHandler;

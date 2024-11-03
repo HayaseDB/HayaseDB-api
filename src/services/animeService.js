@@ -1,65 +1,102 @@
 const { model: Anime } = require('../models/animeModel');
-
-const mediaHandler = require('../handlers/mediaHandler');
-
+const { sequelize } = require("../config/databaseConfig");
+const customErrors = require("../utils/customErrors");
 
 const animeService = {
     createAnime: async (data, transaction) => {
-        try {
-            const animeEntry = await Anime.create(data, { transaction });
-            return mediaHandler.translateMediaUrls(Anime, [animeEntry])[0];
-        } catch (error) {
-            throw error;
+        const existingAnime = await Anime.findOne({ where: { title: data.title } });
+        if (existingAnime) {
+            throw new customErrors.ConflictError('Anime with this title already exists');
         }
+
+        const anime = await Anime.create(data, { transaction });
+
+        const queryInterface = sequelize.getQueryInterface();
+        const description = await queryInterface.describeTable(Anime.getTableName());
+        const foreignKeys = await queryInterface.getForeignKeyReferencesForTable(Anime.getTableName());
+        let animeData = anime.toJSON();
+
+        const mediaFieldNames = new Set(foreignKeys.map(fk => fk.columnName));
+
+        return Object.keys(description).map(key => {
+            return {
+                name: key,
+                value: animeData[key],
+                type: mediaFieldNames.has(key) ? 'MEDIA' : description[key].type,
+            };
+        });
     },
+
 
     deleteAnime: async (id, transaction) => {
-        try {
-            const anime = await Anime.findByPk(id);
-            if (!anime) {
-                throw new Error('Anime not found');
-            }
-            await anime.destroy({transaction});
-           return anime;
-        } catch (error) {
-            throw error;
+        const anime = await Anime.findByPk(id);
+        if (!anime) {
+            throw new customErrors.NotFoundError('Anime not found');
         }
+
+        await anime.destroy({ transaction });
+        return anime;
     },
 
-    async listAnimes(page, limit, order = "DESC", translateMedia = true) {
-        try {
-            const offset = (page - 1) * limit;
+    getAnimeById: async (id) => {
+        const anime = await Anime.findByPk(id);
+        if (!anime) {
+            throw new customErrors.NotFoundError('Anime not found');
+        }
 
-            const { rows: animes, count: totalItems } = await Anime.findAndCountAll({
-                offset,
-                limit: parseInt(limit),
-                order: [['createdAt', order]],
+        const queryInterface = sequelize.getQueryInterface();
+        const description = await queryInterface.describeTable(Anime.getTableName());
+        const foreignKeys = await queryInterface.getForeignKeyReferencesForTable(Anime.getTableName());
+        let animeData = anime.toJSON();
+
+        const mediaFieldNames = new Set(foreignKeys.map(fk => fk.columnName));
+
+        return Object.keys(description).map(key => {
+            return {
+                name: key,
+                value: animeData[key],
+                type: mediaFieldNames.has(key) ? 'MEDIA' : description[key].type,
+            };
+        });
+    },
+    listAnimes: async (page = 1, limit = 10, orderDirection = 'DESC') => {
+        const offset = (page - 1) * limit;
+
+        const { rows: animes, count: totalItems } = await Anime.findAndCountAll({
+            limit,
+            offset,
+            order: [['createdAt', orderDirection]],
+        });
+
+        if (totalItems === 0) {
+            throw new customErrors.NotFoundError('No anime found');
+        }
+
+        const queryInterface = sequelize.getQueryInterface();
+        const description = await queryInterface.describeTable(Anime.getTableName());
+        const foreignKeys = await queryInterface.getForeignKeyReferencesForTable(Anime.getTableName());
+
+        const mediaFieldNames = new Set(foreignKeys.map(fk => fk.columnName));
+
+        const formattedAnimes = animes.map(anime => {
+            const animeData = anime.toJSON();
+
+            return Object.keys(description).map(key => {
+                return {
+                    name: key,
+                    value: animeData[key],
+                    type: mediaFieldNames.has(key) ? 'MEDIA' : description[key].type,
+                };
             });
+        });
 
-            const totalPages = Math.ceil(totalItems / limit);
+        const totalPages = Math.ceil(totalItems / limit);
 
-            if (translateMedia) {
-                const translatedAnimes = mediaHandler.translateMediaUrls(Anime, animes);
-                return { animes: translatedAnimes, totalItems, totalPages };
-            }
-
-            return { animes, totalItems, totalPages };
-        } catch (error) {
-            throw error;
-        }
-    },
-
-    getAnimeById: async (id, translateMedia = true) => {
-        try {
-            const anime = await Anime.findByPk(id);
-            if (translateMedia && anime) {
-                return mediaHandler.translateMediaUrls(Anime, [anime])[0];
-            }
-    
-            return anime;
-        } catch (error) {
-            throw error;
-        }
+        return {
+            animes: formattedAnimes,
+            totalItems,
+            totalPages,
+        };
     },
 };
 

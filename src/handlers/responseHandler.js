@@ -1,4 +1,11 @@
 const { Sequelize } = require('sequelize');
+const {
+    NotFoundError,
+    ConflictError,
+    ValidationError,
+    UnauthorizedError,
+    ForbiddenError
+} = require('../utils/customErrors');
 
 const responseHandler = {
     success(res, data, message = 'Operation successful', statusCode = 200) {
@@ -10,9 +17,17 @@ const responseHandler = {
     },
 
     error(res, error, statusCode = 500) {
-        if (error instanceof Sequelize.UniqueConstraintError) {
+        if (error instanceof NotFoundError) {
+            statusCode = 404; // Not Found
+        } else if (error instanceof ConflictError) {
+            statusCode = 409; // Conflict
+        } else if (error instanceof ValidationError || error instanceof Sequelize.ValidationError) {
             statusCode = 400; // Bad Request
-        } else if (error instanceof Sequelize.ValidationError) {
+        } else if (error instanceof UnauthorizedError) {
+            statusCode = 401; // Unauthorized
+        } else if (error instanceof ForbiddenError) {
+            statusCode = 403; // Forbidden
+        } else if (error instanceof Sequelize.UniqueConstraintError) {
             statusCode = 400; // Bad Request
         } else if (error instanceof Sequelize.ForeignKeyConstraintError) {
             statusCode = 409; // Conflict
@@ -26,7 +41,7 @@ const responseHandler = {
             statusCode = 503; // Service Unavailable
         }
 
-        const message = error.errors?.[0]?.message || error.message || 'Server error';
+        const message = error.message || 'Server error';
         const stack = process.env.NODE_ENV === 'development' ? error.stack?.split('\n') : undefined;
 
         res.status(statusCode).json({

@@ -3,6 +3,7 @@ const mediaHandler = require('../handlers/mediaHandler');
 const fieldsUtils = require('../utils/fieldsUtil');
 const responseHandler = require('../handlers/responseHandler');
 const { model: Anime } = require('../models/animeModel');
+const transformMediaFields = require("../utils/transformMediaFields");
 
 /**
  * Creates a new anime entry
@@ -16,12 +17,16 @@ const createAnime = async (req, res) => {
             req.transaction
         );
 
-        const result = await animeService.createAnime({
+
+        let createdAnime = await animeService.createAnime({
             ...req.body,
             ...mediaEntries,
         }, req.transaction);
 
-        return responseHandler.success(res, { anime: result }, 'Anime created successfully', 201);
+
+        createdAnime = transformMediaFields([createdAnime]);
+
+        return responseHandler.success(res, { anime: createdAnime }, 'Anime created successfully', 201);
     } catch (error) {
         return responseHandler.error(res, error);
     }
@@ -32,39 +37,39 @@ const createAnime = async (req, res) => {
  */
 const deleteAnime = async (req, res) => {
     try {
-        const anime = await animeService.deleteAnime(req.params.id, req.transaction);
-        if (!anime) throw new Error('Anime not found');
-        
+        await animeService.deleteAnime(req.params.id, req.transaction);
         return responseHandler.success(res, null, 'Anime deleted successfully');
     } catch (error) {
         if (error.message === 'Anime not found') {
-            return responseHandler.notFound(res);
+            return responseHandler.notFound(res, 'Anime not found');
         }
         return responseHandler.error(res, error);
     }
 };
 
 /**
- * Lists anime entries with pagination and sorting
+ * List all anime entries
  */
+
 const listAnimes = async (req, res) => {
     try {
-        const { 
-            page = 1, 
-            limit = 10, 
-            translateMedia = 'true', 
-            order = 'DESC' 
+        const {
+            page = 1,
+            limit = 10,
+            order = 'DESC',
+            translateMedia = 'true'
         } = req.query;
 
-        const isTranslateMedia = translateMedia === 'true'; 
         const orderDirection = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-        
-        const { animes, totalItems, totalPages } = await animeService.listAnimes(
+
+        let { animes, totalItems, totalPages } = await animeService.listAnimes(
             Number(page),
             Number(limit),
             orderDirection,
-            isTranslateMedia
         );
+        if (translateMedia !== 'false' ) {
+             animes = transformMediaFields(animes);
+        }
 
         return responseHandler.success(res, {
             animes,
@@ -77,29 +82,30 @@ const listAnimes = async (req, res) => {
     }
 };
 
-
 /**
  * Retrieves a single anime entry by ID
  */
 const getAnime = async (req, res) => {
     try {
-
         const {
-            translateMedia = 'true',
+            translateMedia = 'true'
         } = req.query;
 
-        const isTranslateMedia = translateMedia === 'true'; 
-        const anime = await animeService.getAnimeById(req.params.id, isTranslateMedia); 
-        
+        let anime = await animeService.getAnimeById(req.params.id);
+
         if (!anime) {
             return responseHandler.notFound(res, 'Anime not found');
         }
 
-        return responseHandler.success(res, { anime });
+        if (translateMedia !== 'false' ) {
+            anime = transformMediaFields(anime);
+        }
+        return responseHandler.success(res, { anime }, 'Anime retrieved successfully');
     } catch (error) {
         return responseHandler.error(res, error);
     }
 };
+
 module.exports = {
     createAnime,
     deleteAnime,

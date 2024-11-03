@@ -35,6 +35,10 @@
  *           type: string
  *           format: binary
  *           description: "The cover image for the anime."
+ *         bannerImage:
+ *           type: string
+ *           format: binary
+ *           description: "The banner image for the anime."
  *       required:
  *         - title
  */
@@ -85,11 +89,22 @@ const Anime = sequelize.define('Anime', {
             key: 'id',
         },
     },
+    bannerImage: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'Media',
+            key: 'id',
+        },
+    },
 }, {
 
 });
 
+
+
 Anime.belongsTo(Media, { foreignKey: 'coverImage', onDelete: "cascade", hooks: true });
+Anime.belongsTo(Media, { foreignKey: 'bannerImage', onDelete: "cascade", hooks: true });
 
 module.exports = {
     model: Anime,
