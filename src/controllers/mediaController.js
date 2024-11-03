@@ -1,6 +1,7 @@
 const { model: Media } = require('../models/mediaModel');
 const customErrors = require('../utils/customErrorsUtil');
 const mediaService = require("../services/mediaService");
+const responseHandler = require("../handlers/responseHandler");
 
 /**
  * Fetch the media image file by its ID
@@ -14,12 +15,7 @@ const getMediaById = async (req, res) => {
         res.set('Content-Type', 'image/jpeg');
         res.send(mediaEntry.media);
     } catch (error) {
-
-        if (error instanceof customErrors.NotFoundError) {
-            return res.status(404).json({ success: false, message: error.message });
-        }
-
-        res.status(500).json({ success: false, message: 'Server error' });
+        return responseHandler.error(res, error);
     }
 };
 
