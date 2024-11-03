@@ -78,7 +78,7 @@ const Anime = sequelize.define('Anime', {
         },
     },
     description: {
-        type: DataTypes.TEXT,
+        type: DataTypes.TEXT('long'),
         allowNull: true,
     },
     coverImage: {
@@ -103,8 +103,8 @@ const Anime = sequelize.define('Anime', {
 
 
 
-Anime.belongsTo(Media, { foreignKey: 'coverImage', onDelete: "cascade", hooks: true });
-Anime.belongsTo(Media, { foreignKey: 'bannerImage', onDelete: "cascade", hooks: true });
+Anime.belongsTo(Media, { foreignKey: 'coverImage', as: 'coverMedia', onDelete: "cascade", hooks: true });
+Anime.belongsTo(Media, { foreignKey: 'bannerImage', as: 'bannerMedia', onDelete: "cascade", hooks: true });
 
 module.exports = {
     model: Anime,
