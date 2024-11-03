@@ -7,8 +7,7 @@ const animeService = {
     createAnime: async (data, transaction) => {
         try {
             const animeEntry = await Anime.create(data, { transaction });
-            const translatedAnimeEntry = mediaHandler.translateMediaUrls(Anime, [animeEntry])[0];
-            return translatedAnimeEntry;
+            return mediaHandler.translateMediaUrls(Anime, [animeEntry])[0];
         } catch (error) {
             throw error;
         }
