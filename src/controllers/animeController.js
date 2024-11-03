@@ -3,7 +3,7 @@ const mediaHandler = require('../handlers/mediaHandler');
 const fieldsUtils = require('../utils/fieldsUtil');
 const responseHandler = require('../handlers/responseHandler');
 const { model: Anime } = require('../models/animeModel');
-const transformMediaFields = require("../utils/transformMediaFields");
+const transformMediaFields = require("../utils/transformMediaFieldsUtil");
 
 /**
  * Creates a new anime entry

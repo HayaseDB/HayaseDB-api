@@ -1,6 +1,4 @@
 const mediaService = require('../services/mediaService');
-const fieldsUtils = require('../utils/fieldsUtil');
-const {sequelize} = require("../config/databaseConfig");
 
 const mediaHandler = {
     async processMediaFiles(files, mediaFields, transaction) {

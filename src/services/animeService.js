@@ -1,6 +1,6 @@
 const { model: Anime } = require('../models/animeModel');
 const { sequelize } = require("../config/databaseConfig");
-const customErrors = require("../utils/customErrors");
+const customErrors = require("../utils/customErrorsUtil");
 
 const animeService = {
     createAnime: async (data, transaction) => {

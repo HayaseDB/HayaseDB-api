@@ -1,4 +1,4 @@
-const transformMediaFields = (data) => {
+const transformMediaFieldsUtil = (data) => {
     const baseMediaUrl = `${process.env.API_URL}/media/`;
 
     const hasLayoutStructure = (item) => {
@@ -35,4 +35,4 @@ const transformMediaFields = (data) => {
     return recursiveTransform(data);
 };
 
-module.exports = transformMediaFields;
+module.exports = transformMediaFieldsUtil;

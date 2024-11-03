@@ -1,4 +1,5 @@
 const { model: Media } = require('../models/mediaModel');
+const customErrors = require("../utils/customErrorsUtil");
 
 const mediaService = {
     createMedia: async ({ media }, transaction) => {
@@ -8,18 +9,16 @@ const mediaService = {
                 { transaction }
             );
         } catch (error) {
-            console.error('Error creating media entry:', error);
             throw new Error('Failed to create media entry');
         }
     },
 
     getMediaById: async (id) => {
-        try {
-            return await Media.findByPk(id);
-        } catch (error) {
-            console.error('Error retrieving media entry:', error);
-            throw new Error('Failed to retrieve media entry');
+        const mediaEntry = await Media.findByPk(id);
+        if (!mediaEntry) {
+            throw new customErrors.NotFoundError('Media not found');
         }
+        return mediaEntry;
     },
 
     deleteMedia: async (id, transaction) => {

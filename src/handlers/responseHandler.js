@@ -5,7 +5,7 @@ const {
     ValidationError,
     UnauthorizedError,
     ForbiddenError
-} = require('../utils/customErrors');
+} = require('../utils/customErrorsUtil');
 
 const responseHandler = {
     success(res, data, message = 'Operation successful', statusCode = 200) {
