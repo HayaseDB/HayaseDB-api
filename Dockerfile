@@ -1,3 +1,6 @@
+LABEL version="1.0.0"
+LABEL description="HayaseDB API Service Image"
+LABEL maintainer="info@hayasedb.com"
 FROM node:20-alpine
 
 WORKDIR /usr/src/app

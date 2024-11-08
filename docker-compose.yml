@@ -9,9 +9,6 @@ services:
         NODE_ENV: production
     ports:
       - "3000:3000"
-    labels:
-      - "version=1.0.0"
-      - "maintainer=info@hayasedb.com"
     environment:
       NODE_ENV: production
       MONGO_USERNAME: ${MONGO_USERNAME}
