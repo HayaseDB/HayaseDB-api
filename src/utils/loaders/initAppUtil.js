@@ -1,10 +1,10 @@
 const express = require('express');
-const cors = require("../config/corsConfig");
+const cors = require("../../config/corsConfig");
 const loadRoute = require('./routeLoaderUtil');
-const authRoutes = require('../routes/authRoutes');
-const animeRoutes = require('../routes/animeRoutes');
-const mediaRoutes = require('../routes/mediaRoutes');
-const metricsRoutes = require('../routes/metricsRoutes');
+const authRoutes = require('../../routes/authRoutes');
+const animeRoutes = require('../../routes/animeRoutes');
+const mediaRoutes = require('../../routes/mediaRoutes');
+const metricsRoutes = require('../../routes/metricsRoutes');
 const path = require("node:path");
 
 const initApp = () => {

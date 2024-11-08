@@ -1,4 +1,3 @@
-const { getArrayFields } = require('../utils/fieldsUtil');
 
 const cleanData = (data, arrayFields) => {
     return Object.fromEntries(
@@ -18,8 +17,7 @@ const cleanData = (data, arrayFields) => {
 
 const sanitizeMiddleware = (model) => {
     return (req, res, next) => {
-        const arrayFields = getArrayFields(model);
-        req.body = cleanData(req.body, arrayFields);
+
         next();
     };
 };

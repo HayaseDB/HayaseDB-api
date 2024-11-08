@@ -43,7 +43,7 @@ const transactionMiddleware = require('../middlewares/transactionMiddleware');
  *       500:
  *         description: Server error
  */
-router.post('/create', authMiddleware.user, multerMiddleware, sanitizeMiddleware(Anime), animeController.createAnime);
+router.post('/create', authMiddleware.user, multerMiddleware, animeController.createAnime);
 
 
 /**
@@ -72,7 +72,7 @@ router.post('/create', authMiddleware.user, multerMiddleware, sanitizeMiddleware
  *       500:
  *         description: Server error
  */
-router.delete('/delete/:id', authMiddleware.admin, transactionMiddleware, animeController.deleteAnime);
+router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
 
 
 /**

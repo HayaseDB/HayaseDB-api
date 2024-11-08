@@ -18,8 +18,7 @@
 
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
-const User = require("./userModel");
-const Anime = require('./animeModel');
+
 
 const Media = sequelize.define('Media', {
     id: {
