@@ -18,8 +18,8 @@
 
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
-const {model: User} = require("./userModel");
-const { model: Anime } = require('../models/animeModel');
+const User = require("./userModel");
+const Anime = require('./animeModel');
 
 const Media = sequelize.define('Media', {
     id: {
@@ -31,26 +31,8 @@ const Media = sequelize.define('Media', {
         type: DataTypes.BLOB,
         allowNull: false,
     },
-    createdBy: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: 'Users',
-            key: 'id',
-        },
-    },
+
 }, {
 });
 
-Media.belongsTo(User, { foreignKey: 'createdBy', as: 'authorUser', onDelete: "SET NULL", hooks: true });
-
-
-
-Media.belongsTo(Anime, { foreignKey: 'coverImage', as: 'coverMedia', onDelete: "cascade" });
-Media.belongsTo(Anime, { foreignKey: 'bannerImage', as: 'bannerMedia', onDelete: "cascade" });
-
-
-module.exports = {
-    model: Media,
-    priority: 2
-};
+module.exports = Media;

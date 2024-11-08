@@ -2,7 +2,8 @@ const animeService = require('../services/animeService');
 const mediaHandler = require('../handlers/mediaHandler');
 const fieldsUtils = require('../utils/fieldsUtil');
 const responseHandler = require('../handlers/responseHandler');
-const { model: Anime } = require('../models/animeModel');
+const Anime = require('../models/animeModel');
+const User = require('../models/userModel');
 const translateReferenceFields = require("../utils/translateReferenceFields");
 
 /**
@@ -10,29 +11,29 @@ const translateReferenceFields = require("../utils/translateReferenceFields");
  */
 const createAnime = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const mediaFields = fieldsUtils.getMediaFields(Anime);
+        const user = req.user; // This should be the authenticated user object
+        const acc = await User.findByPk(user.id); // Find the user by primary key
 
-        const mediaEntries = await mediaHandler.processMediaFiles(
-            req.files,
-            userId,
-            mediaFields,
-            req.transaction
-        );
+        // Check if the user exists
+        if (!acc) {
+            return responseHandler.error(res, 'User not found', 404);
+        }
 
-        let createdAnime = await animeService.createAnime({
-            ...req.body,
-            createdBy: userId,
-            ...mediaEntries,
-        }, req.transaction);
+        // Create the anime using Sequelize model
+        const createdAnime = await Anime.create({
+            ...req.body, // Spread the request body into the new anime creation
+        });
 
-        createdAnime = await translateReferenceFields([createdAnime]);
+        // Associate the created anime with the user
+        await acc.addAnime(createdAnime); // Use the instance of createdAnime
 
         return responseHandler.success(res, { anime: createdAnime }, 'Anime created successfully', 201);
     } catch (error) {
+        // Handle errors gracefully
         return responseHandler.error(res, error);
     }
 };
+
 
 /**
  * Deletes an anime entry by ID

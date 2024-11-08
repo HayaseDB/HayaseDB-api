@@ -1,4 +1,4 @@
-const { model: User } = require('../models/userModel');
+const User = require('../models/userModel');
 
 const translateReferenceFields = async (data) => {
     const baseMediaUrl = `${process.env.API_URL}/media/`;

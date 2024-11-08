@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const logger = require('../utils/loggerUtil');
 
+
 const sequelize = new Sequelize(process.env.POSTGRES_DB, process.env.POSTGRES_USER, process.env.POSTGRES_PASSWORD, {
     host: process.env.POSTGRES_HOST,
     dialect: 'postgres',
@@ -15,8 +16,8 @@ const connectDB = async (retries = 5, delay = 2000) => {
     const modelFiles = fs.readdirSync(modelsDirectory).filter(file => file.endsWith('.js'));
 
     for (const file of modelFiles) {
-        const { model, priority } = require(path.join(modelsDirectory, file));
-        models.push({ model, priority });
+        const model = require(path.join(modelsDirectory, file));
+        models.push({ model });
     }
 
     const syncModels = async () => {
@@ -41,6 +42,7 @@ const connectDB = async (retries = 5, delay = 2000) => {
             await sequelize.authenticate();
             logger.info('Connection to PostgreSQL has been established successfully.');
             await syncModels();
+
             return;
         } catch (error) {
             logger.error('Database connection error: ' + error);

@@ -45,8 +45,8 @@
 
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
-const { model: User } = require('../models/userModel');
-const { model: Media } = require('../models/mediaModel');
+const Media = require('./mediaModel');
+const User = require('./userModel');
 
 const Anime = sequelize.define('Anime', {
     id: {
@@ -82,45 +82,19 @@ const Anime = sequelize.define('Anime', {
         type: DataTypes.TEXT,
         allowNull: true,
     },
-    coverImage: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: 'Media',
-            key: 'id',
-        },
-    },
-    bannerImage: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: 'Media',
-            key: 'id',
-        },
-    },
-    createdBy: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: 'Users',
-            key: 'id',
-        },
-    },
 }, {
-
+    tableName: 'Animes', // Ensure this matches the reference in UserAnime
+    timestamps: false
 });
 
+User.hasMany(Anime, {
+    through: "User_Profiles",
+    foreignKey: "id",
+});
 
+Anime.hasOne(User, {
+    through: "User_Profiles",
+    foreignKey: "id",
 
-Anime.belongsTo(Media, { foreignKey: 'coverImage', as: 'coverMedia', onDelete: "SET NULL" });
-Anime.belongsTo(Media, { foreignKey: 'bannerImage', as: 'bannerMedia', onDelete: "SET NULL" });
-
-Anime.belongsTo(User, { foreignKey: 'createdBy', as: 'authorUser', onDelete: "SET NULL", hooks: true });
-
-
-
-
-module.exports = {
-    model: Anime,
-    priority: 3
-};
+});
+module.exports = Anime;

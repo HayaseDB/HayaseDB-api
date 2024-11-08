@@ -1,4 +1,4 @@
-const { model: Anime } = require('../models/animeModel');
+const Anime = require('../models/animeModel');
 const { sequelize } = require("../config/databaseConfig");
 const customErrors = require("../utils/customErrorsUtil");
 

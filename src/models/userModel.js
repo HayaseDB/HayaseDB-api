@@ -17,6 +17,7 @@
 
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
+const Anime = require('./animeModel');
 
 const User = sequelize.define('User', {
     id: {
@@ -51,9 +52,13 @@ const User = sequelize.define('User', {
         defaultValue: false,
     },
 }, {
+    tableName: 'Users', // Ensure this matches the reference in UserAnime
+    timestamps: false
 });
 
-module.exports = {
-    model: User,
-    priority: 1
-};
+
+
+
+
+module.exports = User;
+

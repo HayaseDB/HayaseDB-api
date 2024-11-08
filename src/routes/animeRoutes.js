@@ -5,7 +5,7 @@ const authMiddleware = require('../middlewares/authMiddleware')
 const router = express.Router();
 const multerMiddleware = require('../middlewares/multerMiddleware');
 const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
-const { model: Anime } = require('../models/animeModel');
+const Anime = require('../models/animeModel');
 const transactionMiddleware = require('../middlewares/transactionMiddleware');
 
 /**
@@ -43,7 +43,7 @@ const transactionMiddleware = require('../middlewares/transactionMiddleware');
  *       500:
  *         description: Server error
  */
-router.post('/create', authMiddleware.user, multerMiddleware, sanitizeMiddleware(Anime), transactionMiddleware, animeController.createAnime);
+router.post('/create', authMiddleware.user, multerMiddleware, sanitizeMiddleware(Anime), animeController.createAnime);
 
 
 /**
