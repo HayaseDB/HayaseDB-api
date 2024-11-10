@@ -43,7 +43,7 @@ const transactionMiddleware = require('../middlewares/transactionMiddleware');
  *       500:
  *         description: Server error
  */
-router.post('/create', authMiddleware.user, multerMiddleware, animeController.createAnime);
+router.post('/create', authMiddleware.user, multerMiddleware, sanitizeMiddleware(Anime), animeController.createAnime);
 
 
 /**

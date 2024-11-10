@@ -85,9 +85,28 @@ const Anime = sequelize.define('Anime', {
     timestamps: false
 });
 
-Anime.associate = (models) => {
-    Anime.belongsToMany(models.Media, { through: "AnimeMedia", as: "Media" });
-    Anime.belongsToMany(models.User, { through: "UserAnime", as: "CreatedBy" });
+Anime.describeAnimeFields = async function(animeDetails) {
+    const animeAttributes = this.attributes;
 
+    const transformedAnimeDetails = Object.entries(animeDetails).map(([field, value]) => {
+        const attribute = animeAttributes[field];
+
+        if (attribute) {
+            return {
+                field,
+                value,
+                type: attribute.type.constructor.name.toUpperCase(),
+            };
+        } else {
+            throw new Error(`Unknown field: ${field}`);
+        }
+    });
+
+    return transformedAnimeDetails;
+};
+
+Anime.associate = (models) => {
+    Anime.belongsToMany(models.Media, { through: "AnimeMedia", as: "media" });
+    Anime.belongsToMany(models.User, { through: "UserAnime", as: "createdBy" });
 }
 module.exports = Anime;

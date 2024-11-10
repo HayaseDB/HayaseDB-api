@@ -18,13 +18,13 @@ const createAnime = async (req, res) => {
             User: user
         };
 
-        const anime = await animeService.createAnime(data, transaction);
-
+        let anime = await animeService.createAnime(data, transaction);
+        anime = await animeService.getAnime(anime.id, transaction);
         await transaction.commit();
 
-        return responseHandler.success(res, {
-            anime
-        }, 'Anime created successfully', 201);
+        return responseHandler.success(res,
+            anime,
+            'Anime created successfully', 201);
 
     } catch (error) {
         await transaction.rollback();

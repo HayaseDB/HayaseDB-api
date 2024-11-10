@@ -33,12 +33,12 @@ const Media = sequelize.define('Media', {
     media: {
         type: DataTypes.BLOB,
         allowNull: false
-    },
+    }
 
 }, {
     defaultScope: {
         attributes: {
-            exclude: ['createdBy', 'media']
+            exclude: ['media']
         }
     },
     timestamps: false,
@@ -52,6 +52,7 @@ const Media = sequelize.define('Media', {
 
 Media.associate = (models) => {
     Media.belongsToMany(models.Anime, { through: "AnimeMedia" });
+    Media.belongsToMany(models.User, { through: 'MediaUser', as: 'createdBy' });
 
 }
 

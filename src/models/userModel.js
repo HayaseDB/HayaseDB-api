@@ -63,6 +63,7 @@ const User = sequelize.define('User', {
 User.associate = (models) => {
     User.belongsToMany(models.Anime, { through: "UserAnime" });
 
+    User.belongsToMany(models.Media, { through: 'MediaUser', as: 'media' });
 }
 
 

@@ -7,6 +7,7 @@ const sequelize = new Sequelize(process.env.POSTGRES_DB, process.env.POSTGRES_US
     host: process.env.POSTGRES_HOST,
     dialect: 'postgres',
     logging: false,
+
 });
 
 const connectDB = async (retries = 5, delay = 2000) => {
@@ -15,20 +16,18 @@ const connectDB = async (retries = 5, delay = 2000) => {
     const modelsDirectory = path.join(__dirname, '../models');
     const modelFiles = fs.readdirSync(modelsDirectory).filter(file => file.endsWith('.js'));
 
-    // Dynamically load all models
     for (const file of modelFiles) {
         const model = require(path.join(modelsDirectory, file));
-        models.push(model);  // Store model directly without priority
+        models.push(model);
     }
 
-    // Function to sync models
     const syncModels = async () => {
         const isDevelopment = process.env.NODE_ENV === 'development';
         const syncOptions = isDevelopment ? { alter: true } : { force: true };
 
         try {
             for (const model of models) {
-                await model.sync(syncOptions);  // Sync each model
+                await model.sync(syncOptions);
                 logger.custom("cyan", "MODEL", `${model.name} table synchronized successfully.`);
             }
         } catch (error) {
@@ -37,7 +36,6 @@ const connectDB = async (retries = 5, delay = 2000) => {
         }
     };
 
-    // Connect to the database with retry logic
     for (let attempts = 0; attempts < retries; attempts++) {
         try {
             await sequelize.authenticate();
