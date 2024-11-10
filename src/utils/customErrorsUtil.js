@@ -40,11 +40,21 @@ class DatabaseError extends Error {
     }
 }
 
+
+class DuplicateError extends Error {
+    constructor(message = 'Duplicate resource') {
+        super(message);
+        this.name = 'DuplicateError';
+    }
+}
+
+
 module.exports = {
     NotFoundError,
     ConflictError,
     ValidationError,
     UnauthorizedError,
     ForbiddenError,
-    DatabaseError
+    DatabaseError,
+    DuplicateError
 };

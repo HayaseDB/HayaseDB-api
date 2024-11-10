@@ -4,9 +4,9 @@ const {
     ConflictError,
     ValidationError,
     UnauthorizedError,
-    ForbiddenError
+    ForbiddenError,
+    DuplicateError
 } = require('../utils/customErrorsUtil');
-
 const responseHandler = {
     success(res, data, message = 'Operation successful', statusCode = 200) {
         res.status(statusCode).json({
@@ -17,31 +17,34 @@ const responseHandler = {
     },
 
     error(res, error, statusCode = 500) {
-        if (error instanceof NotFoundError) {
-            statusCode = 404; // Not Found
-        } else if (error instanceof ConflictError) {
-            statusCode = 409; // Conflict
-        } else if (error instanceof ValidationError || error instanceof Sequelize.ValidationError) {
-            statusCode = 400; // Bad Request
-        } else if (error instanceof UnauthorizedError) {
-            statusCode = 401; // Unauthorized
-        } else if (error instanceof ForbiddenError) {
-            statusCode = 403; // Forbidden
-        } else if (error instanceof Sequelize.UniqueConstraintError) {
-            statusCode = 400; // Bad Request
+
+        if (error instanceof Sequelize.UniqueConstraintError) {
+            statusCode = 409;
         } else if (error instanceof Sequelize.ForeignKeyConstraintError) {
-            statusCode = 409; // Conflict
+            statusCode = 409;
+        } else if (error instanceof Sequelize.ValidationError || error instanceof ValidationError || error instanceof Sequelize.ValidationError) {
+            statusCode = 400;
         } else if (error instanceof Sequelize.DatabaseError) {
-            statusCode = 500; // Internal Server Error
+            statusCode = 500;
         } else if (error instanceof Sequelize.TimeoutError) {
-            statusCode = 504; // Gateway Timeout
+            statusCode = 504;
         } else if (error instanceof Sequelize.EmptyResultError) {
-            statusCode = 404; // Not Found
+            statusCode = 404;
         } else if (error instanceof Sequelize.ConnectionError) {
-            statusCode = 503; // Service Unavailable
+            statusCode = 503;
         }
 
-        const message = error.message || 'Server error';
+        else if (error instanceof NotFoundError) {
+            statusCode = 404;
+        } else if (error instanceof ConflictError || error instanceof DuplicateError) {
+            statusCode = 409;
+        } else if (error instanceof UnauthorizedError) {
+            statusCode = 401;
+        } else if (error instanceof ForbiddenError) {
+            statusCode = 403;
+        }
+
+        const message = (error.errors && Array.isArray(error.errors) && error.errors[0]?.message) || 'Server error';
         const stack = process.env.NODE_ENV === 'development' ? error.stack?.split('\n') : undefined;
 
         res.status(statusCode).json({
@@ -51,19 +54,7 @@ const responseHandler = {
         });
     },
 
-    notFound(res, message = 'Resource not found') {
-        res.status(404).json({
-            success: false,
-            message
-        });
-    },
 
-    validationError(res, message = 'Validation failed') {
-        res.status(400).json({
-            success: false,
-            message
-        });
-    }
 };
 
 module.exports = responseHandler;

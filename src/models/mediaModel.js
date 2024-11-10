@@ -24,14 +24,30 @@ const Media = sequelize.define('Media', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
+    },
+    type: {
+        type: DataTypes.ENUM('coverImage', 'bannerImage'),
+        allowNull: false
     },
     media: {
         type: DataTypes.BLOB,
-        allowNull: false,
+        allowNull: false
     },
 
 }, {
+    defaultScope: {
+        attributes: {
+            exclude: ['createdBy', 'blob']
+        }
+    },
+    timestamps: false,
+    schema: 'public',
+    getterMethods: {
+        url() {
+            return `/media/${this.id}`;
+        }
+    }
 });
 
 module.exports = Media;

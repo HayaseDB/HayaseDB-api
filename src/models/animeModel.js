@@ -45,8 +45,6 @@
 
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
-const Media = require('./mediaModel');
-const User = require('./userModel');
 
 const Anime = sequelize.define('Anime', {
     id: {
@@ -83,18 +81,9 @@ const Anime = sequelize.define('Anime', {
         allowNull: true,
     },
 }, {
-    tableName: 'Animes', // Ensure this matches the reference in UserAnime
+    tableName: 'Animes',
     timestamps: false
 });
 
-User.hasMany(Anime, {
-    through: "User_Profiles",
-    foreignKey: "id",
-});
 
-Anime.hasOne(User, {
-    through: "User_Profiles",
-    foreignKey: "id",
-
-});
 module.exports = Anime;
