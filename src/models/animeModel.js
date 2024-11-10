@@ -85,5 +85,9 @@ const Anime = sequelize.define('Anime', {
     timestamps: false
 });
 
+Anime.associate = (models) => {
+    Anime.belongsToMany(models.Media, { through: "AnimeMedia", as: "Media" });
+    Anime.belongsToMany(models.User, { through: "UserAnime", as: "CreatedBy" });
 
+}
 module.exports = Anime;

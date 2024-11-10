@@ -1,41 +1,57 @@
-const Anime = require('../models/animeModel');
 const { sequelize } = require("../config/databaseConfig");
 const customErrors = require("../utils/customErrorsUtil");
+const User = require('../models/userModel');
+const Media = require('../models/mediaModel');
+const Anime = require('../models/animeModel');
 
 const animeService = {
     createAnime: async (data, transaction) => {
-        const existingAnime = await Anime.findOne({ where: { title: data.title } });
-        if (existingAnime) {
-            throw new customErrors.ConflictError('Anime with this title already exists');
+        const { Media: mediaFiles, Meta: metaData, User: user } = data;
+        const mediaItems = [];
+
+        if (mediaFiles && mediaFiles.length > 0) {
+            mediaFiles.forEach(file => {
+                const mediaType = file.fieldname;
+                mediaItems.push({
+                    media: file.buffer,
+                    type: mediaType,
+                    createdBy: user.id
+                });
+            });
         }
 
-        const anime = await Anime.create(data, { transaction });
-
-        const queryInterface = sequelize.getQueryInterface();
-        const description = await queryInterface.describeTable(Anime.getTableName());
-        const foreignKeys = await queryInterface.getForeignKeyReferencesForTable(Anime.getTableName());
-
-        const mediaFieldNames = new Set(
-            foreignKeys
-                .filter(fk => fk.referencedTableName === 'Media')
-                .map(fk => fk.columnName)
-        );
-
-        const userFieldNames = new Set(
-            foreignKeys
-                .filter(fk => fk.referencedTableName === 'Users')
-                .map(fk => fk.columnName)
-        );
-
-        let animeData = anime.toJSON();
-
-        return Object.keys(description).map(key => {
-            return {
-                name: key,
-                value: animeData[key],
-                type: mediaFieldNames.has(key) ? 'MEDIA' : userFieldNames.has(key) ? 'USER ID' : description[key].type,
-            };
+        const anime = await Anime.create({
+            ...metaData,
+            Media: mediaItems
+        }, {
+            include: [
+                {
+                    model: Media,
+                    as: 'Media',
+                    through: { attributes: [] }
+                },
+            ],
+            transaction
         });
+
+        await anime.addCreatedBy(user, { transaction });
+
+        await anime.reload({
+            include: [
+                {
+                    model: Media,
+                    as: 'Media',
+                    through: { attributes: [] }
+                },
+                {
+                    model: User,
+                    as: 'CreatedBy',
+                    through: { attributes: [] }
+                }
+            ],
+            transaction
+        });
+        return anime;
     },
 
 

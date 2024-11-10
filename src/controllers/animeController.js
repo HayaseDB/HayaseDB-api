@@ -1,23 +1,38 @@
 const animeService = require('../services/animeService');
 const responseHandler = require('../handlers/responseHandler');
-const User = require('../models/userModel');
+const {sequelize} = require("../config/databaseConfig");
+
 
 /**
  * Creates a new anime entry
  */
 const createAnime = async (req, res) => {
+    const { files, body, user } = req;
+
+    const transaction = await sequelize.transaction();
+
     try {
-        const user = req.user; // This should be the authenticated user object
-        const acc = await User.findByPk(user.id); // Find the user by primary key
+        const data = {
+            Media: files,
+            Meta: body,
+            User: user
+        };
 
+        const anime = await animeService.createAnime(data, transaction);
 
+        await transaction.commit();
 
-        return responseHandler.success(res, { anime: createdAnime }, 'Anime created successfully', 201);
+        return responseHandler.success(res, {
+            anime
+        }, 'Anime created successfully', 201);
+
     } catch (error) {
-        // Handle errors gracefully
+        await transaction.rollback();
         return responseHandler.error(res, error);
     }
 };
+
+
 
 
 /**

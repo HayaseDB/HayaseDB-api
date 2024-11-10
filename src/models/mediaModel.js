@@ -38,16 +38,21 @@ const Media = sequelize.define('Media', {
 }, {
     defaultScope: {
         attributes: {
-            exclude: ['createdBy', 'blob']
+            exclude: ['createdBy', 'media']
         }
     },
     timestamps: false,
     schema: 'public',
     getterMethods: {
         url() {
-            return `/media/${this.id}`;
+            return `${process.env.API_URL}/media/${this.id}`;
         }
     }
 });
+
+Media.associate = (models) => {
+    Media.belongsToMany(models.Anime, { through: "AnimeMedia" });
+
+}
 
 module.exports = Media;

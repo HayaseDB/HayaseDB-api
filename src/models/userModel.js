@@ -52,12 +52,18 @@ const User = sequelize.define('User', {
         defaultValue: false,
     },
 }, {
-    tableName: 'Users', // Ensure this matches the reference in UserAnime
-    timestamps: false
+    tableName: 'Users',
+    timestamps: false,
+    defaultScope: {
+        attributes: ['id', 'username'],
+    },
 });
 
 
+User.associate = (models) => {
+    User.belongsToMany(models.Anime, { through: "UserAnime" });
 
+}
 
 
 module.exports = User;

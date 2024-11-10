@@ -13,7 +13,7 @@ const authenticateToken = async (req, res, next) => {
             return responseHandler.error(res, new Error('Invalid token'), 403);
         }
 
-        const dbUser = await User.findByPk(user.id);
+        const dbUser = await User.unscoped().findByPk(user.id);
         if (!dbUser) {
             return responseHandler.error(res, new Error('User not found'), 404);
         }
