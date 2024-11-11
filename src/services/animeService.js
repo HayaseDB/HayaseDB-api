@@ -1,26 +1,114 @@
 const {sequelize} = require("../config/databaseConfig");
-const customErrors = require("../utils/customErrorsUtil");
+const {NotFoundError, ValidationError, DatabaseError} = require("../utils/customErrorsUtil");
 const User = require('../models/userModel');
 const Media = require('../models/mediaModel');
 const Anime = require('../models/animeModel');
+const {Op} = require('sequelize');
+
+const DEFAULT_INCLUDES = {
+    DETAILED: [
+        {
+            model: Media,
+            as: 'media',
+            include: [{
+                model: User,
+                as: 'createdBy',
+                attributes: ['id', 'username'],
+                through: {attributes: []}
+            }]
+        },
+        {
+            model: User,
+            as: 'createdBy',
+            attributes: ['id', 'username'],
+            through: {attributes: []}
+        }
+    ],
+    BASIC: [
+        {
+            model: Media,
+            as: 'media'
+        }
+    ]
+};
+
+const formatAnimeResponse = (anime, detailed = false) => {
+    if (!anime) return null;
+
+    const timestampFields = ['createdAt', 'updatedAt', 'deletedAt'];
+
+    const details = Object.keys(Anime.getAttributes())
+        .filter(field => !timestampFields.includes(field) && field !== 'id')
+        .reduce((acc, field) => {
+            acc[field] = {
+                value: anime[field],
+                type: Anime.getAttributes()[field].type.key
+            };
+            return acc;
+        }, {});
+
+    const media = anime.media?.reduce((acc, mediaItem) => {
+        acc[mediaItem.type] = {
+            id: mediaItem.id,
+            url: mediaItem.url,
+            mimeType: mediaItem.mimetype,
+            size: mediaItem.size,
+            createdBy: detailed && mediaItem.createdBy
+                ? mediaItem.createdBy.map(user => ({
+                    id: user.id,
+                    username: user.username
+                }))
+                : undefined,
+            createdAt: mediaItem.createdAt
+        };
+        return acc;
+    }, {}) || {};
+
+    const meta = {
+        id: anime.id,
+        ...(detailed && anime.createdBy ? {
+            createdBy: anime.createdBy.map(user => ({
+                id: user.id,
+                username: user.username
+            }))
+        } : {}),
+        timestamps: timestampFields.reduce((acc, field) => {
+            if (anime[field]) {
+                acc[field] = anime[field];
+            }
+            return acc;
+        }, {})
+    };
+
+    return {
+        anime: {details, media},
+        meta
+    };
+};
 
 const animeService = {
-    createAnime: async (data, transaction) => {
+    async createAnime(data, transaction) {
         if (!data?.Media || !data?.Meta || !data?.User || !transaction) {
-            throw new Error('Missing required parameters: "Media", "Meta", "User", and "transaction" are required.');
+            throw new ValidationError('Missing required parameters: Media, Meta, User, and transaction');
         }
 
         const {Media: mediaFiles = [], Meta: animeDetails, User: user} = data;
-
         const anime = await Anime.create(animeDetails, {transaction});
         await anime.addCreatedBy(user, {transaction});
 
         const mediaItems = await Promise.all(
             mediaFiles.map(async (file) => {
                 if (!file.buffer || !file.fieldname) {
-                    throw new Error('Invalid media file: both "buffer" and "fieldname" are required.');
+                    throw new ValidationError('Invalid media file: buffer and fieldname are required');
                 }
-                const mediaItem = await Media.create({media: file.buffer, type: file.fieldname}, {transaction});
+
+                const mediaItem = await Media.create({
+                    media: file.buffer,
+                    type: file.fieldname,
+                    mimeType: file.mimetype,
+                    size: file.size
+                }, {transaction});
+
                 await mediaItem.addCreatedBy(user, {transaction});
                 return mediaItem;
             })
@@ -30,162 +118,149 @@ const animeService = {
             await anime.addMedia(mediaItems, {transaction});
         }
 
-        await anime.reload({transaction, include: []});
+        await anime.reload({
+            transaction,
+            include: DEFAULT_INCLUDES.DETAILED
+        });
 
-        return anime;
+        return formatAnimeResponse(anime, true);
     },
 
-
-    deleteAnime: async (id, transaction) => {
-        const anime = await Anime.findByPk(id);
-        if (!anime) {
-            throw new customErrors.NotFoundError('Anime not found');
-        }
-
-        await anime.destroy({transaction});
-        return anime;
-    },
-
-
-    getAnime: async (id, transaction) => {
+    async getAnime(id, transaction, detailed = false) {
         if (!id) {
-            throw new Error('Missing required parameters: "animeId" and "transaction" are required.');
+            throw new ValidationError('Anime ID is required');
         }
 
         const anime = await Anime.findByPk(id, {
             transaction,
-            include: [
-                {
-                    model: Media,
-                    as: 'media',
-                    include: [{
-                        model: User,
-                        as: 'createdBy',
-                        attributes: ['id', 'username'],
-                        through: {attributes: []}
-                    }]
-                },
-                {
-                    model: User,
-                    as: 'createdBy',
-                    attributes: ['id', 'username'],
-                    through: {attributes: []}
-                }
-            ]
+            include: detailed ? DEFAULT_INCLUDES.DETAILED : DEFAULT_INCLUDES.BASIC
         });
 
         if (!anime) {
-            throw new Error('Anime not found.');
+            throw new NotFoundError('Anime not found');
         }
 
-        const responseDetails = Object.keys(Anime.getAttributes()).reduce((acc, field) => {
-            acc[field] = {value: anime[field], type: Anime.getAttributes()[field].type.key};
-            return acc;
-        }, {});
+        return formatAnimeResponse(anime, detailed);
+    },
 
-        const mediaResponse = anime.media.reduce((acc, mediaItem) => {
-            acc[mediaItem.type] = {
-                id: mediaItem.id,
-                url: mediaItem.url,
-                createdBy: mediaItem.createdBy.map(user => ({id: user.id, username: user.username})),
-                createdAt: mediaItem.createdAt
+    async listAnimes({
+                         page = 1,
+                         limit = 10,
+                         orderDirection = 'DESC',
+                         detailed = false,
+                         search = '',
+                         filters = {}
+                     } = {}) {
+        const offset = Math.max(0, (page - 1) * Math.min(100, Math.max(1, limit)));
+        const whereClause = {
+            ...(search && {
+                [Op.or]: [
+                    {title: {[Op.iLike]: `%${search}%`}},
+                    {description: {[Op.iLike]: `%${search}%`}}
+                ]
+            }),
+            ...filters
+        };
 
-            };
-            return acc;
-        }, {});
+        const {rows: animes, count: totalItems} = await Anime.findAndCountAll({
+            where: whereClause,
+            limit: Math.min(100, Math.max(1, limit)),
+            offset,
+            order: [['createdAt', orderDirection === 'ASC' ? 'ASC' : 'DESC']],
+            include: detailed ? DEFAULT_INCLUDES.DETAILED : DEFAULT_INCLUDES.BASIC
+        });
 
-        const createdBy = anime.createdBy.map(user => ({id: user.id, username: user.username}));
+        const formattedAnimes = animes.map(anime => formatAnimeResponse(anime, detailed));
 
         return {
-            anime: {
-                details: responseDetails,
-                media: mediaResponse
-            },
+            animes: formattedAnimes,
             meta: {
-                createdBy
+                totalItems,
+                totalPages: Math.ceil(totalItems / limit),
+                currentPage: page,
+                itemsPerPage: limit,
+                filters: Object.keys(filters),
+                search: search || undefined
             }
         };
     },
 
-    listAnimes: async (page = 1, limit = 10, orderDirection = 'DESC', detailed = false) => {
-        const offset = (page - 1) * limit;
-
-        const { rows: animes, count: totalItems } = await Anime.findAndCountAll({
-            limit,
-            offset,
-            order: [['createdAt', orderDirection]],
-            include: [
-                {
-                    model: Media,
-                    as: 'media',
-                    include: detailed ? [{
-                        model: User,
-                        as: 'createdBy',
-                        attributes: ['id', 'username'],
-                        through: { attributes: [] }
-                    }] : []
-                },
-                ...(detailed ? [{
-                    model: User,
-                    as: 'createdBy',
-                    attributes: ['id', 'username'],
-                    through: { attributes: [] }
-                }] : [])
-            ]
-        });
-
-        if (totalItems === 0) {
-            return {
-                animes: [],
-                totalItems: 0,
-                totalPages: 1,
-            };
+    async updateAnime(id, data, transaction) {
+        if (!id || !transaction) {
+            throw new ValidationError('Anime ID and transaction are required');
         }
 
-        const queryInterface = sequelize.getQueryInterface();
-        const description = await queryInterface.describeTable(Anime.getTableName());
-
-        const formattedAnimes = animes.map(anime => {
-            const animeData = anime.toJSON();
-
-            const details = Object.keys(description).reduce((acc, key) => {
-                acc[key] = { value: animeData[key], type: description[key].type };
-                return acc;
-            }, {});
-
-            const media = anime.media.reduce((acc, mediaItem) => {
-                acc[mediaItem.type] = {
-                    id: mediaItem.id,
-                    url: mediaItem.url,
-                    createdBy: detailed
-                        ? mediaItem.createdBy.map(user => ({ id: user.id, username: user.username }))
-                        : undefined,
-                    createdAt: mediaItem.createdAt
-                };
-                return acc;
-            }, {});
-
-            const createdBy = detailed
-                ? anime.createdBy.map(user => ({ id: user.id, username: user.username }))
-                : undefined;
-
-            return {
-                anime: {
-                    details,
-                    media
-                },
-                meta: detailed ? { createdBy } : {}
-            };
+        const anime = await Anime.findByPk(id, {
+            transaction,
+            include: DEFAULT_INCLUDES.DETAILED
         });
 
-        const totalPages = Math.ceil(totalItems / limit);
+        if (!anime) {
+            throw new NotFoundError('Anime not found');
+        }
 
-        return {
-            animes: formattedAnimes,
-            totalItems,
-            totalPages,
-        };
+        const {Meta: animeDetails, Media: mediaFiles, User: user} = data;
+
+        if (animeDetails) {
+            await anime.update(animeDetails, {transaction});
+        }
+
+        if (mediaFiles?.length > 0) {
+            const mediaItems = await Promise.all(
+                mediaFiles.map(async (file) => {
+                    if (!file.buffer || !file.fieldname) {
+                        throw new ValidationError('Invalid media file: buffer and fieldname are required');
+                    }
+
+                    const mediaItem = await Media.create({
+                        media: file.buffer,
+                        type: file.fieldname,
+                        mimeType: file.mimetype,
+                        size: file.size
+                    }, {transaction});
+
+                    await mediaItem.addCreatedBy(user, {transaction});
+                    return mediaItem;
+                })
+            );
+
+            await anime.addMedia(mediaItems, {transaction});
+        }
+
+        await anime.reload({
+            transaction,
+            include: DEFAULT_INCLUDES.DETAILED
+        });
+
+        return formatAnimeResponse(anime, true);
     },
-}
 
-    module.exports = animeService;
+    async deleteAnime(id, transaction) {
+        if (!id || !transaction) {
+            throw new ValidationError('Anime ID and transaction are required');
+        }
+
+        const anime = await Anime.findByPk(id, {
+            transaction,
+            include: DEFAULT_INCLUDES.BASIC
+        });
+
+        if (!anime) {
+            throw new NotFoundError('Anime not found');
+        }
+
+        if (anime.media?.length > 0) {
+            await Media.destroy({
+                where: {
+                    id: anime.media.map(media => media.id)
+                },
+                transaction
+            });
+        }
+
+        await anime.destroy({transaction});
+        return formatAnimeResponse(anime);
+    },
+};
+
+module.exports = animeService;

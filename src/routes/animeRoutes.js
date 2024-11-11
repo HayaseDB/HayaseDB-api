@@ -1,12 +1,10 @@
-
 const express = require('express');
 const animeController = require('../controllers/animeController');
-const authMiddleware = require('../middlewares/authMiddleware')
+const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
 const multerMiddleware = require('../middlewares/multerMiddleware');
 const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
 const Anime = require('../models/animeModel');
-const transactionMiddleware = require('../middlewares/transactionMiddleware');
 
 /**
  * @swagger
@@ -15,14 +13,13 @@ const transactionMiddleware = require('../middlewares/transactionMiddleware');
  *   description: Anime API
  */
 
-
 /**
  * @swagger
  * /anime/create:
  *   post:
  *     tags: [Anime]
  *     summary: Creates Anime
- *     description: Create a new Anime entry on Database.
+ *     description: Create a new Anime entry in the Database.
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -37,7 +34,7 @@ const transactionMiddleware = require('../middlewares/transactionMiddleware');
  *                   explode: true
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: Anime created successfully
  *       400:
  *         description: Bad request (e.g., missing fields)
  *       500:
@@ -96,7 +93,7 @@ router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
  *           default: 10
  *         description: Number of animes to retrieve per page
  *       - in: query
- *         name: translateFields
+ *         name: detailed
  *         schema:
  *           type: boolean
  *         description: Enable or disable media translation to accessible URLs
@@ -105,7 +102,7 @@ router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
  *         schema:
  *           type: string
  *           enum: [ASC, DESC]
- *           default: ASC
+ *           default: DESC
  *         description: Order of the results, either ascending (ASC) or descending (DESC)
  *     responses:
  *       200:
@@ -132,19 +129,16 @@ router.get('/list', animeController.listAnimes);
  *           format: uuid
  *         description: The ID of the anime to retrieve
  *       - in: query
- *         name: translateFields
+ *         name: detailed
  *         schema:
  *           type: boolean
  *         description: Enable or disable media translation to accessible URLs
  *     responses:
  *       200:
- *         description: Animes retrieved successfully
+ *         description: Anime retrieved successfully
  *       500:
  *         description: Server error
  */
-
-
 router.get('/:id', animeController.getAnime);
-
 
 module.exports = router;
