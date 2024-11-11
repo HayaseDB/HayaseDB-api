@@ -60,7 +60,6 @@ const listAnimes = async (req, res) => {
             page = 1,
             limit = 10,
             order = 'DESC',
-            translateFields = 'true'
         } = req.query;
 
         const orderDirection = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
@@ -79,6 +78,7 @@ const listAnimes = async (req, res) => {
             totalItems,
         });
     } catch (error) {
+        console.log(error)
         return responseHandler.error(res, error);
     }
 };

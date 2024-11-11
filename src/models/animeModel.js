@@ -82,7 +82,7 @@ const Anime = sequelize.define('Anime', {
     },
 }, {
     tableName: 'Animes',
-    timestamps: false
+    timestamps: true
 });
 
 Anime.describeAnimeFields = async function(animeDetails) {

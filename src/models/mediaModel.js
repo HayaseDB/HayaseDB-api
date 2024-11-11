@@ -41,7 +41,7 @@ const Media = sequelize.define('Media', {
             exclude: ['media']
         }
     },
-    timestamps: false,
+    timestamps: true,
     schema: 'public',
     getterMethods: {
         url() {

@@ -10,31 +10,30 @@ const animeService = {
             throw new Error('Missing required parameters: "Media", "Meta", "User", and "transaction" are required.');
         }
 
-        const { Media: mediaFiles = [], Meta: animeDetails, User: user } = data;
+        const {Media: mediaFiles = [], Meta: animeDetails, User: user} = data;
 
-        const anime = await Anime.create(animeDetails, { transaction });
-        await anime.addCreatedBy(user, { transaction });
+        const anime = await Anime.create(animeDetails, {transaction});
+        await anime.addCreatedBy(user, {transaction});
 
         const mediaItems = await Promise.all(
             mediaFiles.map(async (file) => {
                 if (!file.buffer || !file.fieldname) {
                     throw new Error('Invalid media file: both "buffer" and "fieldname" are required.');
                 }
-                const mediaItem = await Media.create({ media: file.buffer, type: file.fieldname }, { transaction });
-                await mediaItem.addCreatedBy(user, { transaction });
+                const mediaItem = await Media.create({media: file.buffer, type: file.fieldname}, {transaction});
+                await mediaItem.addCreatedBy(user, {transaction});
                 return mediaItem;
             })
         );
 
         if (mediaItems.length > 0) {
-            await anime.addMedia(mediaItems, { transaction });
+            await anime.addMedia(mediaItems, {transaction});
         }
 
-        await anime.reload({ transaction, include: [] });
+        await anime.reload({transaction, include: []});
 
         return anime;
     },
-
 
 
     deleteAnime: async (id, transaction) => {
@@ -63,14 +62,14 @@ const animeService = {
                         model: User,
                         as: 'createdBy',
                         attributes: ['id', 'username'],
-                        through: { attributes: [] }
+                        through: {attributes: []}
                     }]
                 },
                 {
                     model: User,
                     as: 'createdBy',
                     attributes: ['id', 'username'],
-                    through: { attributes: [] }
+                    through: {attributes: []}
                 }
             ]
         });
@@ -80,7 +79,7 @@ const animeService = {
         }
 
         const responseDetails = Object.keys(Anime.getAttributes()).reduce((acc, field) => {
-            acc[field] = { value: anime[field], type: Anime.getAttributes()[field].type.key };
+            acc[field] = {value: anime[field], type: Anime.getAttributes()[field].type.key};
             return acc;
         }, {});
 
@@ -88,14 +87,14 @@ const animeService = {
             acc[mediaItem.type] = {
                 id: mediaItem.id,
                 url: mediaItem.url,
-                createdBy: mediaItem.createdBy.map(user => ({ id: user.id, username: user.username })),
+                createdBy: mediaItem.createdBy.map(user => ({id: user.id, username: user.username})),
                 createdAt: mediaItem.createdAt
 
             };
             return acc;
         }, {});
 
-        const createdBy = anime.createdBy.map(user => ({ id: user.id, username: user.username }));
+        const createdBy = anime.createdBy.map(user => ({id: user.id, username: user.username}));
 
         return {
             anime: {
@@ -108,45 +107,75 @@ const animeService = {
         };
     },
 
-    listAnimes: async (page = 1, limit = 10, orderDirection = 'DESC') => {
+    listAnimes: async (page = 1, limit = 10, orderDirection = 'DESC', detailed = false) => {
         const offset = (page - 1) * limit;
 
-        const {rows: animes, count: totalItems} = await Anime.findAndCountAll({
+        const { rows: animes, count: totalItems } = await Anime.findAndCountAll({
             limit,
             offset,
             order: [['createdAt', orderDirection]],
+            include: [
+                {
+                    model: Media,
+                    as: 'media',
+                    include: detailed ? [{
+                        model: User,
+                        as: 'createdBy',
+                        attributes: ['id', 'username'],
+                        through: { attributes: [] }
+                    }] : []
+                },
+                ...(detailed ? [{
+                    model: User,
+                    as: 'createdBy',
+                    attributes: ['id', 'username'],
+                    through: { attributes: [] }
+                }] : [])
+            ]
         });
 
         if (totalItems === 0) {
-            throw new customErrors.NotFoundError('No anime found');
+            return {
+                animes: [],
+                totalItems: 0,
+                totalPages: 1,
+            };
         }
 
         const queryInterface = sequelize.getQueryInterface();
         const description = await queryInterface.describeTable(Anime.getTableName());
-        const foreignKeys = await queryInterface.getForeignKeyReferencesForTable(Anime.getTableName());
-
-        const mediaFieldNames = new Set(
-            foreignKeys
-                .filter(fk => fk.referencedTableName === 'Media')
-                .map(fk => fk.columnName)
-        );
-
-        const userFieldNames = new Set(
-            foreignKeys
-                .filter(fk => fk.referencedTableName === 'Users')
-                .map(fk => fk.columnName)
-        );
 
         const formattedAnimes = animes.map(anime => {
             const animeData = anime.toJSON();
 
-            return Object.keys(description).map(key => {
-                return {
-                    name: key,
-                    value: animeData[key],
-                    type: mediaFieldNames.has(key) ? 'MEDIA' : userFieldNames.has(key) ? 'USER ID' : description[key].type,
+            const details = Object.keys(description).reduce((acc, key) => {
+                acc[key] = { value: animeData[key], type: description[key].type };
+                return acc;
+            }, {});
+
+            const media = anime.media.reduce((acc, mediaItem) => {
+                acc[mediaItem.type] = {
+                    id: mediaItem.id,
+                    url: mediaItem.url,
+                    createdBy: detailed
+                        ? mediaItem.createdBy.map(user => ({ id: user.id, username: user.username }))
+                        : undefined,
+                    createdAt: mediaItem.createdAt
                 };
-            });
+                return acc;
+            }, {});
+
+            const createdBy = detailed
+                ? anime.createdBy.map(user => ({ id: user.id, username: user.username }))
+                : undefined;
+
+            return {
+                anime: {
+                    details,
+                    media
+                },
+                meta: detailed ? { createdBy } : {}
+            };
         });
 
         const totalPages = Math.ceil(totalItems / limit);
@@ -157,6 +186,6 @@ const animeService = {
             totalPages,
         };
     },
-};
+}
 
-module.exports = animeService;
+    module.exports = animeService;
