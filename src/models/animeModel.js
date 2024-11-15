@@ -45,8 +45,6 @@
 
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
-const { model: Media } = require('../models/mediaModel');
-const { model: User } = require('../models/userModel');
 
 const Anime = sequelize.define('Anime', {
     id: {
@@ -82,41 +80,33 @@ const Anime = sequelize.define('Anime', {
         type: DataTypes.TEXT,
         allowNull: true,
     },
-    coverImage: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: 'Media',
-            key: 'id',
-        },
-    },
-    bannerImage: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: 'Media',
-            key: 'id',
-        },
-    },
-    createdBy: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: 'Users',
-            key: 'id',
-        },
-    },
 }, {
-
+    tableName: 'Animes',
+    timestamps: true
 });
 
+Anime.describeAnimeFields = async function(animeDetails) {
+    const animeAttributes = this.attributes;
 
+    const transformedAnimeDetails = Object.entries(animeDetails).map(([field, value]) => {
+        const attribute = animeAttributes[field];
 
-Anime.belongsTo(Media, { foreignKey: 'coverImage', as: 'coverMedia', onDelete: "cascade", hooks: true });
-Anime.belongsTo(Media, { foreignKey: 'bannerImage', as: 'bannerMedia', onDelete: "cascade", hooks: true });
-Anime.belongsTo(User, { foreignKey: 'createdBy', as: 'authorUser', onDelete: "SET NULL", hooks: true });
+        if (attribute) {
+            return {
+                field,
+                value,
+                type: attribute.type.constructor.name.toUpperCase(),
+            };
+        } else {
+            throw new Error(`Unknown field: ${field}`);
+        }
+    });
 
-module.exports = {
-    model: Anime,
-    priority: 2
+    return transformedAnimeDetails;
 };
+
+Anime.associate = (models) => {
+    Anime.belongsToMany(models.Media, { through: "AnimeMedia", as: "media", onDelete: "CASCADE" });
+    Anime.belongsToMany(models.User, { through: "UserAnime", as: "createdBy" });
+}
+module.exports = Anime;

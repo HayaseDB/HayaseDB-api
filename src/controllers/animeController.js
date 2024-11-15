@@ -1,33 +1,28 @@
 const animeService = require('../services/animeService');
-const mediaHandler = require('../handlers/mediaHandler');
-const fieldsUtils = require('../utils/fieldsUtil');
 const responseHandler = require('../handlers/responseHandler');
-const { model: Anime } = require('../models/animeModel');
-const translateReferenceFields = require("../utils/translateReferenceFields");
+const { sequelize } = require("../config/databaseConfig");
 
 /**
  * Creates a new anime entry
  */
 const createAnime = async (req, res) => {
+    const { files, body, user } = req;
+    const transaction = await sequelize.transaction();
+
     try {
-        const mediaFields = fieldsUtils.getMediaFields(Anime);
-        const mediaEntries = await mediaHandler.processMediaFiles(
-            req.files,
-            mediaFields,
-            req.transaction
-        );
+        const data = {
+            Media: files,
+            Meta: body,
+            User: user
+        };
 
-        let createdAnime = await animeService.createAnime({
-            ...req.body,
-            createdBy: req.user.id,
-            ...mediaEntries,
-        }, req.transaction);
+        const anime = await animeService.createAnime(data, transaction);
+        await transaction.commit();
 
+        return responseHandler.success(res, anime, 'Anime created successfully', 201);
 
-        createdAnime = await transformMediaFields([createdAnime]);
-
-        return responseHandler.success(res, { anime: createdAnime }, 'Anime created successfully', 201);
     } catch (error) {
+        await transaction.rollback();
         return responseHandler.error(res, error);
     }
 };
@@ -36,10 +31,14 @@ const createAnime = async (req, res) => {
  * Deletes an anime entry by ID
  */
 const deleteAnime = async (req, res) => {
+    const transaction = await sequelize.transaction();
+
     try {
-        await animeService.deleteAnime(req.params.id, req.transaction);
+        await animeService.deleteAnime(req.params.id, transaction);
+        await transaction.commit();
         return responseHandler.success(res, null, 'Anime deleted successfully');
     } catch (error) {
+        await transaction.rollback();
         if (error.message === 'Anime not found') {
             return responseHandler.notFound(res, 'Anime not found');
         }
@@ -50,33 +49,30 @@ const deleteAnime = async (req, res) => {
 /**
  * List all anime entries
  */
-
 const listAnimes = async (req, res) => {
     try {
         const {
             page = 1,
             limit = 10,
             order = 'DESC',
-            translateFields = 'true'
+            detailed = 'false',
+            search = '',
+            filters = {}
         } = req.query;
 
         const orderDirection = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+        const isDetailed = detailed.toLowerCase() === 'true';
 
-        let { animes, totalItems, totalPages } = await animeService.listAnimes(
-            Number(page),
-            Number(limit),
+        const { animes, meta } = await animeService.listAnimes({
+            page: Number(page),
+            limit: Number(limit),
             orderDirection,
-        );
-        if (translateFields !== 'false' ) {
-             animes = await translateReferenceFields(animes);
-        }
-
-        return responseHandler.success(res, {
-            animes,
-            currentPage: Number(page),
-            totalPages,
-            totalItems,
+            detailed: isDetailed,
+            search,
+            filters
         });
+
+        return responseHandler.success(res, { animes, meta });
     } catch (error) {
         return responseHandler.error(res, error);
     }
@@ -88,19 +84,18 @@ const listAnimes = async (req, res) => {
 const getAnime = async (req, res) => {
     try {
         const {
-            translateFields = 'true'
+            detailed = 'false'
         } = req.query;
 
-        let anime = await animeService.getAnimeById(req.params.id);
+        const isDetailed = detailed.toLowerCase() === 'true';
+
+        const anime = await animeService.getAnime(req.params.id, null, isDetailed);
 
         if (!anime) {
             return responseHandler.notFound(res, 'Anime not found');
         }
 
-        if (translateFields !== 'false' ) {
-            anime = await translateReferenceFields(anime);
-        }
-        return responseHandler.success(res, { anime }, 'Anime retrieved successfully');
+        return responseHandler.success(res, anime, 'Anime retrieved successfully');
     } catch (error) {
         return responseHandler.error(res, error);
     }

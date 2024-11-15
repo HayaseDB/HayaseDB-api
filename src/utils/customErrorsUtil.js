@@ -40,11 +40,35 @@ class DatabaseError extends Error {
     }
 }
 
+class DuplicateError extends Error {
+    constructor(message = 'Duplicate resource') {
+        super(message);
+        this.name = 'DuplicateError';
+    }
+}
+
+class BadRequestError extends Error {
+    constructor(message = 'Bad request') {
+        super(message);
+        this.name = 'BadRequestError';
+    }
+}
+
+class TooManyRequestsError extends Error {
+    constructor(message = 'Too many requests, please try again later') {
+        super(message);
+        this.name = 'TooManyRequestsError';
+    }
+}
+
 module.exports = {
     NotFoundError,
     ConflictError,
     ValidationError,
     UnauthorizedError,
     ForbiddenError,
-    DatabaseError
+    DatabaseError,
+    DuplicateError,
+    BadRequestError,
+    TooManyRequestsError
 };

@@ -19,20 +19,41 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
 
+
 const Media = sequelize.define('Media', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
+    },
+    type: {
+        type: DataTypes.ENUM('coverImage', 'bannerImage'),
+        allowNull: false
     },
     media: {
         type: DataTypes.BLOB,
-        allowNull: false,
-    },
+        allowNull: false
+    }
+
 }, {
+    defaultScope: {
+        attributes: {
+            exclude: ['media']
+        }
+    },
+    timestamps: true,
+    schema: 'public',
+    getterMethods: {
+        url() {
+            return `${process.env.API_URL}/media/${this.id}`;
+        }
+    }
 });
 
-module.exports = {
-    model: Media,
-    priority: 1
-};
+Media.associate = (models) => {
+    Media.belongsToMany(models.Anime, { through: "AnimeMedia" });
+    Media.belongsToMany(models.User, { through: 'MediaUser', as: 'createdBy' });
+
+}
+
+module.exports = Media;

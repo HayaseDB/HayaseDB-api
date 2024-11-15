@@ -1,11 +1,11 @@
-const { model: User } = require('../models/userModel');
+const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const customErrors = require("../utils/customErrorsUtil");
 
 const authService = {
     createUser: async (email, password, username) => {
-        const existingUser = await User.findOne({ where: { email } });
+        const existingUser = await User.unscoped().findOne({ where: { email } });
         if (existingUser) {
             throw new customErrors.ConflictError('Email already exists');
         }
@@ -15,7 +15,7 @@ const authService = {
     },
 
     loginUser: async (email, password) => {
-        const user = await User.findOne({ where: { email } });
+        const user = await User.unscoped().findOne({ where: { email } });
         if (!user) throw new customErrors.UnauthorizedError('Invalid email or password');
 
         const isPasswordValid = await bcrypt.compare(password, user.password);

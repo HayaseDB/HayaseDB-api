@@ -1,4 +1,4 @@
-const { model: Media } = require('../models/mediaModel');
+const Media = require('../models/mediaModel');
 const customErrors = require('../utils/customErrorsUtil');
 const mediaService = require("../services/mediaService");
 const responseHandler = require("../handlers/responseHandler");

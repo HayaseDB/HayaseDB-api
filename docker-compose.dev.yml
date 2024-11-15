@@ -31,5 +31,25 @@ services:
       - "${POSTGRES_PORT}:5432"
     attach: false
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: HayaseDB-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-admin}
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    ports:
+      - "5050:80"
+    restart: always
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    attach: false
+
+
 volumes:
   hayasedb-db:
+  pgadmin-data:
+

@@ -1,4 +1,4 @@
-const logger = require('./loggerUtil');
+const logger = require('../loggerUtil');
 
 const loadRoute = (app, routePath, routeModule) => {
     try {

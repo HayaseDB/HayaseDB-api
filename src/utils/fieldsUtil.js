@@ -28,7 +28,7 @@ const getDateFields = (model) => {
 const getArrayFields = (model) => {
     const arrayFields = [];
 
-    Object.keys(model.rawAttributes).forEach(field => {
+    Object.keys(model.getAttributes).forEach(field => {
         const attribute = model.rawAttributes[field];
         if (attribute.type && attribute.type.key === 'ARRAY') {
             arrayFields.push(field);

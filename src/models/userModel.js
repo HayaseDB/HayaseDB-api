@@ -17,6 +17,7 @@
 
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
+const Anime = require('./animeModel');
 
 const User = sequelize.define('User', {
     id: {
@@ -51,9 +52,20 @@ const User = sequelize.define('User', {
         defaultValue: false,
     },
 }, {
+    tableName: 'Users',
+    timestamps: true,
+    defaultScope: {
+        attributes: ['id', 'username'],
+    },
 });
 
-module.exports = {
-    model: User,
-    priority: 1
-};
+
+User.associate = (models) => {
+    User.belongsToMany(models.Anime, { through: "UserAnime" });
+
+    User.belongsToMany(models.Media, { through: 'MediaUser', as: 'media' });
+}
+
+
+module.exports = User;
+
