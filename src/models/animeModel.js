@@ -106,7 +106,7 @@ Anime.describeAnimeFields = async function(animeDetails) {
 };
 
 Anime.associate = (models) => {
-    Anime.belongsToMany(models.Media, { through: "AnimeMedia", as: "media" });
+    Anime.belongsToMany(models.Media, { through: "AnimeMedia", as: "media", onDelete: "CASCADE" });
     Anime.belongsToMany(models.User, { through: "UserAnime", as: "createdBy" });
 }
 module.exports = Anime;

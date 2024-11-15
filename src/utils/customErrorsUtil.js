@@ -40,7 +40,6 @@ class DatabaseError extends Error {
     }
 }
 
-
 class DuplicateError extends Error {
     constructor(message = 'Duplicate resource') {
         super(message);
@@ -48,6 +47,19 @@ class DuplicateError extends Error {
     }
 }
 
+class BadRequestError extends Error {
+    constructor(message = 'Bad request') {
+        super(message);
+        this.name = 'BadRequestError';
+    }
+}
+
+class TooManyRequestsError extends Error {
+    constructor(message = 'Too many requests, please try again later') {
+        super(message);
+        this.name = 'TooManyRequestsError';
+    }
+}
 
 module.exports = {
     NotFoundError,
@@ -56,5 +68,7 @@ module.exports = {
     UnauthorizedError,
     ForbiddenError,
     DatabaseError,
-    DuplicateError
+    DuplicateError,
+    BadRequestError,
+    TooManyRequestsError
 };

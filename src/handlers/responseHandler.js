@@ -5,8 +5,11 @@ const {
     ValidationError,
     UnauthorizedError,
     ForbiddenError,
-    DuplicateError
+    DuplicateError,
+    BadRequestError,
+    TooManyRequestsError
 } = require('../utils/customErrorsUtil');
+
 const responseHandler = {
     success(res, data, message = 'Operation successful', statusCode = 200) {
         res.status(statusCode).json({
@@ -18,11 +21,9 @@ const responseHandler = {
 
     error(res, error, statusCode = 500) {
 
-        if (error instanceof Sequelize.UniqueConstraintError) {
+        if (error instanceof Sequelize.UniqueConstraintError || error instanceof Sequelize.ForeignKeyConstraintError) {
             statusCode = 409;
-        } else if (error instanceof Sequelize.ForeignKeyConstraintError) {
-            statusCode = 409;
-        } else if (error instanceof Sequelize.ValidationError || error instanceof ValidationError || error instanceof Sequelize.ValidationError) {
+        } else if (error instanceof Sequelize.ValidationError || error instanceof ValidationError) {
             statusCode = 400;
         } else if (error instanceof Sequelize.DatabaseError) {
             statusCode = 500;
@@ -32,19 +33,24 @@ const responseHandler = {
             statusCode = 404;
         } else if (error instanceof Sequelize.ConnectionError) {
             statusCode = 503;
-        }
-
-        else if (error instanceof NotFoundError) {
-            statusCode = 404;
-        } else if (error instanceof ConflictError || error instanceof DuplicateError) {
-            statusCode = 409;
+        } else if (error instanceof BadRequestError) {
+            statusCode = 400;
         } else if (error instanceof UnauthorizedError) {
             statusCode = 401;
         } else if (error instanceof ForbiddenError) {
             statusCode = 403;
+        } else if (error instanceof NotFoundError) {
+            statusCode = 404;
+        } else if (error instanceof ConflictError || error instanceof DuplicateError) {
+            statusCode = 409;
+        } else if (error instanceof TooManyRequestsError) {
+            statusCode = 429;
         }
 
-        const message = (error.errors && Array.isArray(error.errors) && error.errors[0]?.message) || 'Server error';
+        const message = error.message ||
+            (error.errors && Array.isArray(error.errors) && error.errors[0]?.message) ||
+            'Server error';
+
         const stack = process.env.NODE_ENV === 'development' ? error.stack?.split('\n') : undefined;
 
         res.status(statusCode).json({
@@ -53,8 +59,6 @@ const responseHandler = {
             ...(stack && { stack })
         });
     },
-
-
 };
 
 module.exports = responseHandler;
