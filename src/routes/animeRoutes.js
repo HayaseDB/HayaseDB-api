@@ -71,14 +71,13 @@ router.post('/create', authMiddleware.user, multerMiddleware, sanitizeMiddleware
  */
 router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
 
-
 /**
  * @swagger
  * /anime/list:
  *   get:
  *     tags: [Anime]
  *     summary: List Animes
- *     description: Retrieve a paginated list of animes.
+ *     description: Retrieve a paginated list of animes, with sorting, filtering and searching.
  *     parameters:
  *       - in: query
  *         name: page
@@ -93,17 +92,27 @@ router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
  *           default: 10
  *         description: Number of animes to retrieve per page
  *       - in: query
- *         name: detailed
- *         schema:
- *           type: boolean
- *         description: Enable or disable media translation to accessible URLs
- *       - in: query
  *         name: order
  *         schema:
  *           type: string
  *           enum: [ASC, DESC]
- *           default: DESC
  *         description: Order of the results, either ascending (ASC) or descending (DESC)
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [title, releaseDate, createdAt, updatedAt]
+ *         description: The field to sort by, either `title`, `releaseDate`, `createdAt` or `updatedAt`
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search query to filter animes
+ *       - in: query
+ *         name: filters
+ *         schema:
+ *           type: object
+ *         description: Additional filters to apply to the anime list
  *     responses:
  *       200:
  *         description: Animes retrieved successfully

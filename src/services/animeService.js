@@ -149,7 +149,8 @@ const animeService = {
                          orderDirection = 'DESC',
                          detailed = false,
                          search = '',
-                         filters = {}
+                         filters = {},
+                         sortBy = 'createdAt'
                      } = {}) {
         const offset = Math.max(0, (page - 1) * Math.min(100, Math.max(1, limit)));
         const whereClause = {
@@ -166,7 +167,9 @@ const animeService = {
             where: whereClause,
             limit: Math.min(100, Math.max(1, limit)),
             offset,
-            order: [['createdAt', orderDirection === 'ASC' ? 'ASC' : 'DESC']],
+            order: [
+                [sortBy, orderDirection === 'ASC' ? 'ASC' : 'DESC']
+            ],
             include: detailed ? DEFAULT_INCLUDES.DETAILED : DEFAULT_INCLUDES.BASIC
         });
 
@@ -180,7 +183,10 @@ const animeService = {
                 currentPage: page,
                 itemsPerPage: limit,
                 filters: Object.keys(filters),
-                search: search || undefined
+                search: search || undefined,
+                orderDirection: orderDirection,
+                sortBy: sortBy
+
             }
         };
     },

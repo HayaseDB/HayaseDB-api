@@ -51,16 +51,21 @@ const deleteAnime = async (req, res) => {
  */
 const listAnimes = async (req, res) => {
     try {
-        const {
+        let {
             page = 1,
             limit = 10,
             order = 'DESC',
+            sortBy = 'createdAt',
             detailed = 'false',
             search = '',
             filters = {}
         } = req.query;
 
         const orderDirection = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+        const validSortFields = ['title', 'releaseDate', 'createdAt', 'updatedAt'];
+        sortBy = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
+
         const isDetailed = detailed.toLowerCase() === 'true';
 
         const { animes, meta } = await animeService.listAnimes({
@@ -69,7 +74,8 @@ const listAnimes = async (req, res) => {
             orderDirection,
             detailed: isDetailed,
             search,
-            filters
+            filters,
+            sortBy,
         });
 
         return responseHandler.success(res, { animes, meta });
@@ -77,6 +83,7 @@ const listAnimes = async (req, res) => {
         return responseHandler.error(res, error);
     }
 };
+
 
 /**
  * Retrieves a single anime entry by ID
