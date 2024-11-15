@@ -47,7 +47,16 @@ const connectDB = async (retries = 5, delay = 2000) => {
                     model.associate(sequelize.models);
                 }
             }
+            const User = require('../models/userModel')
+            const ApiKey = require('../models/keyModel')
+            User.hasMany(ApiKey, {
+                foreignKey: 'userId',
+                onDelete: 'CASCADE'
+            });
 
+            ApiKey.belongsTo(User, {
+                foreignKey: 'userId'
+            });
             await sequelize.sync()
             return;
         } catch (error) {
