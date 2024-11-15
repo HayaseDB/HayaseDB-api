@@ -29,6 +29,27 @@ const authService = {
 
     },
 
+    verifyToken: (token) => {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            return decoded;
+        } catch (error) {
+            throw new customErrors.UnauthorizedError('Invalid or expired token');
+        }
+    },
+
+    getProfile: async (id) => {
+        const user = await User.findByPk(id, {
+            attributes: ['id', 'email', 'username', 'createdAt', 'updatedAt', 'isBanned', 'isAdmin', 'isActivated'],
+        });
+
+        if (!user) {
+            throw new customErrors.NotFoundError('User not found');
+        }
+
+        return user;
+    },
+
     findUserByEmail: async (email) => {
         const user = await User.findOne({ where: { email } });
         if (!user) throw new customErrors.NotFoundError('User not found');

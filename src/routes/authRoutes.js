@@ -1,6 +1,7 @@
 
 const express = require('express');
-const { register, login } = require('../controllers/authController');
+const authController = require('../controllers/authController');
+const authMiddleware = require("../middlewares/authMiddleware");
 const router = express.Router();
 
 /**
@@ -18,7 +19,6 @@ const router = express.Router();
  *       type: http
  *       scheme: bearer
  */
-
 
 /**
  * @swagger
@@ -52,7 +52,7 @@ const router = express.Router();
  *         description: Server error
  */
 
-router.post('/register', register);
+router.post('/register', authController.register);
 
 
 
@@ -96,6 +96,77 @@ router.post('/register', register);
  */
 
 
-router.post('/login', login);
+router.post('/login', authController.login);
+
+/**
+ * @swagger
+ * /auth/verify:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Verify the JWT token
+ *     description: Validates the provided JWT token and returns user information if valid.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 userId:
+ *                   type: integer
+ *                   example: 1
+ *       401:
+ *         description: Unauthorized (e.g., token expired or invalid)
+ *       500:
+ *         description: Server error
+ */
+router.get('/verify', authMiddleware, authController.verifyToken);
+
+
+/**
+ * @swagger
+ * /auth/profile:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Get current authenticated user details
+ *     description: Fetches details of the currently logged-in user.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User details fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 1
+ *                 email:
+ *                   type: string
+ *                   example: nagatoro@example.com
+ *                 username:
+ *                   type: string
+ *                   example: hayase
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2024-11-15T12:34:56Z
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2024-11-15T12:34:56Z
+ *       401:
+ *         description: Unauthorized (e.g., missing or invalid token)
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/profile', authMiddleware, authController.getProfile);
 
 module.exports = router;

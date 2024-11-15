@@ -18,9 +18,6 @@ const authenticateToken = async (req, res, next) => {
             return responseHandler.error(res, new customErrorsUtil.NotFoundError('User not found'), 404);
         }
 
-        if (dbUser.isBanned) {
-            return responseHandler.error(res, new customErrorsUtil.ForbiddenError('User is banned'), 403);
-        }
 
         req.user = dbUser;
         next();
@@ -29,6 +26,10 @@ const authenticateToken = async (req, res, next) => {
 
 const user = async (req, res, next) => {
     await authenticateToken(req, res, async () => {
+        if (req.user.isBanned) {
+            return responseHandler.error(res, new customErrorsUtil.ForbiddenError('User is banned'), 403);
+        }
+
         if (!req.user.isActivated) {
             return responseHandler.error(res, new customErrorsUtil.ForbiddenError('User is not activated'), 401);
         }
@@ -38,6 +39,7 @@ const user = async (req, res, next) => {
 
 const admin = async (req, res, next) => {
     await user(req, res, async () => {
+
         if (!req.user.isAdmin) {
             return responseHandler.error(res, new customErrorsUtil.ForbiddenError('Access denied: Admins only'), 403);
         }

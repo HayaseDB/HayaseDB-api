@@ -17,7 +17,6 @@
 
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
-const Anime = require('./animeModel');
 
 const User = sequelize.define('User', {
     id: {
@@ -62,7 +61,11 @@ const User = sequelize.define('User', {
 
 User.associate = (models) => {
     User.belongsToMany(models.Anime, { through: "UserAnime" });
-
+    User.hasMany(models.ApiKey, {
+        foreignKey: 'userId',
+        as: 'apiKeys',
+        onDelete: 'CASCADE'
+    });
     User.belongsToMany(models.Media, { through: 'MediaUser', as: 'media' });
 }
 
