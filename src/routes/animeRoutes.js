@@ -5,7 +5,7 @@ const router = express.Router();
 const multerMiddleware = require('../middlewares/multerMiddleware');
 const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
 const Anime = require('../models/animeModel');
-
+const keyMiddleware = require('../middlewares/keyMiddleware')
 /**
  * @swagger
  * tags:
@@ -79,7 +79,7 @@ router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
  *     summary: List Animes
  *     description: Retrieve a paginated list of animes, with sorting, filtering and searching.
  *     security:
- *       - ApiKeyAuth: []
+ *       - KeyAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -106,6 +106,11 @@ router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
  *           enum: [title, releaseDate, createdAt, updatedAt]
  *         description: The field to sort by, either `title`, `releaseDate`, `createdAt` or `updatedAt`
  *       - in: query
+ *         name: detailed
+ *         schema:
+ *           type: boolean
+ *         description: Enable or disable media translation to accessible URLs
+ *       - in: query
  *         name: search
  *         schema:
  *           type: string
@@ -121,7 +126,7 @@ router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
  *       500:
  *         description: Server error
  */
-router.get('/list', animeController.listAnimes);
+router.get('/list', keyMiddleware, animeController.listAnimes);
 
 
 /**
@@ -132,7 +137,7 @@ router.get('/list', animeController.listAnimes);
  *     summary: Get Anime
  *     description: Retrieve a specific anime via ID.
  *     security:
- *       - BearerAuth: []
+ *       - KeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -152,6 +157,6 @@ router.get('/list', animeController.listAnimes);
  *       500:
  *         description: Server error
  */
-router.get('/:id', animeController.getAnime);
+router.get('/:id', keyMiddleware, animeController.getAnime);
 
 module.exports = router;

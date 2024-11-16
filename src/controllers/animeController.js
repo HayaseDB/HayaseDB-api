@@ -1,12 +1,12 @@
 const animeService = require('../services/animeService');
 const responseHandler = require('../handlers/responseHandler');
-const { sequelize } = require("../config/databaseConfig");
+const {sequelize} = require("../config/databaseConfig");
 
 /**
  * Creates a new anime entry
  */
 const createAnime = async (req, res) => {
-    const { files, body, user } = req;
+    const {files, body, user} = req;
     const transaction = await sequelize.transaction();
 
     try {
@@ -68,7 +68,7 @@ const listAnimes = async (req, res) => {
 
         const isDetailed = detailed.toLowerCase() === 'true';
 
-        const { animes, meta } = await animeService.listAnimes({
+        const {animes, meta} = await animeService.listAnimes({
             page: Number(page),
             limit: Number(limit),
             orderDirection,
@@ -78,7 +78,12 @@ const listAnimes = async (req, res) => {
             sortBy,
         });
 
-        return responseHandler.success(res, { animes, meta });
+
+        if (animes.length === 0) {
+            return responseHandler.success(res, null, 'No anime entries found for the search criteria.', 404);
+        }
+
+        return responseHandler.success(res, {animes, meta}, "Operation successful", 200);
     } catch (error) {
         return responseHandler.error(res, error);
     }

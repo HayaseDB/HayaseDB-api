@@ -1,147 +1,143 @@
-const {sequelize} = require("../config/databaseConfig");
-const {NotFoundError, ValidationError, DatabaseError} = require("../utils/customErrorsUtil");
+const customErrorsUtil = require("../utils/customErrorsUtil");
 const User = require('../models/userModel');
 const Media = require('../models/mediaModel');
+const Contribution = require('../models/contributionModel');
 const Anime = require('../models/animeModel');
 const {Op} = require('sequelize');
 
-const DEFAULT_INCLUDES = {
-    DETAILED: [
-        {
-            model: Media,
-            as: 'media',
-            include: [{
-                model: User,
-                as: 'createdBy',
-                attributes: ['id', 'username'],
-                through: {attributes: []}
-            }]
-        },
-        {
-            model: User,
-            as: 'createdBy',
-            attributes: ['id', 'username'],
-            through: {attributes: []}
-        }
-    ],
-    BASIC: [
-        {
-            model: Media,
-            as: 'media'
-        }
-    ]
-};
 
 const formatAnimeResponse = (anime, detailed = false) => {
     if (!anime) return null;
 
-    const timestampFields = ['createdAt', 'updatedAt', 'deletedAt'];
+    const details = formatAnimeDetails(anime);
+    const media = formatAnimeMedia(anime.Media, detailed);
+    const meta = formatAnimeMeta(anime, detailed);
 
-    const details = Object.keys(Anime.getAttributes())
-        .filter(field => !timestampFields.includes(field) && field !== 'id')
+    return {anime: {details, media}, meta};
+};
+
+const formatAnimeDetails = (anime) => {
+    const attributes = Anime.getAttributes();
+    return Object.keys(attributes)
+        .filter(field => !['createdAt', 'updatedAt', 'deletedAt'].includes(field) && field !== 'id')
         .reduce((acc, field) => {
             acc[field] = {
                 value: anime[field],
-                type: Anime.getAttributes()[field].type.key
+                type: attributes[field].type.key
             };
             return acc;
         }, {});
+};
 
-    const media = anime.media?.reduce((acc, mediaItem) => {
+const formatAnimeMedia = (mediaItems = [], detailed) => {
+    return mediaItems.reduce((acc, mediaItem) => {
         acc[mediaItem.type] = {
             id: mediaItem.id,
             url: mediaItem.url,
             mimeType: mediaItem.mimetype,
             size: mediaItem.size,
-            createdBy: detailed && mediaItem.createdBy
-                ? mediaItem.createdBy.map(user => ({
-                    id: user.id,
-                    username: user.username
-                }))
-                : undefined,
+            ...(detailed && Array.isArray(mediaItem.CreatedBy) && mediaItem.CreatedBy[0] && {
+                createdBy: {
+                    id: mediaItem.CreatedBy[0].id,
+                    username: mediaItem.CreatedBy[0].username
+                }
+            }),
             createdAt: mediaItem.createdAt
         };
         return acc;
-    }, {}) || {};
-
-    const meta = {
-        id: anime.id,
-        ...(detailed && anime.createdBy ? {
-            createdBy: anime.createdBy.map(user => ({
-                id: user.id,
-                username: user.username
-            }))
-        } : {}),
-        timestamps: timestampFields.reduce((acc, field) => {
-            if (anime[field]) {
-                acc[field] = anime[field];
-            }
-            return acc;
-        }, {})
-    };
-
-    return {
-        anime: {details, media},
-        meta
-    };
+    }, {});
 };
 
+const formatAnimeMeta = (anime, detailed) => ({
+    id: anime.id,
+    ...(detailed && Array.isArray(anime.Contributor) && anime.Contributor[0] && {
+        createdBy: {
+            id: anime.Contributor[0].id,
+            username: anime.Contributor[0].username
+        }
+    }),
+    timestamps: ['createdAt', 'updatedAt', 'deletedAt'].reduce((acc, field) => {
+        if (anime[field]) acc[field] = anime[field];
+        return acc;
+    }, {})
+});
+
+const getIncludeOptions = (detailed = false) => [
+    {
+        model: Media,
+        as: 'Media',
+        ...(detailed && {
+            include: [{
+                model: User,
+                as: 'CreatedBy',
+                through: {attributes: []}
+            }]
+        })
+    },
+    ...(detailed ? [{
+        model: User,
+        as: 'Contributor',
+        through: {
+            model: Contribution,
+            attributes: []
+        },
+    }] : [])
+];
+
+
 const animeService = {
+
     async createAnime(data, transaction) {
-        if (!data?.Media || !data?.Meta || !data?.User || !transaction) {
-            throw new ValidationError('Missing required parameters: Media, Meta, User, and transaction');
-        }
-
         const {Media: mediaFiles = [], Meta: animeDetails, User: user} = data;
-        const anime = await Anime.create(animeDetails, {transaction});
-        await anime.addCreatedBy(user, {transaction});
 
-        const mediaItems = await Promise.all(
-            mediaFiles.map(async (file) => {
-                if (!file.buffer || !file.fieldname) {
-                    throw new ValidationError('Invalid media file: buffer and fieldname are required');
-                }
-
-                const mediaItem = await Media.create({
-                    media: file.buffer,
-                    type: file.fieldname,
-                    mimeType: file.mimetype,
-                    size: file.size
-                }, {transaction});
-
-                await mediaItem.addCreatedBy(user, {transaction});
-                return mediaItem;
-            })
-        );
-
-        if (mediaItems.length > 0) {
-            await anime.addMedia(mediaItems, {transaction});
+        if (!mediaFiles || !animeDetails || !user || !transaction) {
+            throw new customErrorsUtil.ValidationError('Missing required parameters: Media, Meta, User, and transaction');
         }
+
+        const anime = await Anime.create({
+            ...animeDetails,
+            Media: mediaFiles.map(file => ({
+                media: file.buffer,
+                type: file.fieldname,
+            })),
+        }, {
+            transaction,
+            include: [{model: Media, as: 'Media', foreignKey: 'animeId'}]
+        });
+
+        await Promise.all([
+            Contribution.create({
+                userId: user.id,
+                animeId: anime.id,
+                role: 'Owner',
+            }, {
+                transaction
+            }),
+            ...anime.Media.map(media => media.addCreatedBy(user.id, {transaction}))
+        ]);
 
         await anime.reload({
             transaction,
-            include: DEFAULT_INCLUDES.DETAILED
+            include: getIncludeOptions(false)
         });
 
-        return formatAnimeResponse(anime, true);
+        return formatAnimeResponse(anime, false);
     },
 
+
     async getAnime(id, transaction, detailed = false) {
-        if (!id) {
-            throw new ValidationError('Anime ID is required');
-        }
+        if (!id) throw new customErrorsUtil.ValidationError('Anime ID is required');
 
         const anime = await Anime.findByPk(id, {
             transaction,
-            include: detailed ? DEFAULT_INCLUDES.DETAILED : DEFAULT_INCLUDES.BASIC
+            include: getIncludeOptions(detailed)
         });
 
-        if (!anime) {
-            throw new NotFoundError('Anime not found');
-        }
+        if (!anime) throw new customErrorsUtil.NotFoundError('Anime not found');
 
         return formatAnimeResponse(anime, detailed);
     },
+
 
     async listAnimes({
                          page = 1,
@@ -152,7 +148,9 @@ const animeService = {
                          filters = {},
                          sortBy = 'createdAt'
                      } = {}) {
-        const offset = Math.max(0, (page - 1) * Math.min(100, Math.max(1, limit)));
+        const normalizedLimit = Math.min(100, Math.max(1, limit));
+        const offset = Math.max(0, (page - 1) * normalizedLimit);
+
         const whereClause = {
             ...(search && {
                 [Op.or]: [
@@ -165,45 +163,39 @@ const animeService = {
 
         const {rows: animes, count: totalItems} = await Anime.findAndCountAll({
             where: whereClause,
-            limit: Math.min(100, Math.max(1, limit)),
+            limit: normalizedLimit,
             offset,
-            order: [
-                [sortBy, orderDirection === 'ASC' ? 'ASC' : 'DESC']
-            ],
-            include: detailed ? DEFAULT_INCLUDES.DETAILED : DEFAULT_INCLUDES.BASIC
+            order: [[sortBy, orderDirection.toUpperCase() === 'ASC' ? 'ASC' : 'DESC']],
+            include: getIncludeOptions(detailed)
         });
 
-        const formattedAnimes = animes.map(anime => formatAnimeResponse(anime, detailed));
-
         return {
-            animes: formattedAnimes,
+            animes: animes.map(anime => formatAnimeResponse(anime, detailed)),
             meta: {
                 totalItems,
-                totalPages: Math.ceil(totalItems / limit),
+                totalPages: Math.ceil(totalItems / normalizedLimit),
                 currentPage: page,
-                itemsPerPage: limit,
+                itemsPerPage: normalizedLimit,
                 filters: Object.keys(filters),
                 search: search || undefined,
-                orderDirection: orderDirection,
-                sortBy: sortBy
-
+                orderDirection,
+                sortBy
             }
         };
     },
 
+
     async updateAnime(id, data, transaction) {
         if (!id || !transaction) {
-            throw new ValidationError('Anime ID and transaction are required');
+            throw new customErrorsUtil.ValidationError('Anime ID and transaction are required');
         }
 
         const anime = await Anime.findByPk(id, {
             transaction,
-            include: DEFAULT_INCLUDES.DETAILED
+            include: getIncludeOptions(true)
         });
 
-        if (!anime) {
-            throw new NotFoundError('Anime not found');
-        }
+        if (!anime) throw new customErrorsUtil.NotFoundError('Anime not found');
 
         const {Meta: animeDetails, Media: mediaFiles, User: user} = data;
 
@@ -215,7 +207,7 @@ const animeService = {
             const mediaItems = await Promise.all(
                 mediaFiles.map(async (file) => {
                     if (!file.buffer || !file.fieldname) {
-                        throw new ValidationError('Invalid media file: buffer and fieldname are required');
+                        throw new customErrorsUtil.ValidationError('Invalid media file: buffer and fieldname are required');
                     }
 
                     const mediaItem = await Media.create({
@@ -235,38 +227,35 @@ const animeService = {
 
         await anime.reload({
             transaction,
-            include: DEFAULT_INCLUDES.DETAILED
+            include: getIncludeOptions(true)
         });
 
         return formatAnimeResponse(anime, true);
     },
 
+
     async deleteAnime(id, transaction) {
         if (!id || !transaction) {
-            throw new ValidationError('Anime ID and transaction are required');
+            throw new customErrorsUtil.ValidationError('Anime ID and transaction are required');
         }
 
         const anime = await Anime.findByPk(id, {
             transaction,
-            include: DEFAULT_INCLUDES.BASIC
+            include: [{model: Media, as: 'Media'}]
         });
 
-        if (!anime) {
-            throw new NotFoundError('Anime not found');
-        }
+        if (!anime) throw new customErrorsUtil.NotFoundError('Anime not found');
 
-        if (anime.media?.length > 0) {
+        if (anime.Media?.length > 0) {
             await Media.destroy({
-                where: {
-                    id: anime.media.map(media => media.id)
-                },
+                where: {id: anime.Media.map(media => media.id)},
                 transaction
             });
         }
 
         await anime.destroy({transaction});
         return formatAnimeResponse(anime);
-    },
+    }
 };
 
 module.exports = animeService;

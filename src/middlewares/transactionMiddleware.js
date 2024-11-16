@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { sequelize } = require('../config/databaseConfig');
+const {sequelize} = require('../config/databaseConfig');
 const logger = require('../utils/loggerUtil');
 
 const transactionMiddleware = async (req, res, next) => {
@@ -73,7 +73,7 @@ const transactionMiddleware = async (req, res, next) => {
         if (transaction) {
             await transaction.rollback();
         }
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({error: 'Internal server error'});
     }
 };
 

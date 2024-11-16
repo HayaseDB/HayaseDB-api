@@ -1,17 +1,17 @@
 const chalk = require('chalk');
 chalk.level = 3;
 const logger = require('./loggerUtil')
-const { connectDB } = require('../config/databaseConfig');
+const {connectDB} = require('../config/databaseConfig');
 const figlet = require('figlet');
-const { createGradient } = require('./colorUtil');
-const { getUrl } = require('./loaders/urlUtil');
+const {createGradient} = require('./colorUtil');
+const {getUrl} = require('./loaders/urlUtil');
 const PORT = process.env.PORT || 3000;
 
 const startServer = async (app) => {
     await connectDB();
 
     app.listen(PORT, async () => {
-        const logo = figlet.textSync('HayaseDB', { horizontalLayout: 'full' });
+        const logo = figlet.textSync('HayaseDB', {horizontalLayout: 'full'});
         const gradientLogo = createGradient(logo, '#435ed6', '#b396e9');
 
         console.log(gradientLogo);
