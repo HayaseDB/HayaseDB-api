@@ -10,10 +10,20 @@
  *           format: uuid
  *           description: Unique identifier for the media entry.
  *           readOnly: true
+ *         type:
+ *           type: string
+ *           enum:
+ *             - coverImage
+ *             - bannerImage
+ *           description: The type of the media file (binary data for cover or banner image).
  *         media:
  *           type: string
  *           format: binary
  *           description: The binary data for the media file (image).
+ *         animeId:
+ *           type: string
+ *           format: uuid
+ *           description: Unique identifier for the anime entry this media belongs to.
  */
 
 const { DataTypes } = require('sequelize');
@@ -33,9 +43,17 @@ const Media = sequelize.define('Media', {
     media: {
         type: DataTypes.BLOB,
         allowNull: false
-    }
-
+    },
+    animeId: {
+        type: DataTypes.UUID,
+        references: { model: 'Animes', key: 'id' },
+        onDelete: 'CASCADE',
+    },
 }, {
+    name: {
+        singular: 'media',
+        plural: 'media'
+    },
     defaultScope: {
         attributes: {
             exclude: ['media']
@@ -50,9 +68,15 @@ const Media = sequelize.define('Media', {
     }
 });
 
+
 Media.associate = (models) => {
-    Media.belongsToMany(models.Anime, { through: "AnimeMedia" });
-    Media.belongsToMany(models.User, { through: 'MediaUser', as: 'createdBy' });
+
+    Media.belongsToMany(models.User, {
+        through: 'UserMedia',
+        as: 'CreatedBy',
+        foreignKey: 'mediaId',
+        otherKey: 'userId',
+    });
 
 }
 
