@@ -16,7 +16,16 @@ const validateApiKey = async (req, res, next) => {
             return responseHandler.error(res, new customErrorsUtil.UnauthorizedError('Invalid or inactive API Key'), 403);
         }
 
-        keyRecord.usageCount += 1;
+        const rateLimitWindow = keyRecord.rateLimitWindow || (60 * 1000);
+        const maxRequests = keyRecord.maxRequests || 5;
+
+        keyRecord.resetRateLimitIfExpired();
+
+        if (keyRecord.rateLimitCount >= maxRequests) {
+            return responseHandler.error(res, new customErrorsUtil.TooManyRequestsError('Rate limit exceeded, please try again later'), 429);
+        }
+
+        keyRecord.rateLimitCount += 1;
         keyRecord.lastUsedAt = new Date();
         await keyRecord.save();
 

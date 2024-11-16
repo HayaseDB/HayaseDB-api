@@ -117,4 +117,31 @@ router.get('/verify', apiKeyController.verifyApiKey);
  */
 router.get('/list', authMiddleware.user, apiKeyController.listApiKeys);
 
+
+/**
+ * @swagger
+ * /key/{id}/regenerate:
+ *   put:
+ *     summary: Regenerate an API key
+ *     tags: [API Keys]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the API key to regenerate
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: API key regenerated successfully
+ *       404:
+ *         description: API key not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.put('/:id/regenerate', authMiddleware.user, apiKeyController.regenerateApiKey);
+
+
 module.exports = router;
