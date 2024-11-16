@@ -39,6 +39,8 @@ const connectDB = async (retries = 5, delay = 2000) => {
     for (let attempts = 0; attempts < retries; attempts++) {
         try {
             await sequelize.authenticate();
+            await sequelize.sync()
+
             logger.info('Connection to PostgreSQL has been established successfully.');
             await syncModels();
 
@@ -47,16 +49,7 @@ const connectDB = async (retries = 5, delay = 2000) => {
                     model.associate(sequelize.models);
                 }
             }
-            const User = require('../models/userModel')
-            const ApiKey = require('../models/keyModel')
-            User.hasMany(ApiKey, {
-                foreignKey: 'userId',
-                onDelete: 'CASCADE'
-            });
 
-            ApiKey.belongsTo(User, {
-                foreignKey: 'userId'
-            });
             await sequelize.sync()
             return;
         } catch (error) {

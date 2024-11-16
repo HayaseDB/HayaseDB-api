@@ -14,12 +14,11 @@ const apiKeyService = {
             throw new customErrors.NotFoundError('User not found');
         }
 
-        const apiKey = crypto.randomBytes(32).toString('hex');
+        const apiKey = crypto.randomBytes(69).toString('hex');
 
-        const hashedApiKey = await bcrypt.hash(apiKey, 10);
 
         const newApiKey = await ApiKey.create({
-            key: hashedApiKey,
+            key: apiKey,
             userId: user.id,
             description,
         });
@@ -31,6 +30,32 @@ const apiKeyService = {
         };
     },
 
+    regenerateApiKey: async (id, userId) => {
+        if (!validate(id)) {
+            throw new customErrors.BadRequestError('Invalid API Key ID format');
+        }
+
+        const apiKey = await ApiKey.findByPk(id);
+        if (!apiKey || !apiKey.isActive) {
+            throw new customErrors.NotFoundError('API Key not found or is inactive');
+        }
+
+        if (apiKey.userId !== userId) {
+            throw new customErrors.UnauthorizedError('You do not have permission to regenerate this API key');
+        }
+
+        const newApiKey = crypto.randomBytes(69).toString('hex');
+
+        apiKey.key = newApiKey;
+
+        await apiKey.save();
+
+        return {
+            key: newApiKey,
+            id: apiKey.id,
+            description: apiKey.description,
+        };
+    },
 
     revokeApiKey: async (id, userId, res) => {
         if (!validate(id)) {
@@ -47,7 +72,7 @@ const apiKeyService = {
         }
 
         if (!apiKey.isActive) {
-            throw new customErrors.NotFoundError('API Key is already revoked, no changes made');
+            throw new customErrors.NotFoundError('API Key not found or is inactive');
         }
 
         apiKey.isActive = false;
@@ -59,8 +84,9 @@ const apiKeyService = {
 
     verifyApiKey: async (apiKey) => {
         const apiKeyRecord = await ApiKey.findOne({ where: { key: apiKey } });
+
         if (!apiKeyRecord || !apiKeyRecord.isActive) {
-            throw new customErrors.UnauthorizedError('Invalid or revoked API key');
+            throw new customErrors.NotFoundError('API Key is not active or does not exist');
         }
 
         apiKeyRecord.usageCount += 1;
@@ -77,16 +103,17 @@ const apiKeyService = {
         }
 
         const apiKeys = await ApiKey.findAll({
-            where: { userId },
+            where: { userId, isActive: true },
             attributes: ['id', 'description', 'isActive', 'usageCount', 'lastUsedAt', 'createdAt', 'updatedAt'],
         });
 
         if (!apiKeys.length) {
-            throw new customErrors.NotFoundError('No API Keys found for this user');
+            throw new customErrors.NotFoundError('No active API Keys found for this user');
         }
 
         return apiKeys;
     },
+
 };
 
 module.exports = apiKeyService;

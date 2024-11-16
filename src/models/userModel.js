@@ -40,7 +40,7 @@ const User = sequelize.define('User', {
     },
     isAdmin: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false,
+        defaultValue: true,
     },
     isBanned: {
         type: DataTypes.BOOLEAN,
@@ -48,7 +48,7 @@ const User = sequelize.define('User', {
     },
     isActivated: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false,
+        defaultValue: true,
     },
 }, {
     tableName: 'Users',
@@ -60,8 +60,21 @@ const User = sequelize.define('User', {
 
 
 User.associate = (models) => {
-    User.belongsToMany(models.Anime, { through: "UserAnime" });
-    User.belongsToMany(models.Media, { through: 'MediaUser', as: 'media' });
+
+    User.belongsToMany(models.Anime, {
+        through: models.Contribution,
+        as: 'Contributor',
+        foreignKey: 'userId',
+        otherKey: 'animeId',
+    });
+    User.belongsToMany(models.Media, {
+        through: 'UserMedia',
+        as: 'Media',
+        foreignKey: 'userId',
+        otherKey: 'mediaId',
+    });
+    User.hasMany(models.ApiKey,{ foreignKey: 'userId'})
+
 }
 
 

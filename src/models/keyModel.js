@@ -1,5 +1,3 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/databaseConfig');
 
 /**
  * @swagger
@@ -24,6 +22,9 @@ const { sequelize } = require('../config/databaseConfig');
  *         usageCount:
  *           type: integer
  *           example: 15
+ *         rateLimitCount:
+ *           type: integer
+ *           example: 0
  *         lastUsedAt:
  *           type: string
  *           format: date-time
@@ -33,6 +34,10 @@ const { sequelize } = require('../config/databaseConfig');
  *           format: uuid
  *           example: "87654321-dcba-4321-hgfe-0987654321ba"
  */
+
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/databaseConfig');
+
 
 const ApiKey = sequelize.define('ApiKey', {
     id: {
@@ -62,6 +67,12 @@ const ApiKey = sequelize.define('ApiKey', {
         allowNull: false,
         comment: 'Tracks how many times this API key has been used',
     },
+    rateLimitCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+        comment: 'Tracks how many requests have been made in the current time window',
+    },
     lastUsedAt: {
         type: DataTypes.DATE,
         allowNull: true,
@@ -69,7 +80,18 @@ const ApiKey = sequelize.define('ApiKey', {
     },
     userId: {
         type: DataTypes.UUID,
-        allowNull: false,
+        references: { model: 'Users', key: 'id' },
+        onDelete: 'CASCADE',
+    },
+    rateLimitWindow: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 60 * 1000,
+    },
+    maxRequests: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 5,
     },
 }, {
     tableName: 'ApiKey',
@@ -77,8 +99,15 @@ const ApiKey = sequelize.define('ApiKey', {
 });
 
 
-ApiKey.associate = (models) => {
-    ApiKey.hasOne(models.User, {foreignKey: 'userId'})
-}
+
+ApiKey.prototype.resetRateLimitIfExpired = function () {
+    const currentTime = new Date();
+    const rateLimitWindow = this.rateLimitWindow || (60 * 1000);
+
+    if (this.lastUsedAt && currentTime - new Date(this.lastUsedAt) > rateLimitWindow) {
+        this.rateLimitCount = 0;
+    }
+};
+
 
 module.exports = ApiKey;
