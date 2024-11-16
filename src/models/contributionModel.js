@@ -1,4 +1,3 @@
-
 /**
  * @swagger
  * components:
@@ -32,8 +31,8 @@
  *           format: date-time
  *           example: "2024-11-16T12:30:00Z"
  */
-const { DataTypes } = require("sequelize");
-const { sequelize } = require('../config/databaseConfig');
+const {DataTypes} = require("sequelize");
+const {sequelize} = require('../config/databaseConfig');
 
 const Contribution = sequelize.define('Contribution', {
     id: {
@@ -48,12 +47,12 @@ const Contribution = sequelize.define('Contribution', {
     },
     userId: {
         type: DataTypes.UUID,
-        references: { model: 'Users', key: 'id' },
+        references: {model: 'Users', key: 'id'},
         onDelete: 'CASCADE',
     },
     animeId: {
         type: DataTypes.UUID,
-        references: { model: 'Animes', key: 'id' },
+        references: {model: 'Animes', key: 'id'},
         onDelete: 'CASCADE',
     },
 }, {

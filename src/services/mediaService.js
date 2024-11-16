@@ -23,7 +23,7 @@ const mediaService = {
 
         if (mediaEntry.CreatedBy && mediaEntry.CreatedBy.length > 0) {
             mediaEntry.CreatedBy = await User.findAll({
-                where: { id: mediaEntry.CreatedBy[0].id },
+                where: {id: mediaEntry.CreatedBy[0].id},
                 attributes: ['id', 'username']
             });
         }
@@ -34,7 +34,7 @@ const mediaService = {
 
     deleteMedia: async (id, transaction) => {
         return await Media.destroy({
-            where: { id },
+            where: {id},
             transaction,
         });
     },

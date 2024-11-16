@@ -6,7 +6,7 @@ const customErrors = require("../utils/customErrorsUtil");
  * Register a new user entry
  */
 const register = async (req, res) => {
-    const { email, password, username } = req.body;
+    const {email, password, username} = req.body;
 
     try {
         const user = await authService.createUser(email, password, username);
@@ -24,10 +24,10 @@ const register = async (req, res) => {
  * Request a new token for user
  */
 const login = async (req, res) => {
-    const { email, password } = req.body;
+    const {email, password} = req.body;
 
     try {
-        const { user, token } = await authService.loginUser(email, password);
+        const {user, token} = await authService.loginUser(email, password);
         responseHandler.success(res, {
             token,
             user: {
@@ -54,7 +54,7 @@ const verifyToken = async (req, res) => {
     try {
         const decoded = await authService.verifyToken(token);
 
-        return responseHandler.success(res, { userId: decoded.id }, 'Token is valid', 200);
+        return responseHandler.success(res, {userId: decoded.id}, 'Token is valid', 200);
     } catch (error) {
         return responseHandler.error(res, new customErrors.UnauthorizedError('Invalid or expired token'), 404);
     }
@@ -73,4 +73,4 @@ const getProfile = async (req, res) => {
 };
 
 
-module.exports = { register, login, verifyToken, getProfile };
+module.exports = {register, login, verifyToken, getProfile};

@@ -1,4 +1,4 @@
-const { Sequelize } = require('sequelize');
+const {Sequelize} = require('sequelize');
 const fs = require('fs');
 const path = require('path');
 const logger = require('../utils/loggerUtil');
@@ -23,7 +23,7 @@ const connectDB = async (retries = 5, delay = 2000) => {
 
     const syncModels = async () => {
         const isDevelopment = process.env.NODE_ENV === 'development';
-        const syncOptions = isDevelopment ? { alter: true } : { force: true };
+        const syncOptions = isDevelopment ? {alter: true} : {force: true};
 
         try {
             for (const model of models) {
@@ -61,4 +61,4 @@ const connectDB = async (retries = 5, delay = 2000) => {
     logger.error('Unable to connect to the database after multiple attempts.');
 };
 
-module.exports = { sequelize, connectDB };
+module.exports = {sequelize, connectDB};

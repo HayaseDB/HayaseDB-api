@@ -1,38 +1,37 @@
-
 const keyService = require('../services/keyService');
 const responseHandler = require('../handlers/responseHandler');
 const customErrorsUtil = require('../utils/customErrorsUtil');
 
 const createKey = async (req, res) => {
     try {
-        const { description } = req.body;
+        const {description} = req.body;
         const userId = req.user.id
 
         const Key = await keyService.createKey(userId, description);
 
-        return responseHandler.success(res, { Key }, "Operation successful",201);
+        return responseHandler.success(res, {Key}, "Operation successful", 201);
     } catch (error) {
         return responseHandler.error(res, error, 500);
     }
 };
 const regenerateKey = async (req, res) => {
     try {
-        const { id } = req.params;
+        const {id} = req.params;
 
         const newKey = await keyService.regenerateKey(id, req.user.id);
 
-        return responseHandler.success(res, { Key: newKey }, "API key regenerated successfully.",200);
+        return responseHandler.success(res, {Key: newKey}, "API key regenerated successfully.", 200);
     } catch (error) {
         return responseHandler.error(res, error, 500);
     }
 };
 const revokeKey = async (req, res) => {
     try {
-        const { id } = req.params;
+        const {id} = req.params;
 
         const result = await keyService.revokeKey(id, req.user.id);
 
-        return responseHandler.success(res, { message: result.message }, 200);
+        return responseHandler.success(res, {message: result.message}, 200);
     } catch (error) {
         return responseHandler.error(res, error, 500);
     }
@@ -63,7 +62,7 @@ const listKeys = async (req, res) => {
 
         const Keys = await keyService.listKeys(userId);
 
-        return responseHandler.success(res, { Keys }, "Operation successful", 200);
+        return responseHandler.success(res, {Keys}, "Operation successful", 200);
     } catch (error) {
         return responseHandler.error(res, error, 500);
     }

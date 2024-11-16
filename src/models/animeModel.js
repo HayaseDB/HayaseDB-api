@@ -43,8 +43,8 @@
  *         - title
  */
 
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/databaseConfig');
+const {DataTypes} = require('sequelize');
+const {sequelize} = require('../config/databaseConfig');
 
 const Anime = sequelize.define('Anime', {
     id: {

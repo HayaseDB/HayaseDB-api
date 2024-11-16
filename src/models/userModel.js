@@ -15,8 +15,8 @@
  */
 
 
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/databaseConfig');
+const {DataTypes} = require('sequelize');
+const {sequelize} = require('../config/databaseConfig');
 
 const User = sequelize.define('User', {
     id: {
@@ -73,7 +73,7 @@ User.associate = (models) => {
         foreignKey: 'userId',
         otherKey: 'mediaId',
     });
-    User.hasMany(models.Key,{ foreignKey: 'userId'})
+    User.hasMany(models.Key, {foreignKey: 'userId'})
 
 }
 

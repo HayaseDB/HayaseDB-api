@@ -1,7 +1,7 @@
-const { sequelize } = require('../config/databaseConfig');
+const {sequelize} = require('../config/databaseConfig');
 const customErrors = require("../utils/customErrorsUtil");
 const os = require("node:os");
-const { version, author, license, homepage } = require('../../package.json');
+const {version, author, license, homepage} = require('../../package.json');
 
 
 const metricsService = {

@@ -1,5 +1,5 @@
 const dns = require('dns').promises;
-const net = require('net'); 
+const net = require('net');
 const logger = require('../loggerUtil');
 
 const checkUrl = async (url) => {
@@ -40,7 +40,7 @@ const getUrl = async (url, fallback = "http://localhost") => {
     if (!urlObj) {
         await logger.warn(`${url} is not reachable. Falling back to ${fallback}`);
         const fallbackObj = await checkUrl(fallback);
-        
+
         if (fallbackObj) {
             const isFallbackReachable = await checkPort(fallbackObj.hostname, fallbackObj.port);
             return {
@@ -61,7 +61,7 @@ const getUrl = async (url, fallback = "http://localhost") => {
     if (!isPrimaryReachable) {
         await logger.warn(`${url} is not reachable on port ${urlObj.port}. Falling back to ${fallback}`);
         const fallbackObj = await checkUrl(fallback);
-        
+
         if (fallbackObj) {
             const isFallbackReachable = await checkPort(fallbackObj.hostname, fallbackObj.port);
             return {
@@ -85,4 +85,4 @@ const getUrl = async (url, fallback = "http://localhost") => {
     };
 };
 
-module.exports = { getUrl };
+module.exports = {getUrl};

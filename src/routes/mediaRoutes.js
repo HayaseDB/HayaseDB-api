@@ -65,7 +65,6 @@ router.get('/:id', mediaController.getMediaById);
 router.delete('/:id', authMiddleware.admin, mediaController.deleteMedia);
 
 
-
 /**
  * @swagger
  * /media/{id}/meta:

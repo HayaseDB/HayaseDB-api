@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 const customErrors = require('../utils/customErrorsUtil');
 const crypto = require('crypto');
 const bcrypt = require("bcrypt");
-const { validate } = require('uuid');
+const {validate} = require('uuid');
 const responseHandler = require('../handlers/responseHandler');
 
 const KeyService = {
@@ -78,12 +78,12 @@ const KeyService = {
         Key.isActive = false;
         await Key.save();
 
-        return { message: 'API Key revoked successfully' };
+        return {message: 'API Key revoked successfully'};
     },
 
 
     verifyKey: async (Key) => {
-        const KeyRecord = await Key.findOne({ where: { key: Key } });
+        const KeyRecord = await Key.findOne({where: {key: Key}});
 
         if (!KeyRecord || !KeyRecord.isActive) {
             throw new customErrors.NotFoundError('API Key is not active or does not exist');
@@ -103,7 +103,7 @@ const KeyService = {
         }
 
         const Keys = await Key.findAll({
-            where: { userId, isActive: true },
+            where: {userId, isActive: true},
             attributes: ['id', 'description', 'isActive', 'usageCount', 'lastUsedAt', 'createdAt', 'updatedAt'],
         });
 

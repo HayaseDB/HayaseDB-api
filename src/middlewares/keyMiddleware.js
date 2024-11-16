@@ -10,7 +10,7 @@ const validateKey = async (req, res, next) => {
     }
 
     try {
-        const keyRecord = await Key.findOne({ where: { key: Key, isActive: true } });
+        const keyRecord = await Key.findOne({where: {key: Key, isActive: true}});
 
         if (!keyRecord) {
             return responseHandler.error(res, new customErrorsUtil.UnauthorizedError('Invalid or inactive API Key'), 403);

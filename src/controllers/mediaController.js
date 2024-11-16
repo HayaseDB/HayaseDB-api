@@ -7,7 +7,7 @@ const responseHandler = require("../handlers/responseHandler");
  * Fetch the media image file by its ID
  */
 const getMediaById = async (req, res) => {
-    const { id } = req.params;
+    const {id} = req.params;
 
     try {
         const mediaEntry = await mediaService.getMediaById(id);
@@ -20,7 +20,7 @@ const getMediaById = async (req, res) => {
 };
 
 const deleteMedia = async (req, res) => {
-    const { id } = req.params;
+    const {id} = req.params;
 
     try {
         const deletedCount = await mediaService.deleteMedia(id);
@@ -36,7 +36,7 @@ const deleteMedia = async (req, res) => {
 };
 
 const getMediaMeta = async (req, res) => {
-    const { id } = req.params;
+    const {id} = req.params;
 
     try {
         const mediaMeta = await mediaService.getMediaMeta(id);

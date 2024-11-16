@@ -26,8 +26,8 @@
  *           description: Unique identifier for the anime entry this media belongs to.
  */
 
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/databaseConfig');
+const {DataTypes} = require('sequelize');
+const {sequelize} = require('../config/databaseConfig');
 
 
 const Media = sequelize.define('Media', {
@@ -46,7 +46,7 @@ const Media = sequelize.define('Media', {
     },
     animeId: {
         type: DataTypes.UUID,
-        references: { model: 'Animes', key: 'id' },
+        references: {model: 'Animes', key: 'id'},
         onDelete: 'CASCADE',
     },
 }, {

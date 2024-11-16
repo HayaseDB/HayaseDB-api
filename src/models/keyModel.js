@@ -1,4 +1,3 @@
-
 /**
  * @swagger
  * components:
@@ -35,8 +34,8 @@
  *           example: "87654321-dcba-4321-hgfe-0987654321ba"
  */
 
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/databaseConfig');
+const {DataTypes} = require('sequelize');
+const {sequelize} = require('../config/databaseConfig');
 
 
 const Key = sequelize.define('Key', {
@@ -80,7 +79,7 @@ const Key = sequelize.define('Key', {
     },
     userId: {
         type: DataTypes.UUID,
-        references: { model: 'Users', key: 'id' },
+        references: {model: 'Users', key: 'id'},
         onDelete: 'CASCADE',
     },
     rateLimitWindow: {
@@ -97,7 +96,6 @@ const Key = sequelize.define('Key', {
     tableName: 'Key',
     timestamps: true,
 });
-
 
 
 Key.prototype.resetRateLimitIfExpired = function () {

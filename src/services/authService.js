@@ -5,27 +5,27 @@ const customErrors = require("../utils/customErrorsUtil");
 
 const authService = {
     createUser: async (email, password, username) => {
-        const existingUser = await User.unscoped().findOne({ where: { email } });
+        const existingUser = await User.unscoped().findOne({where: {email}});
         if (existingUser) {
             throw new customErrors.ConflictError('Email already exists');
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        return await User.create({ email, password: hashedPassword, username });
+        return await User.create({email, password: hashedPassword, username});
     },
 
     loginUser: async (email, password) => {
-        const user = await User.unscoped().findOne({ where: { email } });
+        const user = await User.unscoped().findOne({where: {email}});
         if (!user) throw new customErrors.UnauthorizedError('Invalid email or password');
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) throw new customErrors.UnauthorizedError('Invalid email or password');
 
-        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
+        const token = jwt.sign({id: user.id, email: user.email}, process.env.JWT_SECRET, {
             expiresIn: '1h',
         });
 
-        return { user, token };
+        return {user, token};
 
     },
 
@@ -51,7 +51,7 @@ const authService = {
     },
 
     findUserByEmail: async (email) => {
-        const user = await User.findOne({ where: { email } });
+        const user = await User.findOne({where: {email}});
         if (!user) throw new customErrors.NotFoundError('User not found');
         return user;
 
@@ -81,7 +81,7 @@ const authService = {
         if (!user) throw new customErrors.NotFoundError('User not found');
 
         await user.destroy();
-        return { message: 'User deleted successfully' };
+        return {message: 'User deleted successfully'};
 
     },
 

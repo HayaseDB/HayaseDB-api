@@ -3,8 +3,7 @@ const User = require('../models/userModel');
 const Media = require('../models/mediaModel');
 const Contribution = require('../models/contributionModel');
 const Anime = require('../models/animeModel');
-const { Op } = require('sequelize');
-
+const {Op} = require('sequelize');
 
 
 const formatAnimeResponse = (anime, detailed = false) => {
@@ -14,7 +13,7 @@ const formatAnimeResponse = (anime, detailed = false) => {
     const media = formatAnimeMedia(anime.Media, detailed);
     const meta = formatAnimeMeta(anime, detailed);
 
-    return { anime: { details, media }, meta };
+    return {anime: {details, media}, meta};
 };
 
 const formatAnimeDetails = (anime) => {
@@ -71,7 +70,7 @@ const getIncludeOptions = (detailed = false) => [
             include: [{
                 model: User,
                 as: 'CreatedBy',
-                through: { attributes: [] }
+                through: {attributes: []}
             }]
         })
     },
@@ -89,7 +88,7 @@ const getIncludeOptions = (detailed = false) => [
 const animeService = {
 
     async createAnime(data, transaction) {
-        const { Media: mediaFiles = [], Meta: animeDetails, User: user } = data;
+        const {Media: mediaFiles = [], Meta: animeDetails, User: user} = data;
 
         if (!mediaFiles || !animeDetails || !user || !transaction) {
             throw new customErrorsUtil.ValidationError('Missing required parameters: Media, Meta, User, and transaction');
@@ -103,7 +102,7 @@ const animeService = {
             })),
         }, {
             transaction,
-            include: [{ model: Media, as: 'Media', foreignKey: 'animeId' }]
+            include: [{model: Media, as: 'Media', foreignKey: 'animeId'}]
         });
 
         await Promise.all([
@@ -111,10 +110,10 @@ const animeService = {
                 userId: user.id,
                 animeId: anime.id,
                 role: 'Owner',
-            },{
+            }, {
                 transaction
             }),
-            ...anime.Media.map(media => media.addCreatedBy(user.id, { transaction }))
+            ...anime.Media.map(media => media.addCreatedBy(user.id, {transaction}))
         ]);
 
         await anime.reload({
@@ -155,14 +154,14 @@ const animeService = {
         const whereClause = {
             ...(search && {
                 [Op.or]: [
-                    { title: { [Op.iLike]: `%${search}%` } },
-                    { description: { [Op.iLike]: `%${search}%` } }
+                    {title: {[Op.iLike]: `%${search}%`}},
+                    {description: {[Op.iLike]: `%${search}%`}}
                 ]
             }),
             ...filters
         };
 
-        const { rows: animes, count: totalItems } = await Anime.findAndCountAll({
+        const {rows: animes, count: totalItems} = await Anime.findAndCountAll({
             where: whereClause,
             limit: normalizedLimit,
             offset,
@@ -198,10 +197,10 @@ const animeService = {
 
         if (!anime) throw new customErrorsUtil.NotFoundError('Anime not found');
 
-        const { Meta: animeDetails, Media: mediaFiles, User: user } = data;
+        const {Meta: animeDetails, Media: mediaFiles, User: user} = data;
 
         if (animeDetails) {
-            await anime.update(animeDetails, { transaction });
+            await anime.update(animeDetails, {transaction});
         }
 
         if (mediaFiles?.length > 0) {
@@ -216,14 +215,14 @@ const animeService = {
                         type: file.fieldname,
                         mimeType: file.mimetype,
                         size: file.size
-                    }, { transaction });
+                    }, {transaction});
 
-                    await mediaItem.addCreatedBy(user, { transaction });
+                    await mediaItem.addCreatedBy(user, {transaction});
                     return mediaItem;
                 })
             );
 
-            await anime.addMedia(mediaItems, { transaction });
+            await anime.addMedia(mediaItems, {transaction});
         }
 
         await anime.reload({
@@ -242,19 +241,19 @@ const animeService = {
 
         const anime = await Anime.findByPk(id, {
             transaction,
-            include: [{ model: Media, as: 'Media' }]
+            include: [{model: Media, as: 'Media'}]
         });
 
         if (!anime) throw new customErrorsUtil.NotFoundError('Anime not found');
 
         if (anime.Media?.length > 0) {
             await Media.destroy({
-                where: { id: anime.Media.map(media => media.id) },
+                where: {id: anime.Media.map(media => media.id)},
                 transaction
             });
         }
 
-        await anime.destroy({ transaction });
+        await anime.destroy({transaction});
         return formatAnimeResponse(anime);
     }
 };

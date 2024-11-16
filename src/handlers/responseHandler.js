@@ -1,4 +1,4 @@
-const { Sequelize } = require('sequelize');
+const {Sequelize} = require('sequelize');
 const {
     NotFoundError,
     ConflictError,
@@ -42,9 +42,7 @@ const responseHandler = {
         } else if (error instanceof Sequelize.ConnectionError) {
             statusCode = 503;
             error.message = 'Database connection error';
-        }
-
-        else if (error instanceof BadRequestError) {
+        } else if (error instanceof BadRequestError) {
             statusCode = 400;
         } else if (error instanceof UnauthorizedError) {
             statusCode = 401;
@@ -56,17 +54,13 @@ const responseHandler = {
             statusCode = 409;
         } else if (error instanceof TooManyRequestsError) {
             statusCode = 429;
-        }
-
-        else if (error instanceof SyntaxError) {
+        } else if (error instanceof SyntaxError) {
             statusCode = 400;
             error.message = 'Invalid JSON format';
         } else if (error instanceof TypeError) {
             statusCode = 400;
             error.message = 'Unexpected type encountered';
-        }
-
-        else if (error instanceof Error) {
+        } else if (error instanceof Error) {
             if (error.code === 'ECONNREFUSED') {
                 statusCode = 503;
                 error.message = 'Service unavailable (Connection refused)';
@@ -76,9 +70,7 @@ const responseHandler = {
             } else {
                 statusCode = 500;
             }
-        }
-
-        else {
+        } else {
             statusCode = 500;
             error.message = error.message || 'Server error';
         }
@@ -89,7 +81,7 @@ const responseHandler = {
         res.status(statusCode).json({
             success: false,
             message,
-            ...(stack && { stack })
+            ...(stack && {stack})
         });
     },
 };
