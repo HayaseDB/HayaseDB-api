@@ -10,16 +10,25 @@ const createApiKey = async (req, res) => {
 
         const apiKey = await keyService.createApiKey(userId, description);
 
-        return responseHandler.success(res, { apiKey }, 201);
+        return responseHandler.success(res, { apiKey }, "Operation successful",201);
     } catch (error) {
         return responseHandler.error(res, error, 500);
     }
 };
+const regenerateApiKey = async (req, res) => {
+    try {
+        const { id } = req.params;
 
+        const newApiKey = await keyService.regenerateApiKey(id, req.user.id);
+
+        return responseHandler.success(res, { apiKey: newApiKey }, "API key regenerated successfully.",200);
+    } catch (error) {
+        return responseHandler.error(res, error, 500);
+    }
+};
 const revokeApiKey = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log('Received API Key ID:', id);
 
         const result = await keyService.revokeApiKey(id, req.user.id);
 
@@ -39,7 +48,7 @@ const verifyApiKey = async (req, res) => {
         const isValid = await keyService.verifyApiKey(apiKey);
 
         if (isValid) {
-            return responseHandler.success(res, { message: 'API Key is valid' }, 200);
+            return responseHandler.success(res, {apiKey: isValid}, "API Key is valid", 200);
         } else {
             return responseHandler.error(res, new customErrorsUtil.UnauthorizedError('Invalid API Key'), 401);
         }
@@ -54,7 +63,7 @@ const listApiKeys = async (req, res) => {
 
         const apiKeys = await keyService.listApiKeys(userId);
 
-        return responseHandler.success(res, { apiKeys }, 200);
+        return responseHandler.success(res, { apiKeys }, "Operation successful", 200);
     } catch (error) {
         return responseHandler.error(res, error, 500);
     }
@@ -63,5 +72,6 @@ module.exports = {
     createApiKey,
     revokeApiKey,
     verifyApiKey,
-    listApiKeys
+    listApiKeys,
+    regenerateApiKey
 };

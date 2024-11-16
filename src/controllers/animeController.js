@@ -78,8 +78,13 @@ const listAnimes = async (req, res) => {
             sortBy,
         });
 
-        return responseHandler.success(res, { animes, meta });
-    } catch (error) {
+
+        if (animes.length === 0) {
+            return responseHandler.success(res,null,'No anime entries found for the search criteria.', 404);
+        }
+
+        return responseHandler.success(res, { animes, meta }, "Operation successful", 200);}
+    catch (error) {
         return responseHandler.error(res, error);
     }
 };
