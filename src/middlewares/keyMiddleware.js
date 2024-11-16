@@ -1,16 +1,16 @@
-const ApiKey = require('../models/keyModel');
+const Key = require('../models/keyModel');
 const responseHandler = require('../handlers/responseHandler');
 const customErrorsUtil = require('../utils/customErrorsUtil');
 
-const validateApiKey = async (req, res, next) => {
-    const apiKey = req.headers['x-api-key'];
+const validateKey = async (req, res, next) => {
+    const Key = req.headers['x-api-key'];
 
-    if (!apiKey) {
+    if (!Key) {
         return responseHandler.error(res, new customErrorsUtil.BadRequestError('API Key not provided'), 401);
     }
 
     try {
-        const keyRecord = await ApiKey.findOne({ where: { key: apiKey, isActive: true } });
+        const keyRecord = await Key.findOne({ where: { key: Key, isActive: true } });
 
         if (!keyRecord) {
             return responseHandler.error(res, new customErrorsUtil.UnauthorizedError('Invalid or inactive API Key'), 403);
@@ -29,11 +29,11 @@ const validateApiKey = async (req, res, next) => {
         keyRecord.lastUsedAt = new Date();
         await keyRecord.save();
 
-        req.apiKey = keyRecord;
+        req.Key = keyRecord;
         next();
     } catch (err) {
         return responseHandler.error(res, new customErrorsUtil.ValidationError('Failed to validate API Key'), 500);
     }
 };
 
-module.exports = validateApiKey;
+module.exports = validateKey;

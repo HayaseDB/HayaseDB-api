@@ -2,7 +2,7 @@
  * @swagger
  * components:
  *   securitySchemes:
- *     ApiKeyAuth:
+ *     KeyAuth:
  *       type: apiKey
  *       in: header
  *       name: x-api-key
@@ -17,7 +17,7 @@
 
 const express = require('express');
 const router = express.Router();
-const apiKeyController = require('../controllers/keyController');
+const KeyController = require('../controllers/keyController');
 const keyMiddleware = require('../middlewares/keyMiddleware');
 const authMiddleware = require('../middlewares/authMiddleware');
 
@@ -46,13 +46,13 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ApiKey'
+ *               $ref: '#/components/schemas/Key'
  *       400:
  *         description: Bad request
  *       401:
  *         description: Unauthorized
  */
-router.post('/create', authMiddleware.user, apiKeyController.createApiKey);
+router.post('/create', authMiddleware.user, KeyController.createKey);
 
 /**
  * @swagger
@@ -77,7 +77,7 @@ router.post('/create', authMiddleware.user, apiKeyController.createApiKey);
  *       401:
  *         description: Unauthorized
  */
-router.delete('/:id/revoke', authMiddleware.user, apiKeyController.revokeApiKey);
+router.delete('/:id/revoke', authMiddleware.user, KeyController.revokeKey);
 
 /**
  * @swagger
@@ -86,14 +86,14 @@ router.delete('/:id/revoke', authMiddleware.user, apiKeyController.revokeApiKey)
  *     summary: Verify an API key
  *     tags: [API Keys]
  *     security:
- *       - ApiKeyAuth: []
+ *       - KeyAuth: []
  *     responses:
  *       200:
  *         description: API key is valid and usage updated
  *       401:
  *         description: Unauthorized or invalid API key
  */
-router.get('/verify', apiKeyController.verifyApiKey);
+router.get('/verify', KeyController.verifyKey);
 
 /**
  * @swagger
@@ -111,11 +111,11 @@ router.get('/verify', apiKeyController.verifyApiKey);
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/ApiKey'
+ *                 $ref: '#/components/schemas/Key'
  *       401:
  *         description: Unauthorized
  */
-router.get('/list', authMiddleware.user, apiKeyController.listApiKeys);
+router.get('/list', authMiddleware.user, KeyController.listKeys);
 
 
 /**
@@ -141,7 +141,7 @@ router.get('/list', authMiddleware.user, apiKeyController.listApiKeys);
  *       401:
  *         description: Unauthorized
  */
-router.put('/:id/regenerate', authMiddleware.user, apiKeyController.regenerateApiKey);
+router.put('/:id/regenerate', authMiddleware.user, KeyController.regenerateKey);
 
 
 module.exports = router;

@@ -79,7 +79,7 @@ router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
  *     summary: List Animes
  *     description: Retrieve a paginated list of animes, with sorting, filtering and searching.
  *     security:
- *       - ApiKeyAuth: []
+ *       - KeyAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -137,7 +137,7 @@ router.get('/list', keyMiddleware, animeController.listAnimes);
  *     summary: Get Anime
  *     description: Retrieve a specific anime via ID.
  *     security:
- *       - ApiKeyAuth: []
+ *       - KeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id

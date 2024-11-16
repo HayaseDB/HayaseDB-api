@@ -1,4 +1,4 @@
-const ApiKey = require('../models/keyModel');
+const Key = require('../models/keyModel');
 const User = require('../models/userModel');
 const customErrors = require('../utils/customErrorsUtil');
 const crypto = require('crypto');
@@ -6,114 +6,114 @@ const bcrypt = require("bcrypt");
 const { validate } = require('uuid');
 const responseHandler = require('../handlers/responseHandler');
 
-const apiKeyService = {
+const KeyService = {
 
-    createApiKey: async (userId, description) => {
+    createKey: async (userId, description) => {
         const user = await User.findByPk(userId);
         if (!user) {
             throw new customErrors.NotFoundError('User not found');
         }
 
-        const apiKey = crypto.randomBytes(69).toString('hex');
+        const Key = crypto.randomBytes(69).toString('hex');
 
 
-        const newApiKey = await ApiKey.create({
-            key: apiKey,
+        const newKey = await Key.create({
+            key: Key,
             userId: user.id,
             description,
         });
 
         return {
-            key: apiKey,
-            id: newApiKey.id,
-            description: newApiKey.description,
+            key: Key,
+            id: newKey.id,
+            description: newKey.description,
         };
     },
 
-    regenerateApiKey: async (id, userId) => {
+    regenerateKey: async (id, userId) => {
         if (!validate(id)) {
             throw new customErrors.BadRequestError('Invalid API Key ID format');
         }
 
-        const apiKey = await ApiKey.findByPk(id);
-        if (!apiKey || !apiKey.isActive) {
+        const Key = await Key.findByPk(id);
+        if (!Key || !Key.isActive) {
             throw new customErrors.NotFoundError('API Key not found or is inactive');
         }
 
-        if (apiKey.userId !== userId) {
+        if (Key.userId !== userId) {
             throw new customErrors.UnauthorizedError('You do not have permission to regenerate this API key');
         }
 
-        const newApiKey = crypto.randomBytes(69).toString('hex');
+        const newKey = crypto.randomBytes(69).toString('hex');
 
-        apiKey.key = newApiKey;
+        Key.key = newKey;
 
-        await apiKey.save();
+        await Key.save();
 
         return {
-            key: newApiKey,
-            id: apiKey.id,
-            description: apiKey.description,
+            key: newKey,
+            id: Key.id,
+            description: Key.description,
         };
     },
 
-    revokeApiKey: async (id, userId, res) => {
+    revokeKey: async (id, userId, res) => {
         if (!validate(id)) {
             throw new customErrors.BadRequestError('Invalid API Key ID format');
         }
 
-        const apiKey = await ApiKey.findByPk(id);
-        if (!apiKey) {
+        const Key = await Key.findByPk(id);
+        if (!Key) {
             throw new customErrors.NotFoundError('API Key not found');
         }
 
-        if (apiKey.userId !== userId) {
+        if (Key.userId !== userId) {
             throw new customErrors.UnauthorizedError('You do not have permission to revoke this API key');
         }
 
-        if (!apiKey.isActive) {
+        if (!Key.isActive) {
             throw new customErrors.NotFoundError('API Key not found or is inactive');
         }
 
-        apiKey.isActive = false;
-        await apiKey.save();
+        Key.isActive = false;
+        await Key.save();
 
         return { message: 'API Key revoked successfully' };
     },
 
 
-    verifyApiKey: async (apiKey) => {
-        const apiKeyRecord = await ApiKey.findOne({ where: { key: apiKey } });
+    verifyKey: async (Key) => {
+        const KeyRecord = await Key.findOne({ where: { key: Key } });
 
-        if (!apiKeyRecord || !apiKeyRecord.isActive) {
+        if (!KeyRecord || !KeyRecord.isActive) {
             throw new customErrors.NotFoundError('API Key is not active or does not exist');
         }
 
-        apiKeyRecord.usageCount += 1;
-        apiKeyRecord.lastUsedAt = new Date();
-        await apiKeyRecord.save();
+        KeyRecord.usageCount += 1;
+        KeyRecord.lastUsedAt = new Date();
+        await KeyRecord.save();
 
-        return apiKeyRecord;
+        return KeyRecord;
     },
 
-    listApiKeys: async (userId) => {
+    listKeys: async (userId) => {
         const user = await User.findByPk(userId);
         if (!user) {
             throw new customErrors.NotFoundError('User not found');
         }
 
-        const apiKeys = await ApiKey.findAll({
+        const Keys = await Key.findAll({
             where: { userId, isActive: true },
             attributes: ['id', 'description', 'isActive', 'usageCount', 'lastUsedAt', 'createdAt', 'updatedAt'],
         });
 
-        if (!apiKeys.length) {
+        if (!Keys.length) {
             throw new customErrors.NotFoundError('No active API Keys found for this user');
         }
 
-        return apiKeys;
+        return Keys;
     },
 
 };
 
-module.exports = apiKeyService;
+module.exports = KeyService;

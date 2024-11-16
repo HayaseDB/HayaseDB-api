@@ -3,7 +3,7 @@
  * @swagger
  * components:
  *   schemas:
- *     ApiKey:
+ *     Key:
  *       type: object
  *       properties:
  *         id:
@@ -39,7 +39,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/databaseConfig');
 
 
-const ApiKey = sequelize.define('ApiKey', {
+const Key = sequelize.define('Key', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -94,13 +94,13 @@ const ApiKey = sequelize.define('ApiKey', {
         defaultValue: 5,
     },
 }, {
-    tableName: 'ApiKey',
+    tableName: 'Key',
     timestamps: true,
 });
 
 
 
-ApiKey.prototype.resetRateLimitIfExpired = function () {
+Key.prototype.resetRateLimitIfExpired = function () {
     const currentTime = new Date();
     const rateLimitWindow = this.rateLimitWindow || (60 * 1000);
 
@@ -110,4 +110,4 @@ ApiKey.prototype.resetRateLimitIfExpired = function () {
 };
 
 
-module.exports = ApiKey;
+module.exports = Key;

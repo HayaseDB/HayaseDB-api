@@ -74,7 +74,7 @@ router.delete('/:id', authMiddleware.admin, mediaController.deleteMedia);
  *     summary: Get Media Meta by ID
  *     description: Retrieve detailed metadata of a media file by its UUID.
  *     security:
- *       - ApiKeyAuth: []
+ *       - KeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id

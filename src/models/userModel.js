@@ -73,7 +73,7 @@ User.associate = (models) => {
         foreignKey: 'userId',
         otherKey: 'mediaId',
     });
-    User.hasMany(models.ApiKey,{ foreignKey: 'userId'})
+    User.hasMany(models.Key,{ foreignKey: 'userId'})
 
 }
 
