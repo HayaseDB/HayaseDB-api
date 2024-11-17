@@ -15,7 +15,7 @@ const checkUrl = async (url) => {
 const checkPort = async (hostname, port) => {
     return new Promise((resolve) => {
         const socket = new net.Socket();
-        socket.setTimeout(2000);
+        socket.setTimeout(10000);
 
         socket.on('connect', () => {
             socket.destroy();
