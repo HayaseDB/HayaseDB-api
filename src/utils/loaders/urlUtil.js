@@ -37,12 +37,17 @@ const checkPort = async (hostname, port) => {
 
 const getUrl = async (url, fallback = "http://localhost") => {
     const urlObj = await checkUrl(url);
+
+    const primaryPort = urlObj ? (urlObj.port || 80) : 80;
+
     if (!urlObj) {
         await logger.warn(`${url} is not reachable. Falling back to ${fallback}`);
         const fallbackObj = await checkUrl(fallback);
 
+        const fallbackPort = fallbackObj ? (fallbackObj.port || 80) : 80;
+
         if (fallbackObj) {
-            const isFallbackReachable = await checkPort(fallbackObj.hostname, fallbackObj.port);
+            const isFallbackReachable = await checkPort(fallbackObj.hostname, fallbackPort);
             return {
                 url: fallback,
                 status: isFallbackReachable ? 'fallback' : 'no connection',
@@ -57,13 +62,15 @@ const getUrl = async (url, fallback = "http://localhost") => {
         };
     }
 
-    const isPrimaryReachable = await checkPort(urlObj.hostname, urlObj.port);
+    const isPrimaryReachable = await checkPort(urlObj.hostname, primaryPort);
     if (!isPrimaryReachable) {
-        await logger.warn(`${url} is not reachable on port ${urlObj.port}. Falling back to ${fallback}`);
+        await logger.warn(`${url} is not reachable on port ${primaryPort}. Falling back to ${fallback}`);
         const fallbackObj = await checkUrl(fallback);
 
+        const fallbackPort = fallbackObj ? (fallbackObj.port || 80) : 80;
+
         if (fallbackObj) {
-            const isFallbackReachable = await checkPort(fallbackObj.hostname, fallbackObj.port);
+            const isFallbackReachable = await checkPort(fallbackObj.hostname, fallbackPort);
             return {
                 url: fallback,
                 status: isFallbackReachable ? 'fallback' : 'no connection',
