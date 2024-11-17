@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: HayaseDB-api
+    #container_name: HayaseDB-api
     env_file:
       - stack.env
     environment:
@@ -16,7 +16,7 @@ services:
 
   postgres:
     image: postgres:latest
-    container_name: HayaseDB-db
+    #container_name: HayaseDB-db
     restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
