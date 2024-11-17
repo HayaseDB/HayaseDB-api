@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: HayaseDB-api
     env_file:
-      - .env
+      - stack.env
     environment:
       - NODE_ENV=production
     ports:
