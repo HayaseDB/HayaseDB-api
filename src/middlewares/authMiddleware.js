@@ -5,17 +5,17 @@ const customErrorsUtil = require('../utils/customErrorsUtil');
 const authenticateToken = async (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
-        return responseHandler.error(res, new customErrorsUtil.BadRequestError('Token not provided'), 401);
+        return responseHandler.error(res, new customErrorsUtil.UnauthorizedError('Token not provided'));
     }
 
     jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
         if (err) {
-            return responseHandler.error(res, new customErrorsUtil.UnauthorizedError('Invalid token'), 403);
+            return responseHandler.error(res, new customErrorsUtil.UnauthorizedError('Invalid token'),);
         }
 
         const dbUser = await User.unscoped().findByPk(user.id);
         if (!dbUser) {
-            return responseHandler.error(res, new customErrorsUtil.NotFoundError('User not found'), 404);
+            return responseHandler.error(res, new customErrorsUtil.NotFoundError('User not found'));
         }
 
 
