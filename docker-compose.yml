@@ -13,6 +13,7 @@ services:
     depends_on:
       - postgres
     pull_policy: build
+    restart: always
 
   postgres:
     image: postgres:latest
