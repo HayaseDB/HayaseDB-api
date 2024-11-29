@@ -126,7 +126,7 @@ router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
  *       500:
  *         description: Server error
  */
-router.get('/list', keyMiddleware, animeController.listAnimes);
+router.get('/list', animeController.listAnimes);
 
 
 /**
@@ -157,6 +157,6 @@ router.get('/list', keyMiddleware, animeController.listAnimes);
  *       500:
  *         description: Server error
  */
-router.get('/:id', keyMiddleware, animeController.getAnime);
+router.get('/:id', animeController.getAnime);
 
 module.exports = router;

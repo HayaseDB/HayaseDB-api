@@ -89,6 +89,6 @@ router.delete('/:id', authMiddleware.admin, mediaController.deleteMedia);
  *       500:
  *         description: Server error
  */
-router.get('/:id/meta', keyMiddleware, mediaController.getMediaMeta);
+router.get('/:id/meta', mediaController.getMediaMeta);
 
 module.exports = router;
