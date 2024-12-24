@@ -5,7 +5,6 @@ const router = express.Router();
 const multerMiddleware = require('../middlewares/multerMiddleware');
 const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
 const Anime = require('../models/animeModel');
-const keyMiddleware = require('../middlewares/keyMiddleware')
 /**
  * @swagger
  * tags:

@@ -18,7 +18,6 @@
 const express = require('express');
 const router = express.Router();
 const KeyController = require('../controllers/keyController');
-const keyMiddleware = require('../middlewares/keyMiddleware');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 /**
