@@ -3,7 +3,7 @@ const Key = require('../models/keyModel');
 const User = require('../models/userModel');
 const responseHandler = require('../handlers/responseHandler');
 const customErrorsUtil = require('../utils/customErrorsUtil');
-
+const Plan = require('../models/planModel');
 const isInternalRequest = (req) => {
     // todo implement internal request check if internal request
     return true
@@ -61,6 +61,7 @@ const resolveAuthentication = async (req, res, next) => {
         }
         next();
     } catch (err) {
+
         return responseHandler.error(
             res,
             new customErrorsUtil.ValidationError('Authentication resolution failed'),
@@ -71,7 +72,6 @@ const resolveAuthentication = async (req, res, next) => {
 
 const createFirewall = (allowedTypes) => {
     return async (req, res, next) => {
-        console.log(req.auth.type, allowedTypes,req.auth.isInternal);
         if (!allowedTypes.includes(req.auth.type)) {
             return responseHandler.error(
                 res,
@@ -99,22 +99,34 @@ const createFirewall = (allowedTypes) => {
 
         if (req.auth.type === 'key') {
             const key = req.auth.key;
-            const rateLimitWindow = key.rateLimitWindow || (60 * 1000);
-            const maxRequests = key.maxRequests || 5;
+            const plan = key.planId ? await Plan.findByPk(key.planId) : null;
 
-            key.resetRateLimitIfExpired();
+            if (plan) {
+                const rateLimitWindow = plan.rateLimitWindow || 60 * 1000;
+                const maxRequests = plan.maxRequests || 100;
 
-            if (key.rateLimitCount >= maxRequests) {
+                if (key.lastUsedAt && new Date() - new Date(key.lastUsedAt) > rateLimitWindow) {
+                    key.rateLimitCount = 0;
+                }
+
+                if (key.rateLimitCount >= maxRequests) {
+                    return responseHandler.error(
+                        res,
+                        new customErrorsUtil.TooManyRequestsError('Rate limit exceeded'),
+                        429
+                    );
+                }
+
+                key.rateLimitCount += 1;
+                key.lastUsedAt = new Date();
+                await key.save();
+            } else {
                 return responseHandler.error(
                     res,
-                    new customErrorsUtil.TooManyRequestsError('Rate limit exceeded'),
-                    429
+                    new customErrorsUtil.ForbiddenError('Invalid plan or no plan assigned'),
+                    403
                 );
             }
-
-            key.rateLimitCount += 1;
-            key.lastUsedAt = new Date();
-            await key.save();
         }
 
         next();

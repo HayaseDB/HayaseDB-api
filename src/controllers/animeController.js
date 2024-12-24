@@ -6,7 +6,8 @@ const {sequelize} = require("../config/databaseConfig");
  * Creates a new anime entry
  */
 const createAnime = async (req, res) => {
-    const {files, body, user} = req;
+    const {files, body} = req;
+    const {user} = req.auth;
     const transaction = await sequelize.transaction();
 
     try {

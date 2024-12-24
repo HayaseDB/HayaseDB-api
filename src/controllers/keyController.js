@@ -5,7 +5,7 @@ const customErrorsUtil = require('../utils/customErrorsUtil');
 const createKey = async (req, res) => {
     try {
         const {description} = req.body;
-        const userId = req.user.id
+        const userId = req.auth.user.id
 
         const Key = await keyService.createKey(userId, description);
 
@@ -18,7 +18,7 @@ const regenerateKey = async (req, res) => {
     try {
         const {id} = req.params;
 
-        const newKey = await keyService.regenerateKey(id, req.user.id);
+        const newKey = await keyService.regenerateKey(id, req.auth.user.id);
 
         return responseHandler.success(res, {Key: newKey}, "API key regenerated successfully.", 200);
     } catch (error) {
@@ -29,7 +29,7 @@ const revokeKey = async (req, res) => {
     try {
         const {id} = req.params;
 
-        const result = await keyService.revokeKey(id, req.user.id);
+        const result = await keyService.revokeKey(id, req.auth.user.id);
 
         return responseHandler.success(res, {message: result.message}, 200);
     } catch (error) {
@@ -58,7 +58,7 @@ const verifyKey = async (req, res) => {
 
 const listKeys = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.auth.user.id;
 
         const Keys = await keyService.listKeys(userId);
 

@@ -63,7 +63,7 @@ const verifyToken = async (req, res) => {
 
 const getProfile = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.auth.id;
         const user = await authService.getProfile(userId);
 
         responseHandler.success(res, user, 'User details fetched successfully', 200);

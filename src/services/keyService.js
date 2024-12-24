@@ -1,117 +1,156 @@
 const Key = require('../models/keyModel');
 const User = require('../models/userModel');
+const Plan = require('../models/planModel');
 const customErrors = require('../utils/customErrorsUtil');
 const crypto = require('crypto');
-const bcrypt = require("bcrypt");
-const {validate} = require('uuid');
-const responseHandler = require('../handlers/responseHandler');
+const { validate } = require('uuid');
+const {getUserPlan} = require("./authService");
 
 const KeyService = {
-
     createKey: async (userId, description) => {
-        const user = await User.findByPk(userId);
-        if (!user) {
-            throw new customErrors.NotFoundError('User not found');
-        }
+        const plan = await getUserPlan(userId);
 
-        const Key = crypto.randomBytes(69).toString('hex');
-
+        const key = crypto.randomBytes(69).toString('hex');
 
         const newKey = await Key.create({
-            key: Key,
-            userId: user.id,
-            description,
+            key: key,
+            userId: userId,
+            planId: plan.id,
+            title: description,
         });
 
         return {
-            key: Key,
+            key: key,
             id: newKey.id,
-            description: newKey.description,
+            title: newKey.title,
+            plan: {
+                name: plan.name,
+                rateLimit: plan.rateLimit,
+                description: plan.description,
+            },
         };
     },
+
 
     regenerateKey: async (id, userId) => {
         if (!validate(id)) {
             throw new customErrors.BadRequestError('Invalid API Key ID format');
         }
 
-        const Key = await Key.findByPk(id);
-        if (!Key || !Key.isActive) {
+        const key = await Key.findByPk(id, {
+            include: Plan,
+        });
+        if (!key || !key.isActive) {
             throw new customErrors.NotFoundError('API Key not found or is inactive');
         }
 
-        if (Key.userId !== userId) {
+        if (key.userId !== userId) {
             throw new customErrors.UnauthorizedError('You do not have permission to regenerate this API key');
         }
 
         const newKey = crypto.randomBytes(69).toString('hex');
 
-        Key.key = newKey;
-
-        await Key.save();
+        key.key = newKey;
+        await key.save();
 
         return {
             key: newKey,
-            id: Key.id,
-            description: Key.description,
+            id: key.id,
+            title: key.title,
+            plan: key.Plan ? {
+                name: key.Plan.name,
+                rateLimit: key.Plan.rateLimit,
+                description: key.Plan.description,
+            } : null,
         };
     },
 
-    revokeKey: async (id, userId, res) => {
+    revokeKey: async (id, userId) => {
         if (!validate(id)) {
             throw new customErrors.BadRequestError('Invalid API Key ID format');
         }
 
-        const Key = await Key.findByPk(id);
-        if (!Key) {
+        const key = await Key.findByPk(id);
+        if (!key) {
             throw new customErrors.NotFoundError('API Key not found');
         }
 
-        if (Key.userId !== userId) {
+        if (key.userId !== userId) {
             throw new customErrors.UnauthorizedError('You do not have permission to revoke this API key');
         }
 
-        if (!Key.isActive) {
+        if (!key.isActive) {
             throw new customErrors.NotFoundError('API Key not found or is inactive');
         }
 
-        Key.isActive = false;
-        await Key.save();
+        key.isActive = false;
+        await key.save();
 
-        return {message: 'API Key revoked successfully'};
+        return { message: 'API Key revoked successfully' };
     },
 
+        verifyKey: async (key) => {
+            const keyRecord = await Key.findOne({ where: { key: key } });
 
-    verifyKey: async (Key) => {
-        const KeyRecord = await Key.findOne({where: {key: Key}});
+            if (!keyRecord || !keyRecord.isActive) {
+                throw new customErrors.NotFoundError('API Key is not active or does not exist');
+            }
 
-        if (!KeyRecord || !KeyRecord.isActive) {
-            throw new customErrors.NotFoundError('API Key is not active or does not exist');
-        }
+            const user = await User.findByPk(keyRecord.userId, {
+                include: Plan,
+            });
 
-        KeyRecord.usageCount += 1;
-        KeyRecord.lastUsedAt = new Date();
-        await KeyRecord.save();
+            if (!user || !user.Plan || user.Plan.status !== 'active') {
+                throw new customErrors.NotFoundError('User\'s plan is not active');
+            }
 
-        return KeyRecord;
-    },
+            keyRecord.rateLimitCounter += 1;
+            keyRecord.lastRequest = new Date();
+            await keyRecord.save();
+
+            return {
+                key: keyRecord.key,
+                id: keyRecord.id,
+                plan: {
+                    name: user.Plan.name,
+                    rateLimit: user.Plan.rateLimit,
+                    description: user.Plan.description,
+                },
+            };
+        },
 
     listKeys: async (userId) => {
-        const user = await User.findByPk(userId);
+        const user = await User.findByPk(userId, {
+            include: {
+                model: Plan,
+                attributes: ['name', 'rateLimit', 'description'],
+            },
+        });
+
         if (!user) {
             throw new customErrors.NotFoundError('User not found');
         }
 
-        const Keys = await Key.findAll({
-            where: {userId, isActive: true},
-            attributes: ['id', 'description', 'isActive', 'usageCount', 'lastUsedAt', 'createdAt', 'updatedAt'],
+        const keys = await Key.findAll({
+            where: { userId, isActive: true },
+            attributes: ['id', 'title', 'isActive', 'rateLimitCounter', 'lastRequest', 'createdAt', 'updatedAt'],
         });
 
-        if (!Keys.length) {
+        if (!keys.length) {
             throw new customErrors.NotFoundError('No active API Keys found for this user');
         }
 
-        return Keys;
+        return keys.map((key) => ({
+            id: key.id,
+            title: key.title,
+            rateLimitCounter: key.rateLimitCounter,
+            lastRequest: key.lastRequest,
+            plan: user.Plan ? {
+                name: user.Plan.name,
+                rateLimit: user.Plan.rateLimit,
+                description: user.Plan.description,
+            } : null,
+        }));
     },
 
 };
