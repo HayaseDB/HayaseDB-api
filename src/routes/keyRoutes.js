@@ -18,7 +18,7 @@
 const express = require('express');
 const router = express.Router();
 const KeyController = require('../controllers/keyController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const { firewall } = require('../middlewares/authMiddleware');
 
 /**
  * @swagger
@@ -51,7 +51,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *       401:
  *         description: Unauthorized
  */
-router.post('/create', authMiddleware.user, KeyController.createKey);
+router.post('/create', firewall.user, KeyController.createKey);
 
 /**
  * @swagger
@@ -76,7 +76,7 @@ router.post('/create', authMiddleware.user, KeyController.createKey);
  *       401:
  *         description: Unauthorized
  */
-router.delete('/:id/revoke', authMiddleware.user, KeyController.revokeKey);
+router.delete('/:id/revoke', firewall.user, KeyController.revokeKey);
 
 /**
  * @swagger
@@ -114,7 +114,7 @@ router.get('/verify', KeyController.verifyKey);
  *       401:
  *         description: Unauthorized
  */
-router.get('/list', authMiddleware.user, KeyController.listKeys);
+router.get('/list', firewall.user, KeyController.listKeys);
 
 
 /**
@@ -140,7 +140,7 @@ router.get('/list', authMiddleware.user, KeyController.listKeys);
  *       401:
  *         description: Unauthorized
  */
-router.put('/:id/regenerate', authMiddleware.user, KeyController.regenerateKey);
+router.put('/:id/regenerate', firewall.user, KeyController.regenerateKey);
 
 
 module.exports = router;

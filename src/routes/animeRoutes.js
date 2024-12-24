@@ -1,6 +1,6 @@
 const express = require('express');
 const animeController = require('../controllers/animeController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const { firewall } = require('../middlewares/authMiddleware');
 const router = express.Router();
 const multerMiddleware = require('../middlewares/multerMiddleware');
 const sanitizeMiddleware = require('../middlewares/sanitizeMiddleware');
@@ -39,7 +39,7 @@ const Anime = require('../models/animeModel');
  *       500:
  *         description: Server error
  */
-router.post('/create', authMiddleware.user, multerMiddleware, sanitizeMiddleware(Anime), animeController.createAnime);
+router.post('/create', firewall.user, multerMiddleware, sanitizeMiddleware(Anime), animeController.createAnime);
 
 
 /**
@@ -68,7 +68,7 @@ router.post('/create', authMiddleware.user, multerMiddleware, sanitizeMiddleware
  *       500:
  *         description: Server error
  */
-router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
+router.delete('/delete/:id', firewall.admin, animeController.deleteAnime);
 
 /**
  * @swagger
@@ -125,7 +125,7 @@ router.delete('/delete/:id', authMiddleware.admin, animeController.deleteAnime);
  *       500:
  *         description: Server error
  */
-router.get('/list', animeController.listAnimes);
+router.get('/list', firewall.mixed(['anonymous', 'key']), animeController.listAnimes);
 
 
 /**
@@ -156,6 +156,6 @@ router.get('/list', animeController.listAnimes);
  *       500:
  *         description: Server error
  */
-router.get('/:id', animeController.getAnime);
+router.get('/:id', firewall.anonymous, animeController.getAnime);
 
 module.exports = router;
