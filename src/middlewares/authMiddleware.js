@@ -179,6 +179,8 @@ const createFirewall = (allowedTypes) => {
             identifier = `ip:${req.ip}`;
         }
 
+        console.log(identifier);
+
         try {
             const rateLimitResult = await checkRateLimit(identifier, isApiKey);
             res.set({
