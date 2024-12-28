@@ -20,7 +20,7 @@ const KeyService = {
             title: newKey.title,
             plan: {
                 name: 'Free',
-                rateLimit: 100, // Example rate limit for free plan
+                rateLimit: 150, // Example rate limit for free plan
                 description: 'Free plan with limited features',
             },
         };
@@ -51,7 +51,7 @@ const KeyService = {
             title: key.title,
             plan: {
                 name: 'Free',
-                rateLimit: 100,
+                rateLimit: 150,
                 description: 'Free plan with limited features',
             },
         };
@@ -97,7 +97,7 @@ const KeyService = {
             id: keyRecord.id,
             plan: {
                 name: 'Free',
-                rateLimit: 100,
+                rateLimit: 150,
                 description: 'Free plan with limited features',
             },
         };
@@ -126,7 +126,7 @@ const KeyService = {
             lastRequest: key.lastRequest,
             plan: {
                 name: 'Free',
-                rateLimit: 100,
+                rateLimit: 150,
                 description: 'Free plan with limited features',
             },
         }));
