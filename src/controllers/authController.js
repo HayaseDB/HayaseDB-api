@@ -60,7 +60,9 @@ const verifyToken = async (req, res) => {
     }
 };
 
-
+/**
+ * Retrieves User Profile details
+ */
 const getProfile = async (req, res) => {
     try {
         const userId = req.auth.user.id;

@@ -19,6 +19,9 @@ const getMediaById = async (req, res) => {
     }
 };
 
+/**
+ * Deletes a media entry by ID
+ */
 const deleteMedia = async (req, res) => {
     const {id} = req.params;
 
@@ -35,6 +38,9 @@ const deleteMedia = async (req, res) => {
     }
 };
 
+/**
+ * Get the metadata of a media entry by its ID
+ */
 const getMediaMeta = async (req, res) => {
     const {id} = req.params;
 

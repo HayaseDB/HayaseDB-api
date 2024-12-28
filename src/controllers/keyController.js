@@ -2,6 +2,10 @@ const keyService = require('../services/keyService');
 const responseHandler = require('../handlers/responseHandler');
 const customErrorsUtil = require('../utils/customErrorsUtil');
 
+
+/**
+ * Creates a new API key
+ */
 const createKey = async (req, res) => {
     try {
         const {description} = req.body;
@@ -14,6 +18,10 @@ const createKey = async (req, res) => {
         return responseHandler.error(res, error, 500);
     }
 };
+
+/**
+ * Regenerates an API key by the id
+ */
 const regenerateKey = async (req, res) => {
     try {
         const {id} = req.params;
@@ -25,6 +33,10 @@ const regenerateKey = async (req, res) => {
         return responseHandler.error(res, error, 500);
     }
 };
+
+/**
+ * Revokes an API key by the id
+ */
 const revokeKey = async (req, res) => {
     try {
         const {id} = req.params;
@@ -36,6 +48,10 @@ const revokeKey = async (req, res) => {
         return responseHandler.error(res, error, 500);
     }
 };
+
+/**
+ * Verifies an API key by the provided key
+ */
 const verifyKey = async (req, res) => {
     try {
         const Key = req.headers['x-api-key'];
@@ -56,6 +72,10 @@ const verifyKey = async (req, res) => {
     }
 };
 
+
+/**
+ * Verifies an API key by the provided key
+ */
 const listKeys = async (req, res) => {
     try {
         const userId = req.auth.user.id;
