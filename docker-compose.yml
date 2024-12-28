@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: HayaseDB-api
+    container_name: HayaseDB-apiv2
     env_file:
       - stack.env
     environment:
@@ -17,7 +17,7 @@ services:
 
   postgres:
     image: postgres:latest
-    container_name: HayaseDB-db
+    container_name: HayaseDB-dbv2
     restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -33,7 +33,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: HayaseDB-pgadmin
+    container_name: HayaseDB-pgadminv2
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-admin}
@@ -52,7 +52,7 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: HayaseDB-redis
+    container_name: HayaseDB-redisv2
     restart: always
     env_file:
       - stack.env
