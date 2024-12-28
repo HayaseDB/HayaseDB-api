@@ -23,7 +23,7 @@ const connectDB = async (retries = 5, delay = 2000) => {
 
     const syncModels = async () => {
         const isDevelopment = process.env.NODE_ENV === 'development';
-        const syncOptions = isDevelopment ? {alter: true} : {force: true};
+        const syncOptions = isDevelopment ? {alter: true} : {force: false};
 
         try {
             for (const model of models) {
