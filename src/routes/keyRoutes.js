@@ -92,7 +92,7 @@ router.delete('/:id/revoke', firewall.user, KeyController.revokeKey);
  *       401:
  *         description: Unauthorized or invalid API key
  */
-router.get('/verify', KeyController.verifyKey);
+router.get('/verify', firewall.mixed(['unauthorized', 'key']), KeyController.verifyKey);
 
 /**
  * @swagger

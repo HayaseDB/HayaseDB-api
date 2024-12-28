@@ -34,7 +34,7 @@ const { firewall } = require('../middlewares/authMiddleware');
  *       500:
  *         description: Server error
  */
-router.get('/:id', firewall.mixed({allowedTypes: ['anonymous', 'key']}), mediaController.getMediaById);
+router.get('/:id', firewall.mixed(['anonymous', 'key']), mediaController.getMediaById);
 
 
 /**
@@ -88,6 +88,6 @@ router.delete('/:id', firewall.admin, mediaController.deleteMedia);
  *       500:
  *         description: Server error
  */
-router.get('/:id/meta', firewall.mixed({allowedTypes: ['anonymous', 'key']}), mediaController.getMediaMeta);
+router.get('/:id/meta', firewall.mixed(['anonymous', 'key']), mediaController.getMediaMeta);
 
 module.exports = router;

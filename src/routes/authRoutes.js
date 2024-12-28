@@ -94,7 +94,7 @@ router.post('/register', firewall.anonymous, authController.register);
  */
 
 
-router.post('/login', authController.login);
+router.post('/login', firewall.anonymous, authController.login);
 
 /**
  * @swagger

@@ -156,6 +156,6 @@ router.get('/list', firewall.mixed(['anonymous', 'key']), animeController.listAn
  *       500:
  *         description: Server error
  */
-router.get('/:id', firewall.anonymous, animeController.getAnime);
+router.get('/:id', firewall.mixed(['anonymous', 'key']), animeController.getAnime);
 
 module.exports = router;
