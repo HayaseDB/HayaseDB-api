@@ -1,21 +1,16 @@
 const Key = require('../models/keyModel');
 const User = require('../models/userModel');
-const Plan = require('../models/planModel');
 const customErrors = require('../utils/customErrorsUtil');
 const crypto = require('crypto');
 const { validate } = require('uuid');
-const {getUserPlan} = require("./authService");
 
 const KeyService = {
     createKey: async (userId, description) => {
-        const plan = await getUserPlan(userId);
-
         const key = crypto.randomBytes(69).toString('hex');
 
         const newKey = await Key.create({
             key: key,
             userId: userId,
-            planId: plan.id,
             title: description,
         });
 
@@ -24,22 +19,19 @@ const KeyService = {
             id: newKey.id,
             title: newKey.title,
             plan: {
-                name: plan.name,
-                rateLimit: plan.rateLimit,
-                description: plan.description,
+                name: 'Free',
+                rateLimit: 100, // Example rate limit for free plan
+                description: 'Free plan with limited features',
             },
         };
     },
-
 
     regenerateKey: async (id, userId) => {
         if (!validate(id)) {
             throw new customErrors.BadRequestError('Invalid API Key ID format');
         }
 
-        const key = await Key.findByPk(id, {
-            include: Plan,
-        });
+        const key = await Key.findByPk(id);
         if (!key || !key.isActive) {
             throw new customErrors.NotFoundError('API Key not found or is inactive');
         }
@@ -57,11 +49,11 @@ const KeyService = {
             key: newKey,
             id: key.id,
             title: key.title,
-            plan: key.Plan ? {
-                name: key.Plan.name,
-                rateLimit: key.Plan.rateLimit,
-                description: key.Plan.description,
-            } : null,
+            plan: {
+                name: 'Free',
+                rateLimit: 100,
+                description: 'Free plan with limited features',
+            },
         };
     },
 
@@ -89,43 +81,30 @@ const KeyService = {
         return { message: 'API Key revoked successfully' };
     },
 
-        verifyKey: async (key) => {
-            const keyRecord = await Key.findOne({ where: { key: key } });
+    verifyKey: async (key) => {
+        const keyRecord = await Key.findOne({ where: { key: key } });
 
-            if (!keyRecord || !keyRecord.isActive) {
-                throw new customErrors.NotFoundError('API Key is not active or does not exist');
-            }
+        if (!keyRecord || !keyRecord.isActive) {
+            throw new customErrors.NotFoundError('API Key is not active or does not exist');
+        }
 
-            const user = await User.findByPk(keyRecord.userId, {
-                include: Plan,
-            });
+        keyRecord.rateLimitCounter += 1;
+        keyRecord.lastRequest = new Date();
+        await keyRecord.save();
 
-            if (!user || !user.Plan || user.Plan.status !== 'active') {
-                throw new customErrors.NotFoundError('User\'s plan is not active');
-            }
-
-            keyRecord.rateLimitCounter += 1;
-            keyRecord.lastRequest = new Date();
-            await keyRecord.save();
-
-            return {
-                key: keyRecord.key,
-                id: keyRecord.id,
-                plan: {
-                    name: user.Plan.name,
-                    rateLimit: user.Plan.rateLimit,
-                    description: user.Plan.description,
-                },
-            };
-        },
+        return {
+            key: keyRecord.key,
+            id: keyRecord.id,
+            plan: {
+                name: 'Free',
+                rateLimit: 100,
+                description: 'Free plan with limited features',
+            },
+        };
+    },
 
     listKeys: async (userId) => {
-        const user = await User.findByPk(userId, {
-            include: {
-                model: Plan,
-                attributes: ['name', 'rateLimit', 'description'],
-            },
-        });
+        const user = await User.findByPk(userId);
 
         if (!user) {
             throw new customErrors.NotFoundError('User not found');
@@ -145,14 +124,13 @@ const KeyService = {
             title: key.title,
             rateLimitCounter: key.rateLimitCounter,
             lastRequest: key.lastRequest,
-            plan: user.Plan ? {
-                name: user.Plan.name,
-                rateLimit: user.Plan.rateLimit,
-                description: user.Plan.description,
-            } : null,
+            plan: {
+                name: 'Free',
+                rateLimit: 100,
+                description: 'Free plan with limited features',
+            },
         }));
     },
-
 };
 
 module.exports = KeyService;

@@ -1,3 +1,4 @@
+/*
 const Plan = require('../models/planModel');
 
 async function seedPlans() {
@@ -28,4 +29,5 @@ async function seedPlans() {
 
 }
 
-module.exports = seedPlans;
+//module.exports = seedPlans;
+*/

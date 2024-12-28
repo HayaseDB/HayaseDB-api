@@ -17,7 +17,6 @@
 
 const {DataTypes} = require('sequelize');
 const {sequelize} = require('../config/databaseConfig');
-const Plan = require('./planModel');
 const User = sequelize.define('User', {
     id: {
         type: DataTypes.UUID,
@@ -49,15 +48,6 @@ const User = sequelize.define('User', {
     isActivated: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
-    },
-    planId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'Plans',
-            key: 'id',
-
-        },
     }
 
 }, {
@@ -84,9 +74,7 @@ User.associate = (models) => {
         otherKey: 'mediaId',
     });
     User.hasMany(models.Key, {foreignKey: 'userId'})
-    User.belongsTo(models.Plan, {
-        foreignKey: 'planId',
-    });}
+}
 
 
 module.exports = User;
