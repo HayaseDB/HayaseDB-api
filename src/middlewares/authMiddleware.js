@@ -138,8 +138,8 @@ const resolveAuthentication = async (req, res, next) => {
         req.auth.isInternal = isInternalRequest(req);
 
         const userIp = getUserIp(req);
-
-        logger.info(`Request received from IP: ${userIp}`);
+        // test logging to check what ip was used (cloudflare or direct)
+        //logger.info(`Request received from IP: ${userIp}`);
 
         const apiKey = req.headers['x-api-key'];
         if (apiKey) {
