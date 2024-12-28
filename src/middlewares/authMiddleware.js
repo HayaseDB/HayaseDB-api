@@ -18,7 +18,7 @@ const DEFAULT_AUTH_STATE = {
 };
 
 const getUserIp = (req) => {
-    return req.headers['cf-connecting-ip'] || req.ip;
+    return req.ip;
 };
 
 const redisClient = redis.createClient({
