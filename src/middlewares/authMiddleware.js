@@ -222,6 +222,8 @@ const firewall = {
         next();
     },
     mixed: (types) => createFirewall(types),
+
+    default: createFirewall(['unauthorized']),
 };
 
 process.on('SIGTERM', async () => {
@@ -233,7 +235,14 @@ process.on('SIGTERM', async () => {
     }
 });
 
+const handleFirewall = (err, req, res, next) => {
+    const firewallType = req.auth.type.length ? req.auth.type[0] : 'unauthorized';
+    const selectedFirewall = firewall[firewallType] || firewall.default;
+    selectedFirewall(req, res, next);
+};
+
 module.exports = {
+    handleFirewall,
     resolveAuthentication,
     firewall,
 };
