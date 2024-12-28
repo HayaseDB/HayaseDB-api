@@ -60,6 +60,12 @@ class TooManyRequestsError extends Error {
         this.name = 'TooManyRequestsError';
     }
 }
+class InternalError extends Error {
+    constructor(message = 'Internal server error') {
+        super(message);
+        this.name = 'InternalError';
+    }
+}
 
 module.exports = {
     NotFoundError,
@@ -70,5 +76,6 @@ module.exports = {
     DatabaseError,
     DuplicateError,
     BadRequestError,
-    TooManyRequestsError
+    TooManyRequestsError,
+    InternalError
 };

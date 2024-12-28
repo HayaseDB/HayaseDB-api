@@ -26,11 +26,43 @@ const Anime = require('../models/animeModel');
  *       content:
  *         multipart/form-data:
  *           schema:
- *               $ref: "#/components/schemas/Anime"
- *           encoding:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: "The title of the anime."
+ *                 example: ""
  *               genre:
- *                   style: form
- *                   explode: true
+ *                 type: array
+ *                 nullable: true
+ *                 items:
+ *                   type: string
+ *                   example: "Action"
+ *                 description: "An array of genres associated with the anime."
+ *                 example: []
+ *               releaseDate:
+ *                 type: string
+ *                 format: date
+ *                 description: "The release date of the anime in YYYY-MM-DD format."
+ *                 example: ""
+ *               description:
+ *                 type: string
+ *                 description: "A brief summary of the anime."
+ *                 example: ""
+ *               coverImage:
+ *                 type: string
+ *                 format: binary
+ *                 description: "The cover image for the anime."
+ *               bannerImage:
+ *                 type: string
+ *                 format: binary
+ *                 description: "The banner image for the anime."
+ *             required:
+ *               - title
+ *           encoding:
+ *             genre:
+ *               style: form
+ *               explode: true
  *     responses:
  *       201:
  *         description: Anime created successfully
