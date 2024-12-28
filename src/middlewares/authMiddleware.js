@@ -17,8 +17,9 @@ const DEFAULT_AUTH_STATE = {
     isInternal: false,
 };
 
+// HayaseDB will be deployed behind cloudflare proxy so we need to get the ip from the headre from cloudflare defined, if you deploy directly to the server you can use req.ip
 const getUserIp = (req) => {
-    return req.ip;
+    return req.headers['cf-connecting-ip'] || req.ip;
 };
 
 const redisClient = redis.createClient({
