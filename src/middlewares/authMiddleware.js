@@ -96,6 +96,7 @@ const resolveAuthentication = async (req, res, next) => {
     };
     req.auth = { ...DEFAULT_AUTH_STATE };
 
+
     try {
         req.auth.isInternal = isInternalRequest(req);
         const userIp = getUserIp(req);
@@ -177,7 +178,7 @@ const createFirewall = (allowedTypes) => {
             identifier = `key:${req.auth.key.id}`;
             isApiKey = true;
         } else {
-            identifier = `ip:${req.ip}`;
+            identifier = `ip:${getUserIp(req)}`;
         }
 
         console.log(identifier);
