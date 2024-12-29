@@ -113,13 +113,16 @@ const resolveAuthentication = async (req, res, next) => {
             }
         }
 
-        if (req.auth.isInternal && req.auth.type.length === 0) {
-            req.auth = { ...req.auth, type: ['anonymous'], role: 'none', isInternal: true };
+        if (req.auth.isInternal) {
+            req.auth.type.push('anonymous');
+            req.isInternal = true;
         }
 
         if (!req.auth.isInternal && req.auth.type.length === 0) {
-            req.auth = { ...req.auth, type: ['unauthorized'], role: 'none', user: null };
+            req.auth.type.push('unauthorized');
+            req.isInternal = false;
         }
+        console.log(req.auth);
         next();
     } catch (err) {
         //logger.error('Authentication resolution failed:', err);
