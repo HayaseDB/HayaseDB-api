@@ -56,11 +56,12 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 
         return { isLimited: false, remaining: Math.max(0, maxRequests - count - 1), resetAt };
     } catch (err) {
-        logger.error('Rate limit check failed:', err);
+        //logger.error('Rate limit check failed:', err);
         return { isLimited: false, remaining: maxRequests - 1, resetAt: now + windowMs };
     }
 };
 
+// todo - implement a more secure way to determine internal requests from website direct requests (ssr eventually)
 const isInternalRequest = () => true;
 
 const verifyToken = async (token) => {
@@ -69,7 +70,7 @@ const verifyToken = async (token) => {
         const user = await User.unscoped().findByPk(decoded.id);
         return user ? { type: 'user', role: user.isAdmin ? 'admin' : 'user', user } : null;
     } catch (err) {
-        logger.error('Token verification failed:', err.message);
+        //logger.error('Token verification failed:', err.message);
         return null;
     }
 };
@@ -100,8 +101,6 @@ const resolveAuthentication = async (req, res, next) => {
             if (apiKeyAuth) {
                 req.auth.key = apiKeyAuth.key;
                 req.auth.type.push('key');
-            } else {
-                logger.warn(`Failed API key verification for key: ${apiKey}`);
             }
         }
 
@@ -111,8 +110,6 @@ const resolveAuthentication = async (req, res, next) => {
                 req.auth.user = tokenAuth.user;
                 req.auth.role = tokenAuth.role;
                 req.auth.type.push('user');
-            } else {
-                logger.warn(`Failed token verification for token: ${token}`);
             }
         }
 
@@ -125,7 +122,7 @@ const resolveAuthentication = async (req, res, next) => {
         }
         next();
     } catch (err) {
-        logger.error('Authentication resolution failed:', err);
+        //logger.error('Authentication resolution failed:', err);
         return responseHandler.error(
             res,
             new customErrorsUtil.ValidationError('Authentication resolution failed'),
@@ -187,10 +184,11 @@ const createFirewall = (allowedTypes) => {
                     429
                 );
             }
+            console.log(req.auth);
 
             next();
         } catch (err) {
-            logger.error('Firewall check failed:', err);
+            //logger.error('Firewall check failed:', err);
             next();
         }
     };
