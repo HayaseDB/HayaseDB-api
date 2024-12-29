@@ -184,7 +184,7 @@ const createFirewall = (allowedTypes) => {
                     429
                 );
             }
-            console.log(req.auth);
+            //console.log(req.auth);
 
             next();
         } catch (err) {
