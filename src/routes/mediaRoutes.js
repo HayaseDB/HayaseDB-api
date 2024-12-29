@@ -19,6 +19,8 @@ const { firewall } = require('../middlewares/authMiddleware');
  *     tags: [Media]
  *     summary: Get Media by ID
  *     description: Retrieve a media file by its UUID.
+ *     security:
+ *       - KeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id
