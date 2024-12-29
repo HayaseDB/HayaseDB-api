@@ -1,6 +1,6 @@
 const express = require('express');
 const authController = require('../controllers/authController');
-const authMiddleware = require("../middlewares/authMiddleware");
+const { firewall } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 /**
@@ -18,6 +18,7 @@ const router = express.Router();
  *       type: http
  *       scheme: bearer
  */
+
 
 /**
  * @swagger
@@ -51,7 +52,7 @@ const router = express.Router();
  *         description: Server error
  */
 
-router.post('/register', authController.register);
+router.post('/register', firewall.anonymous, authController.register);
 
 
 /**
@@ -93,7 +94,7 @@ router.post('/register', authController.register);
  */
 
 
-router.post('/login', authController.login);
+router.post('/login', firewall.anonymous, authController.login);
 
 /**
  * @swagger
@@ -120,7 +121,7 @@ router.post('/login', authController.login);
  *       500:
  *         description: Server error
  */
-router.get('/verify', authMiddleware, authController.verifyToken);
+router.get('/verify', authController.verifyToken);
 
 
 /**
@@ -164,6 +165,6 @@ router.get('/verify', authMiddleware, authController.verifyToken);
  *       500:
  *         description: Server error
  */
-router.get('/profile', authMiddleware, authController.getProfile);
+router.get('/profile', firewall.user, authController.getProfile);
 
 module.exports = router;

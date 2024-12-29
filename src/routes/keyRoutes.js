@@ -18,7 +18,7 @@
 const express = require('express');
 const router = express.Router();
 const KeyController = require('../controllers/keyController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const { firewall } = require('../middlewares/authMiddleware');
 
 /**
  * @swagger
@@ -39,19 +39,70 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *               description:
  *                 type: string
  *                 example: "API key for my Discord Bot"
+ *               title:
+ *                 type: string
+ *                 description: "The title or name associated with the API key."
+ *                 example: "My API Key"
+ *             required:
+ *               - title
+ *               - userId
  *     responses:
  *       200:
  *         description: Successfully created an API key
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Key'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates whether the operation was successful
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   description: A message providing additional information about the operation
+ *                   example: "Operation successful"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     Key:
+ *                       type: object
+ *                       properties:
+ *                         key:
+ *                           type: string
+ *                           description: The unique API key string
+ *                           example: "09a9d0beb23c28ebd2aa177e25a5f84605a2131ae427a5439f05c60e8b6f369bdee027cee5c2777fd9a675f15cb05e8ae9f40a5d294c2379f59fac45de6d3ab68cc6247b50"
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                           description: The unique identifier for the API key
+ *                           example: "b27f8f58-ef35-46bf-bcfe-83b3b817c006"
+ *                         title:
+ *                           type: string
+ *                           description: The title or name associated with the API key
+ *                           example: "API key for my Discord Bot"
+ *                         plan:
+ *                           type: object
+ *                           properties:
+ *                             name:
+ *                               type: string
+ *                               description: The name of the plan associated with the API key
+ *                               example: "Free"
+ *                             rateLimit:
+ *                               type: integer
+ *                               description: The rate limit for the plan
+ *                               example: 150
+ *                             description:
+ *                               type: string
+ *                               description: The description of the plan
+ *                               example: "Free plan with limited features"
  *       400:
  *         description: Bad request
  *       401:
  *         description: Unauthorized
  */
-router.post('/create', authMiddleware.user, KeyController.createKey);
+
+router.post('/create', firewall.user, KeyController.createKey);
 
 /**
  * @swagger
@@ -76,7 +127,7 @@ router.post('/create', authMiddleware.user, KeyController.createKey);
  *       401:
  *         description: Unauthorized
  */
-router.delete('/:id/revoke', authMiddleware.user, KeyController.revokeKey);
+router.delete('/:id/revoke', firewall.user, KeyController.revokeKey);
 
 /**
  * @swagger
@@ -92,8 +143,7 @@ router.delete('/:id/revoke', authMiddleware.user, KeyController.revokeKey);
  *       401:
  *         description: Unauthorized or invalid API key
  */
-router.get('/verify', KeyController.verifyKey);
-
+router.get('/verify', firewall.mixed(['unauthorized', 'key']), KeyController.verifyKey);
 /**
  * @swagger
  * /key/list:
@@ -108,13 +158,63 @@ router.get('/verify', KeyController.verifyKey);
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Key'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates whether the operation was successful
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   description: A message providing additional information about the operation
+ *                   example: "Operation successful"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     Keys:
+ *                       type: array
+ *                       description: A list of API keys associated with the user
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                             description: Unique identifier for the API key
+ *                             example: "166e6702-74f9-4900-a02e-a9ea5b2a5441"
+ *                           title:
+ *                             type: string
+ *                             description: The title or name associated with the API key
+ *                             example: "API key for my Discord Bot"
+ *                           rateLimitCounter:
+ *                             type: integer
+ *                             description: Number of requests made with the key within the rate limit window
+ *                             example: 0
+ *                           lastRequest:
+ *                             type: string
+ *                             format: date-time
+ *                             description: Timestamp of the last request made with the API key
+ *                             example: null
+ *                           plan:
+ *                             type: object
+ *                             description: Information about the plan associated with the API key
+ *                             properties:
+ *                               name:
+ *                                 type: string
+ *                                 description: Name of the plan
+ *                                 example: "Free"
+ *                               rateLimit:
+ *                                 type: integer
+ *                                 description: The rate limit for the plan
+ *                                 example: 150
+ *                               description:
+ *                                 type: string
+ *                                 description: A description of the plan
+ *                                 example: "Free plan with limited features"
  *       401:
  *         description: Unauthorized
  */
-router.get('/list', authMiddleware.user, KeyController.listKeys);
+router.get('/list', firewall.user, KeyController.listKeys);
 
 
 /**
@@ -140,7 +240,7 @@ router.get('/list', authMiddleware.user, KeyController.listKeys);
  *       401:
  *         description: Unauthorized
  */
-router.put('/:id/regenerate', authMiddleware.user, KeyController.regenerateKey);
+router.put('/:id/regenerate', firewall.user, KeyController.regenerateKey);
 
 
 module.exports = router;

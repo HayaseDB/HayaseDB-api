@@ -30,7 +30,12 @@
  *           type: string
  *           format: date-time
  *           example: "2024-11-16T12:30:00Z"
+ *       required:
+ *         - role
+ *         - userId
+ *         - animeId
  */
+
 const {DataTypes} = require("sequelize");
 const {sequelize} = require('../config/databaseConfig');
 

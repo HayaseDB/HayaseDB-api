@@ -47,8 +47,18 @@ services:
       - postgres
     attach: false
 
+  redis:
+    image: redis:alpine
+    container_name: HayaseDB-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
 
 volumes:
   hayasedb-db:
   pgadmin-data:
+  redis-data:
+
 

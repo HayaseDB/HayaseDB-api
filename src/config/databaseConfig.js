@@ -22,9 +22,10 @@ const connectDB = async (retries = 5, delay = 2000) => {
     }
 
     const syncModels = async () => {
+        // DO NOT TOUCH THIS WILL FUCK UP THE DATABASE
         const isDevelopment = process.env.NODE_ENV === 'development';
-        const syncOptions = isDevelopment ? {alter: true} : {force: true};
-
+        const syncOptions = isDevelopment ? {alter: true} : {force: false};
+        // you can touch again
         try {
             for (const model of models) {
                 await model.sync(syncOptions);

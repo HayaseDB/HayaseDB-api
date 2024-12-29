@@ -6,7 +6,8 @@ const {sequelize} = require("../config/databaseConfig");
  * Creates a new anime entry
  */
 const createAnime = async (req, res) => {
-    const {files, body, user} = req;
+    const {files, body} = req;
+    const {user} = req.auth;
     const transaction = await sequelize.transaction();
 
     try {
@@ -39,9 +40,6 @@ const deleteAnime = async (req, res) => {
         return responseHandler.success(res, null, 'Anime deleted successfully');
     } catch (error) {
         await transaction.rollback();
-        if (error.message === 'Anime not found') {
-            return responseHandler.notFound(res, 'Anime not found');
-        }
         return responseHandler.error(res, error);
     }
 };
@@ -104,7 +102,7 @@ const getAnime = async (req, res) => {
         const anime = await animeService.getAnime(req.params.id, null, isDetailed);
 
         if (!anime) {
-            return responseHandler.notFound(res, 'Anime not found');
+            return responseHandler.error(res, 'Anime not found');
         }
 
         return responseHandler.success(res, anime, 'Anime retrieved successfully');

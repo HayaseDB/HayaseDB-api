@@ -2,23 +2,22 @@ services:
   hayasedb:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    container_name: HayaseDB-api
+      dockerfile: Dockerfile
+    container_name: HayaseDB-apiv2
     env_file:
-      - .env
+      - stack.env
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
     ports:
       - "${PORT}:${PORT}"
     depends_on:
       - postgres
-    volumes:
-      - ./src:/app/src
+
     pull_policy: build
 
   postgres:
     image: postgres:latest
-    container_name: HayaseDB-db
+    container_name: HayaseDB-dbv2
     restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -32,7 +31,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: HayaseDB-pgadmin
+    container_name: HayaseDB-pgadminv2
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-admin}
@@ -47,8 +46,18 @@ services:
       - postgres
     attach: false
 
+  redis:
+    image: redis:alpine
+    container_name: HayaseDB-redisv2
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
 
 volumes:
   hayasedb-db:
   pgadmin-data:
+  redis-data:
+
 

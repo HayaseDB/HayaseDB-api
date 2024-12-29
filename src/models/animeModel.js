@@ -13,24 +13,24 @@
  *         title:
  *           type: string
  *           description: "The title of the anime."
- *           example: ""
+ *           example: "Naruto"
  *         genre:
  *           type: array
  *           nullable: true
  *           items:
  *             type: string
- *             example: ""
+ *             example: "Action"
  *           description: "An array of genres associated with the anime."
- *           example: []
+ *           example: ["Action", "Adventure"]
  *         releaseDate:
  *           type: string
  *           format: date
  *           description: "The release date of the anime in YYYY-MM-DD format."
- *           example: ""
+ *           example: "2002-10-03"
  *         description:
  *           type: string
  *           description: "A brief summary of the anime."
- *           example: ""
+ *           example: "A young ninja embarks on a journey to become the Hokage."
  *         coverImage:
  *           type: string
  *           format: binary
@@ -42,6 +42,7 @@
  *       required:
  *         - title
  */
+
 
 const {DataTypes} = require('sequelize');
 const {sequelize} = require('../config/databaseConfig');

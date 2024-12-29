@@ -1,15 +1,16 @@
 const chalk = require('chalk');
 chalk.level = 3;
 const logger = require('./loggerUtil')
-const {connectDB} = require('../config/databaseConfig');
+const {connectDB, sequelize} = require('../config/databaseConfig');
 const figlet = require('figlet');
 const {createGradient} = require('./colorUtil');
 const {getUrl} = require('./loaders/urlUtil');
+const loadSeeds = require('./loaders/seedsLoaderUtil');
 const PORT = process.env.PORT || 3000;
 
 const startServer = async (app) => {
     await connectDB();
-
+    await loadSeeds(sequelize);
     app.listen(PORT, async () => {
         const logo = figlet.textSync('HayaseDB', {horizontalLayout: 'full'});
         const gradientLogo = createGradient(logo, '#435ed6', '#b396e9');

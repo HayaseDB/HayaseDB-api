@@ -2,7 +2,7 @@ const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const customErrors = require("../utils/customErrorsUtil");
-
+const {where} = require("sequelize");
 const authService = {
     createUser: async (email, password, username) => {
         const existingUser = await User.unscoped().findOne({where: {email}});
@@ -84,6 +84,30 @@ const authService = {
         return {message: 'User deleted successfully'};
 
     },
+    /*getUserPlan: async (userId) => {
+        const user = await User.findByPk(userId, {
+            include: {
+                model: Plan,
+                required: false
+            }
+        });
+
+        if (!user) {
+            throw new customErrors.NotFoundError('User not found');
+        }
+
+        const plan = user.Plan;
+        if (plan && plan.status === 'active') {
+            return plan;
+        }
+
+        const freePlan = await Plan.findOne({where: {isDefault: true}});
+        if (!freePlan) {
+            throw new customErrors.NotFoundError('Free plan not found');
+        }
+
+        return freePlan;
+    },*/
 
     listUsers: async (limit, offset) => {
         return await User.findAll({
