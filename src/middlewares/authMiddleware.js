@@ -10,7 +10,6 @@ const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const API_KEY_MAX_REQUESTS = 150;
 const IP_MAX_REQUESTS = 100;
 
-
 const redisClient = redis.createClient({
     url: `redis://${process.env.REDIS_HOST || 'redis'}:${process.env.REDIS_PORT || 6379}`,
     enable_offline_queue: false,
@@ -68,9 +67,7 @@ const verifyToken = async (token) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.unscoped().findByPk(decoded.id);
-        if (!user) return null;
-
-        return { type: 'user', role: user.isAdmin ? 'admin' : 'user', user };
+        return user ? { type: 'user', role: user.isAdmin ? 'admin' : 'user', user } : null;
     } catch (err) {
         logger.error('Token verification failed:', err.message);
         return null;
@@ -78,12 +75,8 @@ const verifyToken = async (token) => {
 };
 
 const verifyApiKey = async (apiKey) => {
-    const keyRecord = await Key.findOne({
-        where: { key: apiKey, isActive: true }
-    });
-    if (!keyRecord) return null;
-
-    return { type: 'key', key: keyRecord };
+    const keyRecord = await Key.findOne({ where: { key: apiKey, isActive: true } });
+    return keyRecord ? { type: 'key', key: keyRecord } : null;
 };
 
 const resolveAuthentication = async (req, res, next) => {
@@ -95,7 +88,6 @@ const resolveAuthentication = async (req, res, next) => {
         isInternal: false,
     };
     req.auth = { ...DEFAULT_AUTH_STATE };
-
 
     try {
         req.auth.isInternal = isInternalRequest(req);
@@ -123,7 +115,6 @@ const resolveAuthentication = async (req, res, next) => {
                 logger.warn(`Failed token verification for token: ${token}`);
             }
         }
-
 
         if (req.auth.isInternal && req.auth.type.length === 0) {
             req.auth = { ...req.auth, type: ['anonymous'], role: 'none', isInternal: true };
@@ -181,7 +172,6 @@ const createFirewall = (allowedTypes) => {
             identifier = `ip:${getUserIp(req)}`;
         }
 
-
         try {
             const rateLimitResult = await checkRateLimit(identifier, isApiKey);
             res.set({
@@ -222,7 +212,6 @@ const firewall = {
         next();
     },
     mixed: (types) => createFirewall(types),
-
 };
 
 ['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach((signal) => {
@@ -232,7 +221,6 @@ const firewall = {
         process.exit(0);
     });
 });
-
 
 module.exports = {
     resolveAuthentication,
