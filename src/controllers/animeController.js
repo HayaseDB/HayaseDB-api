@@ -40,9 +40,6 @@ const deleteAnime = async (req, res) => {
         return responseHandler.success(res, null, 'Anime deleted successfully');
     } catch (error) {
         await transaction.rollback();
-        if (error.message === 'Anime not found') {
-            return responseHandler.notFound(res, 'Anime not found');
-        }
         return responseHandler.error(res, error);
     }
 };
@@ -105,7 +102,7 @@ const getAnime = async (req, res) => {
         const anime = await animeService.getAnime(req.params.id, null, isDetailed);
 
         if (!anime) {
-            return responseHandler.notFound(res, 'Anime not found');
+            return responseHandler.error(res, 'Anime not found');
         }
 
         return responseHandler.success(res, anime, 'Anime retrieved successfully');

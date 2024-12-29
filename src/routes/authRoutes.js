@@ -121,7 +121,7 @@ router.post('/login', firewall.anonymous, authController.login);
  *       500:
  *         description: Server error
  */
-router.get('/verify', firewall.user, authController.verifyToken);
+router.get('/verify', authController.verifyToken);
 
 
 /**

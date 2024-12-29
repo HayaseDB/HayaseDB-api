@@ -99,8 +99,7 @@ const resolveAuthentication = async (req, res, next) => {
 
     try {
         req.auth.isInternal = isInternalRequest(req);
-        const userIp = getUserIp(req);
-        req.ip = userIp;
+        req.ip = getUserIp(req);
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
 
@@ -114,7 +113,7 @@ const resolveAuthentication = async (req, res, next) => {
             }
         }
 
-        if (token) {
+        if (req.auth.isInternal && token) {
             const tokenAuth = await verifyToken(token);
             if (tokenAuth) {
                 req.auth.user = tokenAuth.user;
@@ -124,6 +123,7 @@ const resolveAuthentication = async (req, res, next) => {
                 logger.warn(`Failed token verification for token: ${token}`);
             }
         }
+
 
         if (req.auth.isInternal && req.auth.type.length === 0) {
             req.auth = { ...req.auth, type: ['anonymous'], role: 'none', isInternal: true };
@@ -223,26 +223,18 @@ const firewall = {
     },
     mixed: (types) => createFirewall(types),
 
-    default: createFirewall(['unauthorized']),
 };
 
-process.on('SIGTERM', async () => {
-    try {
+['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach((signal) => {
+    process.on(signal, async () => {
         await redisClient.quit();
-        logger.info('Redis connection closed');
-    } catch (err) {
-        logger.error('Error closing Redis connection:', err);
-    }
+        logger.info(`Redis disconnected due to ${signal}`);
+        process.exit(0);
+    });
 });
 
-const handleFirewall = (err, req, res, next) => {
-    const firewallType = req.auth.type.length ? req.auth.type[0] : 'unauthorized';
-    const selectedFirewall = firewall[firewallType] || firewall.default;
-    selectedFirewall(req, res, next);
-};
 
 module.exports = {
-    handleFirewall,
     resolveAuthentication,
     firewall,
 };
