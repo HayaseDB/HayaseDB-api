@@ -8,24 +8,34 @@
  *         id:
  *           type: string
  *           format: uuid
- *           description: Unique identifier for the media entry.
+ *           description: "Unique identifier for the media entry."
  *           readOnly: true
  *         type:
  *           type: string
  *           enum:
  *             - coverImage
  *             - bannerImage
- *           description: The type of the media file (binary data for cover or banner image).
+ *           description: "The type of the media file (binary data for cover or banner image)."
+ *           example: "coverImage"
  *         media:
  *           type: string
  *           format: binary
- *           description: The binary data for the media file (image).
+ *           description: "The binary data for the media file (image)."
+ *           example: "<binary data>"
  *         animeId:
  *           type: string
  *           format: uuid
- *           description: Unique identifier for the anime entry this media belongs to.
+ *           description: "Unique identifier for the anime entry this media belongs to."
+ *           example: "abcdef12-3456-7890-abcd-123456abcdef"
+ *       required:
+ *         - type
+ *         - media
+ *         - animeId
+ *       links:
+ *         - rel: "self"
+ *           href: "/media/{id}"
+ *       description: "Media entries representing cover or banner images associated with anime."
  */
-
 const {DataTypes} = require('sequelize');
 const {sequelize} = require('../config/databaseConfig');
 

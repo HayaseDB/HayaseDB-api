@@ -14,7 +14,6 @@ const initApp = () => {
     app.use(express.json());
 
     app.use(resolveAuthentication);
-    app.use(handleFirewall);
 
     app.use('/assets', express.static(path.join(__dirname, '../assets')));
     loadRoute(app, '/auth', authRoutes);

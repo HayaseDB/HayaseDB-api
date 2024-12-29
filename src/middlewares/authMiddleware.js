@@ -10,7 +10,6 @@ const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const API_KEY_MAX_REQUESTS = 150;
 const IP_MAX_REQUESTS = 100;
 
-
 const redisClient = redis.createClient({
     url: `redis://${process.env.REDIS_HOST || 'redis'}:${process.env.REDIS_PORT || 6379}`,
     enable_offline_queue: false,
@@ -57,33 +56,28 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 
         return { isLimited: false, remaining: Math.max(0, maxRequests - count - 1), resetAt };
     } catch (err) {
-        logger.error('Rate limit check failed:', err);
+        //logger.error('Rate limit check failed:', err);
         return { isLimited: false, remaining: maxRequests - 1, resetAt: now + windowMs };
     }
 };
 
+// todo - implement a more secure way to determine internal requests from website direct requests (ssr eventually)
 const isInternalRequest = () => true;
 
 const verifyToken = async (token) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.unscoped().findByPk(decoded.id);
-        if (!user) return null;
-
-        return { type: 'user', role: user.isAdmin ? 'admin' : 'user', user };
+        return user ? { type: 'user', role: user.isAdmin ? 'admin' : 'user', user } : null;
     } catch (err) {
-        logger.error('Token verification failed:', err.message);
+        //logger.error('Token verification failed:', err.message);
         return null;
     }
 };
 
 const verifyApiKey = async (apiKey) => {
-    const keyRecord = await Key.findOne({
-        where: { key: apiKey, isActive: true }
-    });
-    if (!keyRecord) return null;
-
-    return { type: 'key', key: keyRecord };
+    const keyRecord = await Key.findOne({ where: { key: apiKey, isActive: true } });
+    return keyRecord ? { type: 'key', key: keyRecord } : null;
 };
 
 const resolveAuthentication = async (req, res, next) => {
@@ -96,11 +90,9 @@ const resolveAuthentication = async (req, res, next) => {
     };
     req.auth = { ...DEFAULT_AUTH_STATE };
 
-
     try {
         req.auth.isInternal = isInternalRequest(req);
-        const userIp = getUserIp(req);
-        req.ip = userIp;
+        req.ip = getUserIp(req);
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
 
@@ -109,19 +101,15 @@ const resolveAuthentication = async (req, res, next) => {
             if (apiKeyAuth) {
                 req.auth.key = apiKeyAuth.key;
                 req.auth.type.push('key');
-            } else {
-                logger.warn(`Failed API key verification for key: ${apiKey}`);
             }
         }
 
-        if (token) {
+        if (req.auth.isInternal && token) {
             const tokenAuth = await verifyToken(token);
             if (tokenAuth) {
                 req.auth.user = tokenAuth.user;
                 req.auth.role = tokenAuth.role;
                 req.auth.type.push('user');
-            } else {
-                logger.warn(`Failed token verification for token: ${token}`);
             }
         }
 
@@ -134,7 +122,7 @@ const resolveAuthentication = async (req, res, next) => {
         }
         next();
     } catch (err) {
-        logger.error('Authentication resolution failed:', err);
+        //logger.error('Authentication resolution failed:', err);
         return responseHandler.error(
             res,
             new customErrorsUtil.ValidationError('Authentication resolution failed'),
@@ -181,7 +169,6 @@ const createFirewall = (allowedTypes) => {
             identifier = `ip:${getUserIp(req)}`;
         }
 
-
         try {
             const rateLimitResult = await checkRateLimit(identifier, isApiKey);
             res.set({
@@ -197,10 +184,11 @@ const createFirewall = (allowedTypes) => {
                     429
                 );
             }
+            //console.log(req.auth);
 
             next();
         } catch (err) {
-            logger.error('Firewall check failed:', err);
+            //logger.error('Firewall check failed:', err);
             next();
         }
     };
@@ -222,27 +210,17 @@ const firewall = {
         next();
     },
     mixed: (types) => createFirewall(types),
-
-    default: createFirewall(['unauthorized']),
 };
 
-process.on('SIGTERM', async () => {
-    try {
+['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach((signal) => {
+    process.on(signal, async () => {
         await redisClient.quit();
-        logger.info('Redis connection closed');
-    } catch (err) {
-        logger.error('Error closing Redis connection:', err);
-    }
+        logger.info(`Redis disconnected due to ${signal}`);
+        process.exit(0);
+    });
 });
 
-const handleFirewall = (err, req, res, next) => {
-    const firewallType = req.auth.type.length ? req.auth.type[0] : 'unauthorized';
-    const selectedFirewall = firewall[firewallType] || firewall.default;
-    selectedFirewall(req, res, next);
-};
-
 module.exports = {
-    handleFirewall,
     resolveAuthentication,
     firewall,
 };

@@ -94,7 +94,7 @@ router.post('/register', firewall.anonymous, authController.register);
  */
 
 
-router.post('/login', authController.login);
+router.post('/login', firewall.anonymous, authController.login);
 
 /**
  * @swagger
@@ -121,7 +121,7 @@ router.post('/login', authController.login);
  *       500:
  *         description: Server error
  */
-router.get('/verify', firewall.user, authController.verifyToken);
+router.get('/verify', authController.verifyToken);
 
 
 /**

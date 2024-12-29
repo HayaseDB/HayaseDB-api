@@ -27,8 +27,6 @@ services:
       - hayasedb-db:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_PORT}:5432"
-    env_file:
-      - stack.env
     attach: false
 
   pgadmin:
@@ -46,16 +44,12 @@ services:
       - pgadmin-data:/var/lib/pgadmin
     depends_on:
       - postgres
-    env_file:
-      - stack.env
     attach: false
 
   redis:
     image: redis:alpine
     container_name: HayaseDB-redisv2
     restart: always
-    env_file:
-      - stack.env
     ports:
       - "6379:6379"
     volumes:
