@@ -33,11 +33,14 @@ redisClient.on('error', (err) => logger.error('Redis error:', err));
 
 const getUserIp = (req) => {
     const cfIp = req.headers['cf-connecting-ip'];
+
     if (cfIp) {
         return cfIp;
     }
+
     return req.ip;
 };
+
 
 const checkRateLimit = async (identifier, isApiKey = false) => {
     const now = Date.now();
@@ -73,9 +76,9 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 // todo - Make website ssr requests internal
 const isRequestInternal = (req) => {
     const clientIp = req.headers['cf-connecting-ip'];
-    console.log(clientIp);
-    return !clientIp;
+    return !!clientIp;
 };
+
 
 
 
