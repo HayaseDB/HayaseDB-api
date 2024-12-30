@@ -68,8 +68,9 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 // todo - Make website ssr requests internal
 const isRequestInternal = (req) => {
     const fromProxy = req.headers['x-from-proxy'];
-    return fromProxy !== 'true';
+    return fromProxy === undefined || fromProxy !== 'true';
 };
+
 
 
 
