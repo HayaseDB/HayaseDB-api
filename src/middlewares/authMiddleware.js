@@ -10,7 +10,14 @@ const redisService = require('../services/redisService');
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const IP_MAX_REQUESTS = 100;
 
-const isRequestInternal = (req) => req.headers['x-from-proxy'] !== 'true';
+const isRequestInternal = (req) => {
+    const host = req.headers['host'];
+    const fromProxy = req.headers['x-from-proxy'];
+    if (fromProxy !== 'true') {
+        return true;
+    }
+    return host === new URL(process.env.WEB_URL).hostname || host === new URL(process.env.API_URL).hostname;
+};
 
 const getUserIp = (req) => {
     const forwardedFor = req.headers['x-forwarded-for'];
