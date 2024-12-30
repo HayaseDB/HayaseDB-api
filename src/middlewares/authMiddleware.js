@@ -76,9 +76,14 @@ const isRequestInternal = (req) => {
 
 
 const getUserIp = (req) => {
-    const clientIp = req.ip;
-    console.log(req.ip)
-    return clientIp;
+    const forwardedFor = req.headers['x-forwarded-for'];
+
+    if (forwardedFor) {
+        const ips = forwardedFor.split(',').map(ip => ip.trim());
+        return isRequestInternal(req) ? ips[ips.length - 1] : ips[0];
+    }
+
+    return req.socket.remoteAddress;
 };
 
 
