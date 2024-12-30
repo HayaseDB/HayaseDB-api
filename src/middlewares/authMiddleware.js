@@ -10,24 +10,6 @@ const redisService = require('../services/redisService');
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const IP_MAX_REQUESTS = 100;
 
-const checkRateLimit = async (identifier, windowMs, maxRequests) => {
-    const now = Date.now();
-    const redisKey = `rate_limit:${identifier}:${Math.floor(now / windowMs)}`;
-    const windowExpiry = Math.floor(windowMs / 1000);
-
-    try {
-        const rateLimitResult = await redisService.checkRateLimit(identifier, windowMs, maxRequests);
-        if (rateLimitResult.isLimited) {
-            return rateLimitResult;
-        }
-
-        return rateLimitResult;
-    } catch (err) {
-        logger.error('Rate limit check failed: ' + err);
-        return { isLimited: false, remaining: maxRequests - 1, resetAt: now + windowMs };
-    }
-};
-
 const isRequestInternal = (req) => req.headers['x-from-proxy'] !== 'true';
 
 const getUserIp = (req) => {
@@ -50,9 +32,13 @@ const verifyToken = async (token) => {
 };
 
 const verifyApiKey = async (apiKey) => {
-    const keyRecord = await Key.findOne({ where: { key: apiKey, isActive: true } });
-    return keyRecord ? { type: 'key', key: keyRecord } : null;
+    const keyRecord = await Key.findOne({ where: { key: apiKey } });
+    if (keyRecord && keyRecord.isActive === true) {
+        return { type: 'key', key: keyRecord };
+    }
+    return null;
 };
+
 
 const getFallbackPlan = async () => {
     const fallbackPlan = await Plan.findOne({ where: { monthlyCost: 0 } });
@@ -148,7 +134,8 @@ const createFirewall = (allowedTypes) => async (req, res, next) => {
     }
 
     try {
-        const rateLimitResult = await checkRateLimit(identifier, RATE_LIMIT_WINDOW_MS, isApiKey ? req.auth.key.rateLimit || 150 : IP_MAX_REQUESTS);
+        const rateLimitResult = await redisService.checkRateLimit(identifier, RATE_LIMIT_WINDOW_MS, isApiKey ? req.auth.key.rateLimit || 0 : IP_MAX_REQUESTS);
+
         res.set({
             'X-RateLimit-Limit': isApiKey ? req.auth.key.rateLimit || 150 : IP_MAX_REQUESTS,
             'X-RateLimit-Remaining': rateLimitResult.remaining,
