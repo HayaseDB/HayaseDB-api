@@ -80,7 +80,7 @@ const getUserIp = (req) => {
 
     if (forwardedFor) {
         const ips = forwardedFor.split(',').map(ip => ip.trim());
-        return isRequestInternal(req) ? ips[ips.length - 1] : ips[0];
+        return ips[0];
     }
 
     return req.socket.remoteAddress;
@@ -116,6 +116,7 @@ const resolveAuthentication = async (req, res, next) => {
     try {
         req.auth.isInternal = isRequestInternal(req);
         req.ip = getUserIp(req);
+        console.log(req.ip)
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
 
