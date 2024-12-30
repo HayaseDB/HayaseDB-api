@@ -67,8 +67,12 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 // todo - check if this is enough and if it can be spoofed
 // todo - Make website ssr requests internal
 const isRequestInternal = (req) => {
-    const fromProxy = req.headers['x-from-proxy'];
-    return fromProxy === undefined || fromProxy !== 'true';
+    if ( req.headers['x-from-proxy']){
+        return true
+    } else {
+        return false
+    }
+
 };
 
 
