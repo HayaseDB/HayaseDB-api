@@ -64,8 +64,9 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 
 // X - todo - implement a more secure way to determine internal requests from website direct requests (ssr eventually)
 // Kinda did it with the cf-connecting-ip header check and x-forwarded-for check if its going over proxy
-// todo - check if this is enough and if it can be spoofed
-// todo - Make website ssr requests internal
+// X - todo - check if this is enough and if it can be spoofed
+// X - todo - Make website ssr requests internal
+// looks good i guess safe enough
 const isRequestInternal = (req) => {
     return req.headers['x-from-proxy'] !== 'true';
 };
