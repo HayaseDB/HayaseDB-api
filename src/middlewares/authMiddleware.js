@@ -31,7 +31,6 @@ const redisClient = redis.createClient({
 
 redisClient.on('error', (err) => logger.error('Redis error:', err));
 
-const getUserIp = (req) => req.ip;
 
 const checkRateLimit = async (identifier, isApiKey = false) => {
     const now = Date.now();
@@ -101,7 +100,6 @@ const resolveAuthentication = async (req, res, next) => {
 
     try {
         req.auth.isInternal = isRequestInternal(req);
-        req.ip = getUserIp(req);
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
 
