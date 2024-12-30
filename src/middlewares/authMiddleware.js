@@ -76,16 +76,12 @@ const isRequestInternal = (req) => {
 
 
 const getUserIp = (req) => {
-    if (req.auth && req.auth.isInternal) {
-        console.log(req.ip);
-        return req.ip;
-    } else {
-        const ip = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0] : req.ip;
-        console.log(ip);
-        return ip;
-    }
-};
+    const forwardedFor = req.headers['x-forwarded-for'];
+    if (!forwardedFor) return req.socket.remoteAddress;
 
+    const ips = forwardedFor.split(',').map(ip => ip.trim());
+    return isRequestInternal(req) ? ips[ips.length - 1] : ips[0];
+};
 
 
 const verifyToken = async (token) => {
