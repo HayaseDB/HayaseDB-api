@@ -115,8 +115,9 @@ const resolveAuthentication = async (req, res, next) => {
 
     try {
         req.auth.isInternal = isRequestInternal(req);
-        req.ip = getUserIp(req);
+        req.ip = await getUserIp(req);
         console.log(getUserIp(req))
+        console.log(req.ip)
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
 
