@@ -31,7 +31,7 @@ const redisClient = redis.createClient({
 
 redisClient.on('error', (err) => logger.error('Redis error:', err));
 
-const getUserIp = (req) => req.headers['cf-connecting-ip'] || req.ip;
+const getUserIp = (req) => req.ip;
 
 const checkRateLimit = async (identifier, isApiKey = false) => {
     const now = Date.now();
@@ -61,8 +61,18 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
     }
 };
 
-// todo - implement a more secure way to determine internal requests from website direct requests (ssr eventually)
-const isInternalRequest = () => true;
+// X - todo - implement a more secure way to determine internal requests from website direct requests (ssr eventually)
+// Kinda did it with the cf-connecting-ip header check and x-forwarded-for check if its going over proxy
+// todo - check if this is enough and if it can be spoofed
+// todo - Make website ssr requests internal
+const isRequestInternal = (req) => {
+    const forwardedFor = req.headers['x-forwarded-for'];
+    console.log(req.ip)
+    return !forwardedFor;
+};
+
+
+
 
 const verifyToken = async (token) => {
     try {
@@ -91,7 +101,7 @@ const resolveAuthentication = async (req, res, next) => {
     req.auth = { ...DEFAULT_AUTH_STATE };
 
     try {
-        req.auth.isInternal = isInternalRequest(req);
+        req.auth.isInternal = isRequestInternal(req);
         req.ip = getUserIp(req);
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
@@ -122,7 +132,7 @@ const resolveAuthentication = async (req, res, next) => {
             req.auth.type.push('unauthorized');
             req.isInternal = false;
         }
-        console.log(req.auth);
+        //console.log(req.auth);
         next();
     } catch (err) {
         //logger.error('Authentication resolution failed:', err);
