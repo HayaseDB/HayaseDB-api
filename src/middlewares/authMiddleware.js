@@ -86,7 +86,6 @@ const getUserIp = (req) => {
     return req.socket.remoteAddress;
 };
 
-
 const verifyToken = async (token) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -110,14 +109,13 @@ const resolveAuthentication = async (req, res, next) => {
         user: null,
         key: null,
         isInternal: false,
+        ip: null,
     };
     req.auth = { ...DEFAULT_AUTH_STATE };
 
     try {
         req.auth.isInternal = isRequestInternal(req);
-        req.ip = await getUserIp(req);
-        console.log(getUserIp(req))
-        console.log(req.ip)
+        req.auth.ip = getUserIp(req);
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
 
@@ -147,7 +145,7 @@ const resolveAuthentication = async (req, res, next) => {
             req.auth.type.push('unauthorized');
             req.isInternal = false;
         }
-        //console.log(req.auth);
+        console.log(req.auth);
         next();
     } catch (err) {
         //logger.error('Authentication resolution failed:', err);
@@ -194,7 +192,7 @@ const createFirewall = (allowedTypes) => {
             identifier = `key:${req.auth.key.id}`;
             isApiKey = true;
         } else {
-            identifier = `ip:${getUserIp(req)}`;
+            identifier = `ip:${req.auth.ip}`;
         }
 
         try {
