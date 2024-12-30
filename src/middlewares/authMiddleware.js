@@ -68,6 +68,7 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 // todo - Make website ssr requests internal
 const isRequestInternal = (req) => {
     const fromProxy = req.headers['x-from-proxy'];
+    console.log(req.headers)
     return fromProxy !== 'true';
 };
 
@@ -110,7 +111,6 @@ const resolveAuthentication = async (req, res, next) => {
     try {
         req.auth.isInternal = isRequestInternal(req);
         req.ip = getUserIp(req);
-        console.log(req.ip);
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
 
