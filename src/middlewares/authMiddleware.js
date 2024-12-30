@@ -67,7 +67,6 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 // todo - Make website ssr requests internal
 const isRequestInternal = (req) => {
     const clientIp = req.headers['cf-connecting-ip'];
-    console.log(clientIp);
     return !clientIp;
 };
 
