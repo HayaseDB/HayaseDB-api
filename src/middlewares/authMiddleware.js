@@ -69,7 +69,7 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 const isRequestInternal = (req) => {
     const fromProxy = req.headers['x-from-proxy'];
     console.log(fromProxy);
-    return fromProxy !== 'true';
+    return fromProxy === 'true'; 
 };
 
 
