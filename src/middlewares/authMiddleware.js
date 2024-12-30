@@ -77,8 +77,10 @@ const isRequestInternal = (req) => {
 
 const getUserIp = (req) => {
     if (req.auth && req.auth.isInternal) {
+        console.log(req.ip)
         return req.ip;
     } else {
+        console.log(req.headers['x-forwarded-for'])
         return req.headers['x-forwarded-for'] || req.ip;
     }
 };
