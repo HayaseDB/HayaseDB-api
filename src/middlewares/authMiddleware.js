@@ -66,8 +66,7 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 // todo - check if this is enough and if it can be spoofed
 // todo - Make website ssr requests internal
 const isRequestInternal = (req) => {
-    const forwardedFor = req.headers['x-forwarded-for'];
-    console.log(req.headers['x-forwarded-for']);
+    const forwardedFor = req.headers['cf-connecting-ip'];
     return !forwardedFor;
 };
 
