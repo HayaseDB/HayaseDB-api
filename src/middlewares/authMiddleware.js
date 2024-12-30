@@ -4,32 +4,11 @@ const User = require('../models/userModel');
 const Plan = require('../models/planModel');
 const responseHandler = require('../handlers/responseHandler');
 const customErrorsUtil = require('../utils/customErrorsUtil');
-const redis = require('redis');
 const logger = require('../utils/loggerUtil');
+const redisService = require('../services/redisService');
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const IP_MAX_REQUESTS = 100;
-
-const redisClient = redis.createClient({
-    url: `redis://${process.env.REDIS_HOST || 'redis'}:${process.env.REDIS_PORT || 6379}`,
-    enable_offline_queue: false,
-    retry_strategy: (options) => {
-        if (options.error) logger.error('Redis error during retry', options.error);
-        if (options.attempt > 10) logger.error('Redis retry attempts exhausted');
-        return Math.min(options.attempt * 100, 3000);
-    },
-});
-
-(async () => {
-    try {
-        await redisClient.connect();
-        logger.info('Redis connected successfully');
-    } catch (err) {
-        logger.error('Redis connection failed:', err);
-    }
-})();
-
-redisClient.on('error', (err) => logger.error('Redis error:', err));
 
 const checkRateLimit = async (identifier, windowMs, maxRequests) => {
     const now = Date.now();
@@ -37,25 +16,14 @@ const checkRateLimit = async (identifier, windowMs, maxRequests) => {
     const windowExpiry = Math.floor(windowMs / 1000);
 
     try {
-        const multi = redisClient.multi();
-        multi.hGet(redisKey, 'count');
-        multi.hIncrBy(redisKey, 'count', 1);
-        multi.expire(redisKey, windowExpiry);
-
-        const [currentCount] = await multi.exec();
-        const count = currentCount ? parseInt(currentCount, 10) : 0;
-        const resetAt = Math.floor(now / windowMs) * windowMs + windowMs;
-
-        if (count >= maxRequests) {
-            return { isLimited: true, remaining: 0, resetAt };
+        const rateLimitResult = await redisService.checkRateLimit(identifier, windowMs, maxRequests);
+        if (rateLimitResult.isLimited) {
+            return rateLimitResult;
         }
 
-
-
-
-        return { isLimited: false, remaining: Math.max(0, maxRequests - count - 1), resetAt };
+        return rateLimitResult;
     } catch (err) {
-        logger.error('Rate limit check failed:' + err);
+        logger.error('Rate limit check failed: ' + err);
         return { isLimited: false, remaining: maxRequests - 1, resetAt: now + windowMs };
     }
 };
@@ -147,8 +115,6 @@ const resolveAuthentication = async (req, res, next) => {
             }
         }
 
-
-
         next();
     } catch (err) {
         logger.error('Authentication resolution failed:', err);
@@ -192,6 +158,7 @@ const createFirewall = (allowedTypes) => async (req, res, next) => {
         if (rateLimitResult.isLimited) {
             return responseHandler.error(res, new customErrorsUtil.TooManyRequestsError('Rate limit exceeded'), 429);
         }
+
         if (isApiKey) {
             const keyId = req.auth.key.id;
 
