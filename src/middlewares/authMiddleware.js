@@ -77,11 +77,12 @@ const isRequestInternal = (req) => {
 
 const getUserIp = (req) => {
     if (req.auth && req.auth.isInternal) {
-        console.log(req.ip)
+        console.log(req.ip);
         return req.ip;
     } else {
-        console.log(req.headers['x-forwarded-for'])
-        return req.headers['x-forwarded-for'] || req.ip;
+        const ip = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0] : req.ip;
+        console.log(ip);
+        return ip;
     }
 };
 
@@ -115,7 +116,6 @@ const resolveAuthentication = async (req, res, next) => {
 
     try {
         req.auth.isInternal = isRequestInternal(req);
-        console.log(req.auth.isInternal)
         req.ip = getUserIp(req);
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
