@@ -32,15 +32,17 @@ const redisClient = redis.createClient({
 redisClient.on('error', (err) => logger.error('Redis error:', err));
 
 const getUserIp = (req) => {
+    const forwardedIp = req.headers['x-real-ip'] || req.headers['x-forwarded-for'];
+
     const cfIp = req.headers['cf-connecting-ip'];
 
-    if (cfIp) {
+    if (forwardedIp) {
+        return forwardedIp.split(',')[0].trim();
+    } else if (cfIp) {
         return cfIp;
     }
-
     return req.ip;
 };
-
 
 const checkRateLimit = async (identifier, isApiKey = false) => {
     const now = Date.now();
@@ -75,8 +77,9 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 // todo - check if this is enough and if it can be spoofed
 // todo - Make website ssr requests internal
 const isRequestInternal = (req) => {
-    const clientIp = req.headers['cf-connecting-ip'];
-    return !!clientIp;
+    const cfIp = req.headers['cf-connecting-ip'];
+
+    return !cfIp;
 };
 
 
