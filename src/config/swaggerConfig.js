@@ -15,6 +15,9 @@ const swaggerOptions = {
             {
                 url: process.env.API_URL,
             },
+            {
+                url: `http://hayasedb:${process.env.PORT || 3000}`,
+            },
         ],
         components: {
             schemas: {}
