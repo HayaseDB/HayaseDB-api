@@ -31,18 +31,8 @@ const redisClient = redis.createClient({
 
 redisClient.on('error', (err) => logger.error('Redis error:', err));
 
-const getUserIp = (req) => {
-    const forwardedIp = req.headers['x-real-ip'] || req.headers['x-forwarded-for'];
 
-    const cfIp = req.headers['cf-connecting-ip'];
 
-    if (forwardedIp) {
-        return forwardedIp.split(',')[0].trim();
-    } else if (cfIp) {
-        return cfIp;
-    }
-    return req.ip;
-};
 
 const checkRateLimit = async (identifier, isApiKey = false) => {
     const now = Date.now();
@@ -77,12 +67,17 @@ const checkRateLimit = async (identifier, isApiKey = false) => {
 // todo - check if this is enough and if it can be spoofed
 // todo - Make website ssr requests internal
 const isRequestInternal = (req) => {
-    const cfIp = req.headers['cf-connecting-ip'];
-
-    return !cfIp;
+    const fromProxy = req.headers['x-from-proxy'];
+    return fromProxy !== 'true';
 };
 
 
+const getUserIp = (req) => {
+    if (req.headers['x-forwarded-for']) {
+        return req.headers['x-forwarded-for'].split(',')[0].trim();
+    }
+    return req.ip;
+};
 
 
 
@@ -115,6 +110,7 @@ const resolveAuthentication = async (req, res, next) => {
     try {
         req.auth.isInternal = isRequestInternal(req);
         req.ip = getUserIp(req);
+        console.log(req.ip);
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
 
