@@ -43,7 +43,7 @@ const revokeKey = async (req, res) => {
 
         const result = await keyService.revokeKey(id, req.auth.user.id);
 
-        return responseHandler.success(res, {message: result.message}, 200);
+        return responseHandler.success(res, null, result.message,200);
     } catch (error) {
         return responseHandler.error(res, error, 500);
     }

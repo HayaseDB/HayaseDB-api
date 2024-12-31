@@ -1,6 +1,7 @@
 const authService = require('../services/authService');
 const responseHandler = require('../handlers/responseHandler');
 const customErrors = require("../utils/customErrorsUtil");
+const {sequelize} = require("../config/databaseConfig");
 
 /**
  * Register a new user entry
@@ -74,5 +75,55 @@ const getProfile = async (req, res) => {
     }
 };
 
+/**
+ * Update User Profile details
+ */
+const updateUser = async (req, res) => {
+    const {email, username, password} = req.body;
+    const userId = req.auth.user.id;
 
-module.exports = {register, login, verifyToken, getProfile};
+    try {
+        const updatedUser = await authService.updateUser(userId, { email, username, password });
+        responseHandler.success(res, {
+            id: updatedUser.id,
+            email: updatedUser.email,
+            username: updatedUser.username,
+        }, 'User updated successfully');
+    } catch (error) {
+        responseHandler.error(res, error);
+    }
+};
+
+
+
+const deleteUser = async (req, res) => {
+    const { password } = req.body;
+    const userId = req.auth.user.id;
+
+    if (!password) {
+        return responseHandler.error(res, new customErrors.BadRequestError('Current password required'), 400);
+    }
+
+
+    const transaction = await sequelize.transaction();
+
+    try {
+        const result = await authService.deleteUserById(userId, password, transaction);
+
+        if (result) {
+            await transaction.commit();
+            return responseHandler.success(res, null, "User Deleted Successfully",200);
+
+        } else {
+            await transaction.rollback();
+            responseHandler.error(res, "Failed to delete User", 400);
+
+        }
+    } catch (error) {
+        await transaction.rollback();
+        responseHandler.error(res, error);
+    }
+};
+
+
+module.exports = {register, login, verifyToken, getProfile, updateUser, deleteUser};

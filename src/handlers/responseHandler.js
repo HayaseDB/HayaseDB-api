@@ -12,13 +12,17 @@ const {
 
 const responseHandler = {
     success(res, data, message = 'Operation successful', statusCode = 200) {
-        res.status(statusCode).json({
+        const response = {
             success: true,
             message,
-            data
-        });
-    },
+        };
 
+        if (data !== null && data !== undefined) {
+            response.data = data;
+        }
+
+        res.status(statusCode).json(response);
+    },
     error(res, error, statusCode = 500) {
         if (error instanceof Sequelize.UniqueConstraintError) {
             const field = error.errors[0]?.path;

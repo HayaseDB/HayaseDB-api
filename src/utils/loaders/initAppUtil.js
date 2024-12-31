@@ -6,6 +6,7 @@ const animeRoutes = require('../../routes/animeRoutes');
 const mediaRoutes = require('../../routes/mediaRoutes');
 const metricsRoutes = require('../../routes/metricsRoutes');
 const keyRoutes = require('../../routes/keyRoutes');
+const userRoutes = require('../../routes/userRoutes');
 const path = require("node:path");
 const { resolveAuthentication, handleFirewall} = require('../../middlewares/authMiddleware');
 const initApp = () => {
@@ -21,6 +22,7 @@ const initApp = () => {
     loadRoute(app, '/media', mediaRoutes);
     loadRoute(app, '/metrics', metricsRoutes);
     loadRoute(app, '/key', keyRoutes);
+    loadRoute(app, '/user', userRoutes);
     app.get('/', (req, res) => res.sendStatus(200));
 
     return app;

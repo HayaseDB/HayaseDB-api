@@ -167,4 +167,89 @@ router.get('/verify', authController.verifyToken);
  */
 router.get('/profile', firewall.user, authController.getProfile);
 
+
+/**
+ * @swagger
+ * /auth/update:
+ *   put:
+ *     tags: [Auth]
+ *     summary: Update user details
+ *     description: Updates the currently authenticated user's profile details.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: newemail@example.com
+ *               username:
+ *                 type: string
+ *                 example: newusername
+ *               password:
+ *                 type: string
+ *                 example: newpassword123
+ *     responses:
+ *       200:
+ *         description: User details updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 1
+ *                 email:
+ *                   type: string
+ *                   example: newemail@example.com
+ *                 username:
+ *                   type: string
+ *                   example: newusername
+ *       400:
+ *         description: Bad request (e.g., missing fields)
+ *       401:
+ *         description: Unauthorized (e.g., invalid token)
+ *       500:
+ *         description: Server error
+ */
+router.put('/update', firewall.user, authController.updateUser);
+
+
+/**
+ * @swagger
+ * /auth/delete:
+ *   delete:
+ *     tags: [Auth]
+ *     summary: Delete current authenticated user account
+ *     description: Deletes the currently authenticated user's account.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 example: yourepassword
+ *     responses:
+ *       200:
+ *         description: User account deleted successfully
+ *       401:
+ *         description: Unauthorized (e.g., missing or invalid token)
+ *       400:
+ *         description: Bad Request (e.g., incorrect current password)
+ *       500:
+ *         description: Server error
+ */
+router.delete('/delete', firewall.user, authController.deleteUser);
+
+
 module.exports = router;

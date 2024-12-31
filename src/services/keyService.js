@@ -104,6 +104,29 @@ const KeyService = {
             plan: plan,
         }));
     },
+    revokeKey: async (id, userId) => {
+        if (!validate(id)) {
+            throw new customErrors.BadRequestError('Invalid API Key ID format');
+        }
+
+        const key = await Key.findByPk(id);
+        if (!key) {
+            throw new customErrors.NotFoundError('API Key not found');
+        }
+
+        if (key.userId !== userId) {
+            throw new customErrors.UnauthorizedError('You do not have permission to revoke this API key');
+        }
+
+        key.isActive = false;
+        await key.save();
+
+        return {
+            id: key.id,
+            title: key.title,
+            message: 'API Key has been successfully revoked',
+        };
+    },
 };
 
 module.exports = KeyService;
