@@ -77,7 +77,17 @@ const User = sequelize.define('User', {
     isActivated: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
-    }
+    },
+    planId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'Plans',
+            key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+    },
 
 }, {
     tableName: 'Users',
@@ -102,7 +112,8 @@ User.associate = (models) => {
         foreignKey: 'userId',
         otherKey: 'mediaId',
     });
-    User.hasMany(models.Key, {foreignKey: 'userId'})
+    User.hasMany(models.Key, {foreignKey: 'userId'});
+    User.belongsTo(models.Plan, { foreignKey: 'planId', as: 'plan' });
 }
 
 

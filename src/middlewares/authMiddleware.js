@@ -1,68 +1,32 @@
 const jwt = require('jsonwebtoken');
 const Key = require('../models/keyModel');
 const User = require('../models/userModel');
+const Plan = require('../models/planModel');
 const responseHandler = require('../handlers/responseHandler');
 const customErrorsUtil = require('../utils/customErrorsUtil');
-const redis = require('redis');
 const logger = require('../utils/loggerUtil');
+const redisService = require('../services/redisService');
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const API_KEY_MAX_REQUESTS = 150;
 const IP_MAX_REQUESTS = 100;
 
-const redisClient = redis.createClient({
-    url: `redis://${process.env.REDIS_HOST || 'redis'}:${process.env.REDIS_PORT || 6379}`,
-    enable_offline_queue: false,
-    retry_strategy: (options) => {
-        if (options.error) logger.error('Redis error during retry', options.error);
-        if (options.attempt > 10) logger.error('Redis retry attempts exhausted');
-        return Math.min(options.attempt * 100, 3000);
-    },
-});
-
-(async () => {
-    try {
-        await redisClient.connect();
-        logger.info('Redis connected successfully');
-    } catch (err) {
-        logger.error('Redis connection failed:', err);
+const isRequestInternal = (req) => {
+    const host = req.headers['host'];
+    const fromProxy = req.headers['x-from-proxy'];
+    if (fromProxy !== 'true') {
+        return true;
     }
-})();
-
-redisClient.on('error', (err) => logger.error('Redis error:', err));
-
-const getUserIp = (req) => req.headers['cf-connecting-ip'] || req.ip;
-
-const checkRateLimit = async (identifier, isApiKey = false) => {
-    const now = Date.now();
-    const windowMs = RATE_LIMIT_WINDOW_MS;
-    const maxRequests = isApiKey ? API_KEY_MAX_REQUESTS : IP_MAX_REQUESTS;
-    const redisKey = `rate_limit:${identifier}:${Math.floor(now / windowMs)}`;
-    const windowExpiry = Math.floor(windowMs / 1000);
-
-    try {
-        const multi = redisClient.multi();
-        multi.hGet(redisKey, 'count');
-        multi.hIncrBy(redisKey, 'count', 1);
-        multi.expire(redisKey, windowExpiry);
-
-        const [currentCount] = await multi.exec();
-        const count = currentCount ? parseInt(currentCount, 10) : 0;
-        const resetAt = Math.floor(now / windowMs) * windowMs + windowMs;
-
-        if (count >= maxRequests) {
-            return { isLimited: true, remaining: 0, resetAt };
-        }
-
-        return { isLimited: false, remaining: Math.max(0, maxRequests - count - 1), resetAt };
-    } catch (err) {
-        //logger.error('Rate limit check failed:', err);
-        return { isLimited: false, remaining: maxRequests - 1, resetAt: now + windowMs };
-    }
+    return host === new URL(process.env.WEB_URL).hostname || host === new URL(process.env.API_URL).hostname;
 };
 
-// todo - implement a more secure way to determine internal requests from website direct requests (ssr eventually)
-const isInternalRequest = () => true;
+const getUserIp = (req) => {
+    const forwardedFor = req.headers['x-forwarded-for'];
+    if (forwardedFor) {
+        const ips = forwardedFor.split(',').map(ip => ip.trim());
+        return ips[0];
+    }
+    return req.socket.remoteAddress;
+};
 
 const verifyToken = async (token) => {
     try {
@@ -70,14 +34,22 @@ const verifyToken = async (token) => {
         const user = await User.unscoped().findByPk(decoded.id);
         return user ? { type: 'user', role: user.isAdmin ? 'admin' : 'user', user } : null;
     } catch (err) {
-        //logger.error('Token verification failed:', err.message);
         return null;
     }
 };
 
 const verifyApiKey = async (apiKey) => {
-    const keyRecord = await Key.findOne({ where: { key: apiKey, isActive: true } });
-    return keyRecord ? { type: 'key', key: keyRecord } : null;
+    const keyRecord = await Key.findOne({ where: { key: apiKey } });
+    if (keyRecord && keyRecord.isActive === true) {
+        return { type: 'key', key: keyRecord };
+    }
+    return null;
+};
+
+
+const getFallbackPlan = async () => {
+    const fallbackPlan = await Plan.findOne({ where: { monthlyCost: 0 } });
+    return fallbackPlan ? fallbackPlan : { rateLimit: 50 };
 };
 
 const resolveAuthentication = async (req, res, next) => {
@@ -87,12 +59,14 @@ const resolveAuthentication = async (req, res, next) => {
         user: null,
         key: null,
         isInternal: false,
+        ip: null,
     };
+
     req.auth = { ...DEFAULT_AUTH_STATE };
 
     try {
-        req.auth.isInternal = isInternalRequest(req);
-        req.ip = getUserIp(req);
+        req.auth.isInternal = isRequestInternal(req);
+        req.auth.ip = getUserIp(req);
         const apiKey = req.headers['x-api-key'];
         const token = req.headers['authorization']?.split(' ')[1];
 
@@ -122,79 +96,81 @@ const resolveAuthentication = async (req, res, next) => {
             req.auth.type.push('unauthorized');
             req.isInternal = false;
         }
-        console.log(req.auth);
+
+        if (req.auth.key) {
+            const user = await User.findByPk(req.auth.key.userId);
+            if (user) {
+                const plan = user.planId
+                    ? await Plan.findByPk(user.planId)
+                    : await getFallbackPlan();
+
+                req.auth.key.rateLimit = plan ? plan.rateLimit : 0;
+            }
+        }
+
         next();
     } catch (err) {
-        //logger.error('Authentication resolution failed:', err);
-        return responseHandler.error(
-            res,
-            new customErrorsUtil.ValidationError('Authentication resolution failed'),
-            500
-        );
+        logger.error('Authentication resolution failed:', err);
+        return responseHandler.error(res, new customErrorsUtil.ValidationError('Authentication resolution failed'), 500);
     }
 };
 
-const createFirewall = (allowedTypes) => {
-    return async (req, res, next) => {
-        if (!allowedTypes.some(type => req.auth.type.includes(type))) {
-            return responseHandler.error(
-                res,
-                new customErrorsUtil.UnauthorizedError('Access denied'),
-                403
-            );
+const createFirewall = (allowedTypes) => async (req, res, next) => {
+    if (!allowedTypes.some(type => req.auth.type.includes(type))) {
+        return responseHandler.error(res, new customErrorsUtil.UnauthorizedError('Access denied'), 403);
+    }
+
+    let identifier;
+    let isApiKey = false;
+
+    if (req.auth.type.includes('user')) {
+        const user = req.auth.user;
+        if (user.isBanned) {
+            return responseHandler.error(res, new customErrorsUtil.ForbiddenError('User is banned'), 403);
         }
 
-        let identifier;
-        let isApiKey = false;
+        if (!user.isActivated) {
+            return responseHandler.error(res, new customErrorsUtil.ForbiddenError('User is not activated'), 401);
+        }
+        identifier = `ip:${req.auth.ip}`;
+    } else if (req.auth.type.includes('key')) {
+        identifier = `key:${req.auth.key.id}`;
+        isApiKey = true;
+    } else {
+        identifier = `ip:${req.auth.ip}`;
+    }
 
-        if (req.auth.type.includes('user')) {
-            const user = req.auth.user;
-            if (user.isBanned) {
-                return responseHandler.error(
-                    res,
-                    new customErrorsUtil.ForbiddenError('User is banned'),
-                    403
-                );
-            }
+    try {
+        const rateLimitResult = await redisService.checkRateLimit(identifier, RATE_LIMIT_WINDOW_MS, isApiKey ? req.auth.key.rateLimit || 0 : IP_MAX_REQUESTS);
 
-            if (!user.isActivated) {
-                return responseHandler.error(
-                    res,
-                    new customErrorsUtil.ForbiddenError('User is not activated'),
-                    401
-                );
-            }
-            identifier = `user:${user.id}`;
-        } else if (req.auth.type.includes('key')) {
-            identifier = `key:${req.auth.key.id}`;
-            isApiKey = true;
-        } else {
-            identifier = `ip:${getUserIp(req)}`;
+        res.set({
+            'X-RateLimit-Limit': isApiKey ? req.auth.key.rateLimit || 150 : IP_MAX_REQUESTS,
+            'X-RateLimit-Remaining': rateLimitResult.remaining,
+            'X-RateLimit-Reset': rateLimitResult.resetAt,
+        });
+
+        if (rateLimitResult.isLimited) {
+            return responseHandler.error(res, new customErrorsUtil.TooManyRequestsError('Rate limit exceeded'), 429);
         }
 
-        try {
-            const rateLimitResult = await checkRateLimit(identifier, isApiKey);
-            res.set({
-                'X-RateLimit-Limit': isApiKey ? API_KEY_MAX_REQUESTS : IP_MAX_REQUESTS,
-                'X-RateLimit-Remaining': rateLimitResult.remaining,
-                'X-RateLimit-Reset': rateLimitResult.resetAt,
+        if (isApiKey) {
+            const keyId = req.auth.key.id;
+
+            await Key.increment('requestCounter', {
+                by: 1,
+                where: { id: keyId },
             });
 
-            if (rateLimitResult.isLimited) {
-                return responseHandler.error(
-                    res,
-                    new customErrorsUtil.TooManyRequestsError('Rate limit exceeded'),
-                    429
-                );
-            }
-            //console.log(req.auth);
-
-            next();
-        } catch (err) {
-            //logger.error('Firewall check failed:', err);
-            next();
+            await Key.update(
+                { lastRequest: new Date() },
+                { where: { id: keyId } }
+            );
         }
-    };
+        next();
+    } catch (err) {
+        logger.error('Rate limit check failed:' + err);
+        next();
+    }
 };
 
 const firewall = {
@@ -204,11 +180,7 @@ const firewall = {
     user: createFirewall(['user']),
     admin: (req, res, next) => {
         if (req.auth.role !== 'admin') {
-            return responseHandler.error(
-                res,
-                new customErrorsUtil.ForbiddenError('Access denied: Admins only'),
-                403
-            );
+            return responseHandler.error(res, new customErrorsUtil.ForbiddenError('Access denied: Admins only'), 403);
         }
         next();
     },

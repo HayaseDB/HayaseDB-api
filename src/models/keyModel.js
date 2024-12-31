@@ -68,13 +68,13 @@ const Key = sequelize.define('Key', {
         references: { model: 'Users', key: 'id' },
         onDelete: 'CASCADE',
     },
-    rateLimitCounter: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-    },
     lastRequest: {
         type: DataTypes.DATE,
         allowNull: true,
+    },
+    requestCounter: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
     },
     isActive: {
         type: DataTypes.BOOLEAN,
