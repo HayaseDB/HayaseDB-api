@@ -110,7 +110,7 @@ const resolveAuthentication = async (req, res, next) => {
 
         next();
     } catch (err) {
-        logger.error('Authentication resolution failed:', err);
+        logger.error('Authentication resolution failed: ' + err);
         return responseHandler.error(res, new customErrorsUtil.ValidationError('Authentication resolution failed'), 500);
     }
 };

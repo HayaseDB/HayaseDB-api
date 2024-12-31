@@ -32,7 +32,7 @@ const connectDB = async (retries = 5, delay = 2000) => {
                 logger.custom("cyan", "MODEL", `${model.name} table synchronized successfully.`);
             }
         } catch (error) {
-            logger.error('Model synchronization error: ', error);
+            logger.error('Model synchronization error: ' + error);
             throw error;
         }
     };

@@ -27,7 +27,7 @@ async function loadSeeds(sequelizeInstance) {
         logger.custom("blue", "SEED", `Seeds executed successfully.`);
 
     } catch (error) {
-        logger.error('Error loading seeds:', error);
+        logger.error('Error loading seeds: ' + error);
         throw error;
     }
 }
