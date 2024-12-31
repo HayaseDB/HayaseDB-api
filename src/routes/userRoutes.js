@@ -10,54 +10,64 @@ const router = express.Router();
  *   description: User API
  */
 
+
 /**
  * @swagger
  * /user/list:
  *   get:
- *     summary: List users based on role (Admin or Normal)
+ *     summary: List users with pagination, sorting, and filtering
  *     tags: [User]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
+ *           minimum: 1
  *           default: 1
- *         description: The page number to retrieve
+ *         description: Page number
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
+ *           minimum: 1
+ *           maximum: 100
  *           default: 10
- *         description: Number of users to retrieve per page
+ *         description: Items per page
  *       - in: query
  *         name: order
  *         schema:
  *           type: string
  *           enum: [ASC, DESC]
- *         description: Order of the results, either ascending (ASC) or descending (DESC)
+ *           default: ASC
+ *         description: Sort order
  *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
  *           enum: [username, email, createdAt, updatedAt]
- *         description: The field to sort by, either `username`, `email`, `createdAt`, or `updatedAt`
+ *           default: username
+ *         description: Field to sort by
  *       - in: query
  *         name: search
  *         schema:
  *           type: string
- *         description: Search query to filter users
+ *         description: Search in username and email
  *       - in: query
  *         name: filters
  *         schema:
  *           type: object
- *         description: Additional filters to apply to the user list
+ *         description: Additional filters (JSON string)
  *     responses:
  *       200:
- *         description: A paginated list of users
+ *         description: Successfully retrieved users
+ *       400:
+ *         description: Invalid input parameters
  *       401:
- *         description: Unauthorized, user not authenticated
+ *         description: Unauthorized
  *       500:
- *         description: Internal server error
+ *         description: Server error
  */
 
 router.get('/list', firewall.anonymous, userController.listUsers);

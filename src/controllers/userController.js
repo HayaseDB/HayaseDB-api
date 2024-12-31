@@ -22,5 +22,42 @@ const getUserById = async (req, res) => {
     }
 };
 
+const listUsers = async (req, res) => {
+    const {
+        page = 1,
+        limit = 10,
+        order = 'ASC',
+        sortBy = 'createdAt',
+        search = '',
+        filters = '{}'
+    } = req.query;
 
-module.exports = {getUserById};
+    try {
+
+        const parsedFilters = JSON.parse(filters);
+        if (typeof parsedFilters !== 'object') {
+            return responseHandler.error(res, 'Invalid filters format', 400);
+        }
+
+        const { users, meta } = await userService.listUsers({
+            page: Number(page),
+            limit: Number(limit),
+            order: order.toUpperCase(),
+            sortBy,
+            search: search?.trim(),
+            filters: parsedFilters,
+            admin: req.auth?.role === 'admin'
+        });
+
+        return responseHandler.success(res, {
+            users: users.length ? users : [],
+            meta: users.length ? meta : { ...meta, message: 'No users found' }
+        });
+
+    } catch (error) {
+        console.log(error)
+        return responseHandler.error(res, error.message || 'Internal server error', 500);
+    }
+};
+
+module.exports = {getUserById, listUsers};
