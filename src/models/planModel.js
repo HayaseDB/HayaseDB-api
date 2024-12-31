@@ -28,6 +28,10 @@ const Plan = sequelize.define('Plan', {
 }, {
     tableName: 'Plans',
     timestamps: true,
+    defaultScope: {
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+
+    },
 });
 
 Plan.associate = (models) => {

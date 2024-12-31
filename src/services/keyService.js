@@ -3,26 +3,23 @@ const User = require('../models/userModel');
 const customErrors = require('../utils/customErrorsUtil');
 const crypto = require('crypto');
 const { validate } = require('uuid');
+const Plan = require('../models/planModel');
+const userService = require("./userService");
+
 
 const KeyService = {
     createKey: async (userId, description) => {
         const key = crypto.randomBytes(69).toString('hex');
 
-        const newKey = await Key.create({
-            key: key,
-            userId: userId,
-            title: description,
-        });
+        const newKey = await Key.create({ key, userId, title: description });
+
+        const plan = await userService.getUserPlan(userId);
 
         return {
-            key: key,
+            key,
             id: newKey.id,
             title: newKey.title,
-            plan: {
-                name: 'Free',
-                rateLimit: 150, // Example rate limit for free plan
-                description: 'Free plan with limited features',
-            },
+            plan: plan,
         };
     },
 
@@ -41,48 +38,21 @@ const KeyService = {
         }
 
         const newKey = crypto.randomBytes(69).toString('hex');
-
         key.key = newKey;
         await key.save();
+
+        const plan = await userService.getUserPlan(userId);
 
         return {
             key: newKey,
             id: key.id,
             title: key.title,
-            plan: {
-                name: 'Free',
-                rateLimit: 150,
-                description: 'Free plan with limited features',
-            },
+            plan: plan,
         };
     },
 
-    revokeKey: async (id, userId) => {
-        if (!validate(id)) {
-            throw new customErrors.BadRequestError('Invalid API Key ID format');
-        }
-
-        const key = await Key.findByPk(id);
-        if (!key) {
-            throw new customErrors.NotFoundError('API Key not found');
-        }
-
-        if (key.userId !== userId) {
-            throw new customErrors.UnauthorizedError('You do not have permission to revoke this API key');
-        }
-
-        if (!key.isActive) {
-            throw new customErrors.NotFoundError('API Key not found or is inactive');
-        }
-
-        key.isActive = false;
-        await key.save();
-
-        return { message: 'API Key revoked successfully' };
-    },
-
     verifyKey: async (key) => {
-        const keyRecord = await Key.findOne({ where: { key: key } });
+        const keyRecord = await Key.findOne({ where: { key } });
 
         if (!keyRecord || !keyRecord.isActive) {
             throw new customErrors.NotFoundError('API Key is not active or does not exist');
@@ -92,19 +62,22 @@ const KeyService = {
         keyRecord.lastRequest = new Date();
         await keyRecord.save();
 
+        const plan = await userService.getUserPlan(keyRecord.userId);
+
         return {
             key: keyRecord.key,
             id: keyRecord.id,
-            plan: {
-                name: 'Free',
-                rateLimit: 150,
-                description: 'Free plan with limited features',
-            },
+            plan: plan,
         };
     },
 
     listKeys: async (userId) => {
-        const user = await User.findByPk(userId);
+        const user = await User.findByPk(userId, {
+            include: {
+                model: Plan,
+                as: 'plan',
+            },
+        });
 
         if (!user) {
             throw new customErrors.NotFoundError('User not found');
@@ -112,23 +85,23 @@ const KeyService = {
 
         const keys = await Key.findAll({
             where: { userId, isActive: true },
-            attributes: ['id', 'title', 'isActive', 'rateLimitCounter', 'lastRequest', 'createdAt', 'updatedAt'],
+            attributes: ['id', 'title', 'requestCounter', 'requestCounter', 'lastRequest', 'createdAt', 'updatedAt'],
         });
 
         if (!keys.length) {
             throw new customErrors.NotFoundError('No active API Keys found for this user');
         }
 
+        const plan = await userService.getUserPlan(userId);
+
         return keys.map((key) => ({
             id: key.id,
             title: key.title,
+            requestCounter: key.requestCounter,
             rateLimitCounter: key.rateLimitCounter,
             lastRequest: key.lastRequest,
-            plan: {
-                name: 'Free',
-                rateLimit: 150,
-                description: 'Free plan with limited features',
-            },
+            createdAt: key.createdAt,
+            plan: plan,
         }));
     },
 };
