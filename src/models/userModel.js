@@ -78,6 +78,10 @@ const User = sequelize.define('User', {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
     },
+    lastLoggedInIp: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     planId: {
         type: DataTypes.UUID,
         allowNull: true,
@@ -88,12 +92,16 @@ const User = sequelize.define('User', {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
     },
+    public: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
 
 }, {
     tableName: 'Users',
     timestamps: true,
     defaultScope: {
-        attributes: ['id', 'username'],
+        attributes: ['id', 'username', 'isAdmin', 'createdAt'],
     },
 });
 
