@@ -37,7 +37,7 @@ const Anime = require('../models/animeModel');
  *                 nullable: true
  *                 items:
  *                   type: string
- *                   example: "Action"
+ *                   example: ""
  *                 description: "An array of genres associated with the anime."
  *                 example: []
  *               releaseDate:
