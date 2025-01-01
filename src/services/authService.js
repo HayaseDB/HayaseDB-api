@@ -50,32 +50,55 @@ const authService = {
     },
 
 
-    updateUser: async (userId, { email, username, password }) => {
-        const user = await User.findByPk(userId);
+    updateUser: async (data, transaction) => {
+        const { Media, Meta, User: user } = data;
+        const { email, username, password } = Meta;
 
         if (!user) {
             throw new customErrors.NotFoundError('User not found');
         }
 
+        let updatedFields = {};
+
         if (email) {
             const existingUser = await User.unscoped().findOne({ where: { email } });
-            if (existingUser && existingUser.id !== userId) {
+            if (existingUser && existingUser.id !== user.id) {
                 throw new customErrors.ConflictError('Email already exists');
             }
-            user.email = email;
+            updatedFields.email = email;
         }
 
         if (username) {
-            user.username = username;
+            updatedFields.username = username;
         }
 
         if (password) {
-            user.password = await bcrypt.hash(password, 10);
+            updatedFields.password = await bcrypt.hash(password, 10);
         }
 
-        await user.save();
-        return user;
+        if (Array.isArray(Media)) {
+            Media.forEach(file => {
+                if (file && file.fieldname) {
+                    if (file.mimetype && !file.mimetype.startsWith('image/')) {
+                        throw new customErrors.BadRequestError('Only image files are allowed for profile picture');
+                    }
+                    updatedFields[file.fieldname] = file.buffer || null;
+                } else {
+                    throw new customErrors.BadRequestError('Invalid file data');
+                }
+            });
+        }
+
+        const updatedUser = await user.update(updatedFields, { transaction });
+
+        if (!updatedUser) {
+            throw new customErrors.ValidationError('An unexpected error occurred while updating the user');
+        }
+
+        return updatedUser;
     },
+
+
 
     deleteUserById: async (userId, password, transaction) => {
         const user = await User.unscoped().findByPk(userId, { transaction });

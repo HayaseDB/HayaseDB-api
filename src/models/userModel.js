@@ -96,12 +96,21 @@ const User = sequelize.define('User', {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
-
+    profilePicture: {
+        type: DataTypes.BLOB,
+        allowNull: true,
+        get() {
+            const blobData = this.getDataValue('profilePicture');
+            return blobData
+                ? `${process.env.API_URL}/user/${this.getDataValue('id')}/avatar`
+                : null;
+        },
+    },
 }, {
     tableName: 'Users',
     timestamps: true,
     defaultScope: {
-        attributes: ['id', 'username', 'isAdmin', 'createdAt'],
+        attributes: ['id', 'username', 'isAdmin', 'createdAt', 'profilePicture'],
     },
 });
 

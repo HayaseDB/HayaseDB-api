@@ -1,6 +1,7 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const { firewall } = require('../middlewares/authMiddleware');
+const multerMiddleware = require("../middlewares/multerMiddleware");
 const router = express.Router();
 
 /**
@@ -174,13 +175,13 @@ router.get('/profile', firewall.user, authController.getProfile);
  *   put:
  *     tags: [Auth]
  *     summary: Update user details
- *     description: Updates the currently authenticated user's profile details.
+ *     description: Updates the currently authenticated user's profile details, including the profile picture.
  *     security:
  *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -193,6 +194,9 @@ router.get('/profile', firewall.user, authController.getProfile);
  *               password:
  *                 type: string
  *                 example: newpassword123
+ *               profilePicture:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: User details updated successfully
@@ -217,7 +221,7 @@ router.get('/profile', firewall.user, authController.getProfile);
  *       500:
  *         description: Server error
  */
-router.put('/update', firewall.user, authController.updateUser);
+router.put('/update', multerMiddleware, authController.updateUser);
 
 
 /**

@@ -79,21 +79,29 @@ const getProfile = async (req, res) => {
  * Update User Profile details
  */
 const updateUser = async (req, res) => {
-    const {email, username, password} = req.body;
-    const userId = req.auth.user.id;
+    const { files, body } = req;
+    const { user } = req.auth;
+    const transaction = await sequelize.transaction();
 
     try {
-        const updatedUser = await authService.updateUser(userId, { email, username, password });
-        responseHandler.success(res, {
-            id: updatedUser.id,
-            email: updatedUser.email,
-            username: updatedUser.username,
-        }, 'User updated successfully');
+        const data = {
+            User: user,
+            Media: files,
+            Meta: body,
+        };
+
+        const updatedUser = await authService.updateUser(data, transaction);
+
+        await transaction.commit();
+
+        return responseHandler.success(res, updatedUser, 'User updated successfully', 200);
     } catch (error) {
-        responseHandler.error(res, error);
+        await transaction.rollback();
+
+        return responseHandler.error(res, error);
+
     }
 };
-
 
 
 const deleteUser = async (req, res) => {

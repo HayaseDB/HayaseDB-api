@@ -119,4 +119,32 @@ router.get('/list', firewall.anonymous, userController.listUsers);
  */
 router.get('/:id', firewall.anonymous, userController.getUserById);
 
+/**
+ * @swagger
+ * /user/{id}/avatar:
+ *   get:
+ *     summary: Get the user's avatar by ID
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the user whose avatar is to be retrieved
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Avatar retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Avatar not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/:id/avatar', firewall.anonymous, userController.getAvatar);
+
 module.exports = router;

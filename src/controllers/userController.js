@@ -1,6 +1,7 @@
 const userService = require("../services/userService");
 const responseHandler = require("../handlers/responseHandler");
 const customErrorsUtil = require("../utils/customErrorsUtil");
+const customErrors = require("../utils/customErrorsUtil");
 
 
 /**
@@ -21,6 +22,26 @@ const getUserById = async (req, res) => {
         return responseHandler.error(res, error, 500);
     }
 };
+
+/**
+ * Get User Avatar by ID
+ */
+const getAvatar = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const avatarBuffer = await userService.getAvatar(id);
+
+        return res.send(avatarBuffer);
+    } catch (error) {
+        if (error instanceof customErrors.NotFoundError) {
+            return responseHandler.error(res, error.message, 404);
+        } else {
+            return responseHandler.error(res, 'Internal server error', 500);
+        }
+    }
+};
+
 
 const listUsers = async (req, res) => {
     const {
@@ -60,4 +81,4 @@ const listUsers = async (req, res) => {
     }
 };
 
-module.exports = {getUserById, listUsers};
+module.exports = {getUserById, listUsers, getAvatar};

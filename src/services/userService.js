@@ -25,6 +25,23 @@ const userService = {
         return user.plan;
     },
 
+    /**
+     * Get Avatar by user ID
+     */
+    getAvatar: async (userId) => {
+        const user = await User.unscoped().findByPk(userId);
+        if (!user) {
+            throw new customErrorsUtil.NotFoundError('User not found');
+        }
+
+        const avatarBuffer = user.getDataValue('profilePicture');
+        if (!avatarBuffer) {
+            throw new customErrorsUtil.NotFoundError('Avatar not found');
+        }
+
+        return avatarBuffer;
+    },
+
 
     getUserById: async (userId) => {
         const user = await User.findByPk(userId);
