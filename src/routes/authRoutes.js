@@ -35,9 +35,6 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               username:
- *                 type: string
- *                 example: hayase
  *               email:
  *                 type: string
  *                 example: nagatoro@example.com

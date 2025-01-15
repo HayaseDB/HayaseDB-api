@@ -38,7 +38,6 @@
  *       required:
  *         - email
  *         - password
- *         - username
  *       description: "User account model containing authentication and profile details."
  */
 
@@ -57,14 +56,16 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+        required: true,
     },
     password: {
         type: DataTypes.STRING,
         allowNull: false,
+        required: true,
     },
     username: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     isAdmin: {
         type: DataTypes.BOOLEAN,

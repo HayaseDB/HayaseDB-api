@@ -7,10 +7,10 @@ const {sequelize} = require("../config/databaseConfig");
  * Register a new user entry
  */
 const register = async (req, res) => {
-    const {email, password, username} = req.body;
+    const {email, password} = req.body;
 
     try {
-        const user = await authService.createUser(email, password, username);
+        const user = await authService.createUser(email, password);
         responseHandler.success(res, {
             id: user.id,
             email: user.email,

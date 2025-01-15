@@ -2,13 +2,15 @@ const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const customErrors = require("../utils/customErrorsUtil");
+const generators = require("../utils/generatorsUtil");
 const authService = {
-    createUser: async (email, password, username) => {
+    createUser: async (email, password) => {
         const existingUser = await User.unscoped().findOne({where: {email}});
         if (existingUser) {
             throw new customErrors.ConflictError('Email already exists');
         }
 
+        const username = await generators.generateUsername()
         const hashedPassword = await bcrypt.hash(password, 10);
         return await User.create({email, password: hashedPassword, username});
     },
