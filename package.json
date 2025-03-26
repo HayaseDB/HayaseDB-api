@@ -5,8 +5,16 @@
   "author": "Sebastian Stepper",
   "license": "MIT",
   "scripts": {
+    "build": "nest build",
     "start:prod": "nest start",
     "start:dev": "nest start --watch",
+    "database:up": "docker-compose --env-file stack.env -p hayasedb-api -f ./docker/docker-compose.yml up postgres -d",
+    "database:down": "docker-compose --env-file stack.env -p hayasedb-api -f ./docker/docker-compose.yml down postgres",
+    "database:destroy": "docker-compose --env-file stack.env -p hayasedb-api -f ./docker/docker-compose.yml down postgres -v",
+    "docker:up": "docker-compose --env-file stack.env -p hayasedb-api -f ./docker/docker-compose.yml up -d",
+    "docker:down": "docker-compose --env-file stack.env -p hayasedb-api -f ./docker/docker-compose.yml down",
+    "docker:destroy": "docker-compose --env-file stack.env -p hayasedb-api -f ./docker/docker-compose.yml down -v",
+    "docker:build": "docker-compose --env-file stack.env -p hayasedb-api -f ./docker/docker-compose.yml build",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
   },
   "dependencies": {
@@ -15,11 +23,13 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.1.0",
+    "@nestjs/typeorm": "^11.0.0",
     "@types/figlet": "^1.7.0",
     "@types/gradient-string": "^1.1.6",
     "chalk": "^5.4.1",
     "figlet": "^1.8.0",
     "gradient-string": "^3.0.0",
+    "pg": "^8.14.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

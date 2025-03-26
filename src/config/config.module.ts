@@ -8,6 +8,7 @@ import appConfig from '@/config/app.config';
     NestConfigModule.forRoot({
       load: [databaseConfig, appConfig],
       cache: true,
+      envFilePath: 'stack.env',
     }),
   ],
 })
