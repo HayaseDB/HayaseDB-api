@@ -19,8 +19,8 @@ async function server() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('doc', app, document);
-
   const configService = app.get(ConfigService);
+
   const port: number = configService.getOrThrow('app.port');
   await app.listen(port);
 
