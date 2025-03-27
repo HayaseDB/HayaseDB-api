@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "description": "Open Source free Anime database",
   "author": "Sebastian Stepper",
+  "github": "https://github.com/hayasedb",
+  "website": "https://hayasedb.com",
   "license": "MIT",
   "scripts": {
     "build": "nest build",
