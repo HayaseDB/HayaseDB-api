@@ -6,14 +6,14 @@ import { configValidate } from '@/config/config.schema';
 import jwtConfig from '@/config/jwt.config';
 
 @Module({
-  imports: [
-    NestConfigModule.forRoot({
-      validationSchema: configValidate,
-      isGlobal: true,
-      load: [databaseConfig, appConfig, jwtConfig],
-      cache: true,
-      envFilePath: 'stack.env',
-    }),
-  ],
+	imports: [
+		NestConfigModule.forRoot({
+			validationSchema: configValidate,
+			isGlobal: true,
+			load: [databaseConfig, appConfig, jwtConfig],
+			cache: true,
+			envFilePath: 'stack.env',
+		}),
+	],
 })
 export class ConfigModule {}
