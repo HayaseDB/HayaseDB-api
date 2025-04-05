@@ -7,35 +7,35 @@ import { LoginDto } from './dto/login.dto';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-	constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-	@Post('login')
-	@HttpCode(HttpStatus.OK)
-	async login(@Body() loginDto: LoginDto) {
-		const loginResult = await this.authService.login(
-			loginDto.email,
-			loginDto.password,
-		);
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  async login(@Body() loginDto: LoginDto) {
+    const loginResult = await this.authService.login(
+      loginDto.email,
+      loginDto.password,
+    );
 
-		return {
-			message: 'Login Successfully',
-			accessToken: loginResult.accessToken,
-			userId: loginResult.userId,
-		};
-	}
+    return {
+      message: 'Login Successfully',
+      accessToken: loginResult.accessToken,
+      userId: loginResult.userId,
+    };
+  }
 
-	@Post('register')
-	@HttpCode(HttpStatus.CREATED)
-	async register(@Body() registerDto: RegisterDto) {
-		const user = await this.authService.register(
-			registerDto.email,
-			registerDto.password,
-		);
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() registerDto: RegisterDto) {
+    const user = await this.authService.register(
+      registerDto.email,
+      registerDto.password,
+    );
 
-		return {
-			message: 'User registered successfully',
-			userId: user.id,
-			email: user.email,
-		};
-	}
+    return {
+      message: 'User registered successfully',
+      userId: user.id,
+      email: user.email,
+    };
+  }
 }

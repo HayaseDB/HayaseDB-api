@@ -8,14 +8,14 @@ import { ContributionsModule } from '@/module/contributions/contributions.module
 import { AppController } from './app.controller';
 
 @Module({
-	imports: [
-		ConfigModule,
-		DatabaseModule,
-		UsersModule,
-		AuthModule,
-		AnimesModule,
-		ContributionsModule,
-	],
-	controllers: [AppController],
+  imports: [
+    ConfigModule,
+    DatabaseModule,
+    UsersModule,
+    AuthModule,
+    AnimesModule,
+    ContributionsModule,
+  ],
+  controllers: [AppController],
 })
 export class AppModule {}

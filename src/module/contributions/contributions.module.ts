@@ -7,8 +7,8 @@ import { Anime } from '@/module/animes/entities/anime.entity';
 import { User } from '@/module/users/entities/user.entity';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Contribution, Anime, User])],
-	controllers: [ContributionsController],
-	providers: [ContributionsService],
+  imports: [TypeOrmModule.forFeature([Contribution, Anime, User])],
+  controllers: [ContributionsController],
+  providers: [ContributionsService],
 })
 export class ContributionsModule {}

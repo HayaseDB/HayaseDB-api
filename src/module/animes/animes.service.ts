@@ -7,31 +7,31 @@ import { UpdateAnimeDto } from '@/module/animes/dto/update-anime.dto';
 
 @Injectable()
 export class AnimesService {
-	constructor(
-		@InjectRepository(Anime)
-		private animesRepository: Repository<Anime>,
-	) {}
+  constructor(
+    @InjectRepository(Anime)
+    private animesRepository: Repository<Anime>,
+  ) {}
 
-	create(createAnimeDto: CreateAnimeDto) {
-		const anime = this.animesRepository.create(createAnimeDto);
-		return this.animesRepository.save(anime);
-	}
+  create(createAnimeDto: CreateAnimeDto) {
+    const anime = this.animesRepository.create(createAnimeDto);
+    return this.animesRepository.save(anime);
+  }
 
-	findAll() {
-		return this.animesRepository.find();
-	}
+  findAll() {
+    return this.animesRepository.find();
+  }
 
-	findOne(id: string) {
-		return this.animesRepository.findOne({ where: { id } });
-	}
+  findOne(id: string) {
+    return this.animesRepository.findOne({ where: { id } });
+  }
 
-	async update(id: string, updateAnimeDto: UpdateAnimeDto) {
-		await this.animesRepository.update(id, updateAnimeDto);
-		return this.findOne(id);
-	}
+  async update(id: string, updateAnimeDto: UpdateAnimeDto) {
+    await this.animesRepository.update(id, updateAnimeDto);
+    return this.findOne(id);
+  }
 
-	async remove(id: string) {
-		await this.animesRepository.delete(id);
-		return { deleted: true };
-	}
+  async remove(id: string) {
+    await this.animesRepository.delete(id);
+    return { deleted: true };
+  }
 }
