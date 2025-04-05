@@ -34,10 +34,5 @@ export class CreateAnimeDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  synopsis?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
   studio?: string;
 }

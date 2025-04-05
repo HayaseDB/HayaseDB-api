@@ -29,6 +29,15 @@ export class UsersService {
     return this.usersRepository.findOneBy({ email: email });
   }
 
+  async verifyUser(id: string): Promise<User | null> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (user) {
+      user.verified = true;
+      return this.usersRepository.save(user);
+    }
+    return null;
+  }
+
   async remove(id: string): Promise<void> {
     await this.usersRepository.delete(id);
   }

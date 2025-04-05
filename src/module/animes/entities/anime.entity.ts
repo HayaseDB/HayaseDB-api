@@ -13,13 +13,10 @@ export class Anime {
   genres: string[];
 
   @Column({ nullable: true })
-  episodes: number;
+  episodes?: number;
 
   @Column({ type: 'date' })
-  releaseDate: Date;
-
-  @Column({ type: 'text', nullable: true })
-  synopsis?: string;
+  releaseDate?: Date;
 
   @Column({ length: 255, nullable: true })
   studio?: string;

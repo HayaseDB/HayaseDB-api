@@ -25,6 +25,7 @@
     "migration:revert": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:revert"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.1",
     "@nestjs/core": "^11.0.1",
@@ -41,7 +42,9 @@
     "class-validator": "^0.14.1",
     "figlet": "^1.8.0",
     "gradient-string": "^3.0.0",
+    "hbs": "^4.2.0",
     "joi": "^17.13.3",
+    "nodemailer": "^6.10.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.14.1",
@@ -60,7 +63,10 @@
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.5",
+    "express": "^5.1.0",
+    "express-handlebars": "^8.0.1",
     "globals": "^16.0.0",
+    "handlebars-layouts": "^3.1.4",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",

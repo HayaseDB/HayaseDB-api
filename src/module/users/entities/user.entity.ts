@@ -5,10 +5,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BeforeInsert,
-  BeforeUpdate,
   OneToMany,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { IsEmail } from 'class-validator';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
 import { generateUsername } from '@/module/users/utility';
@@ -42,7 +40,7 @@ export class User {
   role: Role;
 
   @Column({ default: false })
-  isEmailVerified: boolean;
+  verified: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -55,12 +53,6 @@ export class User {
 
   @OneToMany(() => Contribution, (contribution) => contribution.moderator)
   moderatedContributions: Contribution[];
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 10);
-  }
 
   @BeforeInsert()
   setDefaultUsername() {

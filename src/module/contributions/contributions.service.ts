@@ -54,7 +54,6 @@ export class ContributionsService {
       throw new BadRequestException('Anime not found');
     }
 
-    // Check if there's already a pending contribution for this anime by this user
     const existingContribution = await this.contributionRepository.findOne({
       where: {
         anime: { id: animeId },
@@ -131,15 +130,12 @@ export class ContributionsService {
       contribution.rejectionComment = rejectionComment;
     }
 
-    // Check if it's a new anime submission (anime not set)
     if (status === ContributionStatus.APPROVED) {
       if (!contribution.anime) {
-        // Create new anime for 'new' submissions
         const newAnime = this.animeRepository.create(contribution.changeData);
         const savedAnime = await this.animeRepository.save(newAnime);
         contribution.anime = savedAnime;
       } else {
-        // Update existing anime for 'edit' submissions
         await this.animeRepository.update(
           contribution.anime.id,
           contribution.changeData,

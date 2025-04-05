@@ -93,7 +93,6 @@ export class ContributionsController {
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'status', required: false })
-  @ApiQuery({ name: 'submissionType', required: false })
   @ApiQuery({ name: 'userId', required: false })
   @ApiQuery({ name: 'animeId', required: false })
   async findContributions(

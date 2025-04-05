@@ -8,9 +8,11 @@ import { ConfigService } from '@nestjs/config';
 import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from '@/module/auth/strategy/jwt.strategy';
+import { MailerModule } from '@/module/mailer/mailer.module';
 @Module({
   imports: [
     UsersModule,
+    MailerModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       inject: [ConfigService],
