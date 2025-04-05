@@ -4,7 +4,6 @@ export const configValidate = Joi.object({
   // App Configuration
   APP_PORT: Joi.number().required(),
   APP_BASE_URL: Joi.string().default('http://localhost'),
-  APP_VERSION: Joi.string().optional(),
 
   // JWT Configuration
   JWT_SECRET: Joi.string().required(),
