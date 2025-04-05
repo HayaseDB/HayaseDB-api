@@ -47,9 +47,9 @@ export class ContributionsController {
     );
   }
 
-  @Patch(':contributionId/decline')
+  @Patch(':contributionId/reject')
   @Auth('Moderator')
-  async declineContribution(
+  async rejectContribution(
     @Param('contributionId') contributionId: string,
     @Body() updateContributionStatusDto: UpdateContributionStatusDto,
     @GetUser() moderator: User,
