@@ -14,9 +14,10 @@ import { ContributionStatus } from './entities/contribution.entity';
 import { Auth, GetUser } from '@/module/auth/auth.decorator';
 import { User } from '@/module/users/entities/user.entity';
 import { UpdateContributionStatusDto } from './dto/update-contribution-status.dto';
-import { ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiParam } from '@nestjs/swagger';
 import { CreateContributionDto } from '@/module/contributions/dto/create-contribution.dto';
 import { EditContributionDto } from '@/module/contributions/dto/edit-contribution.dto';
+import { ContributionQueryDto } from '@/module/contributions/dto/query.dto';
 
 @Controller('contributions')
 export class ContributionsController {
@@ -74,25 +75,8 @@ export class ContributionsController {
 
   @Get()
   @Auth('Moderator')
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
-  @ApiQuery({ name: 'status', required: false })
-  @ApiQuery({ name: 'userId', required: false })
-  @ApiQuery({ name: 'animeId', required: false })
-  async findContributions(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
-    @Query('status') status?: ContributionStatus,
-    @Query('userId') userId?: string,
-    @Query('animeId') animeId?: string,
-  ) {
-    return await this.contributionService.findContributions({
-      page,
-      limit,
-      status,
-      userId,
-      animeId,
-    });
+  async findContributions(@Query() query: ContributionQueryDto) {
+    return await this.contributionService.findContributions(query);
   }
 
   @Get(':contributionId')
