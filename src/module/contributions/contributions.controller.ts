@@ -70,7 +70,7 @@ export class ContributionsController {
   ) {
     return await this.contributionService.updateContributionStatus(
       contributionId,
-      ContributionStatus.APPROVED,
+      ContributionStatus.ACCEPTED,
       moderator.id,
     );
   }

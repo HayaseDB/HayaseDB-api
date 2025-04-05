@@ -130,7 +130,7 @@ export class ContributionsService {
       contribution.rejectionComment = rejectionComment;
     }
 
-    if (status === ContributionStatus.APPROVED) {
+    if (status === ContributionStatus.ACCEPTED) {
       if (!contribution.anime) {
         const newAnime = this.animeRepository.create(contribution.changeData);
         const savedAnime = await this.animeRepository.save(newAnime);

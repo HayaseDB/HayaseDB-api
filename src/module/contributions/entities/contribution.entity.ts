@@ -12,7 +12,7 @@ import { Anime } from '@/module/animes/entities/anime.entity';
 
 export enum ContributionStatus {
   PENDING = 'pending',
-  APPROVED = 'approved',
+  ACCEPTED = 'accepted',
   REJECTED = 'rejected',
   DELETED = 'deleted',
 }
