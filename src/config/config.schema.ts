@@ -17,4 +17,10 @@ export const configValidate = Joi.object({
   DATABASE_NAME: Joi.string().required(),
   DATABASE_LOGGING: Joi.boolean().required().default(false),
   DATABASE_SYNC: Joi.boolean().required().default(false),
+
+  // Mailer Configuration
+  MAILER_USER: Joi.string(),
+  MAILER_PASSWORD: Joi.string(),
+  MAILER_HOST: Joi.string(),
+  MAILER_PORT: Joi.number(),
 });
