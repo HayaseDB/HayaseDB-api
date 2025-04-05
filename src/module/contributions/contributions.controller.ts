@@ -7,13 +7,14 @@ import {
   Post,
   Query,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ContributionsService } from './contributions.service';
 import { ContributionStatus } from './entities/contribution.entity';
 import { Auth, GetUser } from '@/module/auth/auth.decorator';
 import { User } from '@/module/users/entities/user.entity';
 import { UpdateContributionStatusDto } from './dto/update-contribution-status.dto';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateContributionDto } from '@/module/contributions/dto/create-contribution.dto';
 import { EditContributionDto } from '@/module/contributions/dto/edit-contribution.dto';
 
@@ -47,44 +48,27 @@ export class ContributionsController {
     );
   }
 
-  @Patch(':contributionId/reject')
+  @Patch(':contributionId/:status')
   @Auth('Moderator')
-  async rejectContribution(
+  @ApiParam({
+    name: 'status',
+    enum: ContributionStatus,
+  })
+  async updateContributionStatus(
     @Param('contributionId') contributionId: string,
+    @Param('status') status: ContributionStatus,
     @Body() updateContributionStatusDto: UpdateContributionStatusDto,
     @GetUser() moderator: User,
   ) {
-    return await this.contributionService.updateContributionStatus(
-      contributionId,
-      ContributionStatus.REJECTED,
-      moderator.id,
-      updateContributionStatusDto.comment,
-    );
-  }
+    if (!Object.values(ContributionStatus).includes(status)) {
+      throw new BadRequestException('Invalid status');
+    }
 
-  @Patch(':contributionId/accept')
-  @Auth('Moderator')
-  async acceptContribution(
-    @Param('contributionId') contributionId: string,
-    @GetUser() moderator: User,
-  ) {
     return await this.contributionService.updateContributionStatus(
       contributionId,
-      ContributionStatus.ACCEPTED,
+      status,
       moderator.id,
-    );
-  }
-
-  @Patch(':contributionId/pending')
-  @Auth('Moderator')
-  async setContributionPending(
-    @Param('contributionId') contributionId: string,
-    @GetUser() moderator: User,
-  ) {
-    return await this.contributionService.updateContributionStatus(
-      contributionId,
-      ContributionStatus.PENDING,
-      moderator.id,
+      updateContributionStatusDto?.comment,
     );
   }
 
