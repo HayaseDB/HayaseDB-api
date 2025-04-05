@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
+import { Media } from '@/module/media/entities/media.entity';
 
 @Entity('animes')
 export class Anime {
@@ -26,4 +27,7 @@ export class Anime {
 
   @OneToMany(() => Contribution, (contribution) => contribution.moderator)
   moderatedContributions: Contribution[];
+
+  @OneToMany(() => Media, (media) => media.anime)
+  media: Media[];
 }

@@ -5,13 +5,14 @@ import appConfig from '@/config/app.config';
 import { configValidate } from '@/config/config.schema';
 import jwtConfig from '@/config/jwt.config';
 import mailerConfig from '@/config/mailer.config';
+import minioConfig from '@/config/minio.config';
 
 @Module({
   imports: [
     NestConfigModule.forRoot({
       validationSchema: configValidate,
       isGlobal: true,
-      load: [databaseConfig, appConfig, jwtConfig, mailerConfig],
+      load: [databaseConfig, appConfig, jwtConfig, mailerConfig, minioConfig],
       cache: true,
       envFilePath: 'stack.env',
     }),

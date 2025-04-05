@@ -23,4 +23,10 @@ export const configValidate = Joi.object({
   MAILER_PASSWORD: Joi.string(),
   MAILER_HOST: Joi.string(),
   MAILER_PORT: Joi.number(),
+
+  // Minio Configuration
+  MINIO_ENDPOINT: Joi.string(),
+  MINIO_PORT: Joi.number(),
+  MINIO_ACCESS_KEY: Joi.string(),
+  MINIO_SECRET_KEY: Joi.string(),
 });
