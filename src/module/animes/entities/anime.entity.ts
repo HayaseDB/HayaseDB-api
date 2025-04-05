@@ -12,7 +12,7 @@ export class Anime {
 	@Column({ length: 255 })
 	genre: string;
 
-	@Column()
+	@Column({ nullable: true })
 	episodes: number;
 
 	@Column({ type: 'date' })

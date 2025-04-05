@@ -4,7 +4,7 @@ import { DatabaseModule } from '@/database/database.module';
 import { UsersModule } from '@/module/users/users.module';
 import { AuthModule } from '@/module/auth/auth.module';
 import { AnimesModule } from './module/animes/animes.module';
-import { ContributionModule } from '@/module/contributions/contribution.module';
+import { ContributionsModule } from '@/module/contributions/contributions.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -14,7 +14,7 @@ import { AppController } from './app.controller';
 		UsersModule,
 		AuthModule,
 		AnimesModule,
-		ContributionModule,
+		ContributionsModule,
 	],
 	controllers: [AppController],
 })

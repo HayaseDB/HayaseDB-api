@@ -1,19 +1,23 @@
-import { IsNotEmpty, IsNumber, IsObject } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsString, IsArray } from 'class-validator';
 
 export class CreateContributionDto {
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsNumber()
-	animeId: string;
+	@IsOptional()
+	@IsString()
+	title?: string;
 
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsNumber()
-	userId: string;
+	@IsOptional()
+	@IsString()
+	description?: string;
 
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsObject()
-	changeData: Record<string, any>;
+	@IsOptional()
+	@IsArray()
+	genres?: string[];
+
+	@IsOptional()
+	@IsString()
+	status?: string;
+
+	@IsOptional()
+	@IsString()
+	releaseDate?: string;
 }

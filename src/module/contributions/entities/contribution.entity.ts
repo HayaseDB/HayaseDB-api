@@ -19,6 +19,9 @@ export class Contribution {
 	@PrimaryGeneratedColumn('uuid')
 	id: string;
 
+	@Column()
+	submission_type: string;
+
 	@ManyToOne(() => Anime, (anime) => anime.contributions, {
 		nullable: false,
 		onDelete: 'CASCADE',
