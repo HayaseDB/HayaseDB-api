@@ -11,6 +11,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { IsEmail } from 'class-validator';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
+import { generateUsername } from '@/module/users/utility';
 
 export enum Role {
   Admin = 'admin',
@@ -22,6 +23,9 @@ export enum Role {
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ unique: true })
+  username: string;
 
   @Column({ unique: true })
   @IsEmail()
@@ -56,5 +60,12 @@ export class User {
   @BeforeUpdate()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
+  }
+
+  @BeforeInsert()
+  setDefaultUsername() {
+    if (!this.username) {
+      this.username = generateUsername();
+    }
   }
 }

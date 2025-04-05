@@ -5,10 +5,17 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { pastel } from 'gradient-string';
 import chalk from 'chalk';
 import figlet from 'figlet';
+import { ValidationPipe } from '@nestjs/common';
 
 async function server() {
   const app = await NestFactory.create(AppModule);
-
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, // ✅ enables transformation
+      whitelist: true, // ✅ strips unknown props
+      forbidNonWhitelisted: true, // ❗ optional: throws if unknown props
+    }),
+  );
   // Swagger Setup for api documentation
   const config = new DocumentBuilder()
     .setTitle('HayaseDB API')

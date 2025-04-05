@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -7,7 +12,6 @@ import {
 } from './entities/contribution.entity';
 import { Anime } from '../animes/entities/anime.entity';
 import { User } from '../users/entities/user.entity';
-import { CreateContributionDto } from './dto/create-contribution.dto';
 
 @Injectable()
 export class ContributionsService {
@@ -20,32 +24,24 @@ export class ContributionsService {
     private userRepository: Repository<User>,
   ) {}
 
-  async createContribution(createDto: CreateContributionDto, userId) {
+  async createContribution(data: any, userId: string) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
-    const newAnime = this.animeRepository.create(createDto);
-    const savedAnime = await this.animeRepository.save(newAnime);
-
     const contribution = this.contributionRepository.create({
-      anime: savedAnime,
       user,
-      changeData: createDto,
+      changeData: data,
       status: ContributionStatus.PENDING,
-      submission_type: 'new',
     });
 
     return await this.contributionRepository.save(contribution);
   }
 
-  async createOrUpdateContribution(
-    animeId: string,
-    createDto: CreateContributionDto,
-  ) {
+  async suggestEditToAnime(animeId: string, data: any, userId: string) {
     const user = await this.userRepository.findOne({
-      where: { id: 'currentUserId' },
+      where: { id: userId },
     });
     if (!user) {
       throw new BadRequestException('User not found');
@@ -58,73 +54,152 @@ export class ContributionsService {
       throw new BadRequestException('Anime not found');
     }
 
+    // Check if there's already a pending contribution for this anime by this user
+    const existingContribution = await this.contributionRepository.findOne({
+      where: {
+        anime: { id: animeId },
+        user: { id: userId },
+        status: ContributionStatus.PENDING,
+      },
+    });
+
+    if (existingContribution) {
+      throw new BadRequestException(
+        'You already have a pending contribution for this anime',
+      );
+    }
+
     const contribution = this.contributionRepository.create({
       anime,
       user,
-      changeData: createDto,
+      changeData: data,
       status: ContributionStatus.PENDING,
-      submission_type: 'edit',
     });
 
     return await this.contributionRepository.save(contribution);
   }
 
-  async editContributionRequest(
-    animeId: string,
-    createDto: CreateContributionDto,
-  ) {
+  async editContribution(contributionId: string, data: any, userId: string) {
     const contribution = await this.contributionRepository.findOne({
-      where: { anime: { id: animeId } },
+      where: { id: contributionId },
+      relations: ['user'],
     });
+
     if (!contribution) {
-      throw new BadRequestException('Contribution not found');
+      throw new NotFoundException('Contribution not found');
     }
 
-    contribution.changeData = createDto;
+    if (contribution.user.id !== userId) {
+      throw new ForbiddenException('You can only edit your own contributions');
+    }
+
+    if (contribution.status !== ContributionStatus.PENDING) {
+      throw new BadRequestException('Only pending contributions can be edited');
+    }
+
+    contribution.changeData = data;
     return await this.contributionRepository.save(contribution);
   }
 
-  async updateContributionStatus(animeId: string, status: ContributionStatus) {
+  async updateContributionStatus(
+    contributionId: string,
+    status: ContributionStatus,
+    moderatorId: string,
+    rejectionComment?: string,
+  ) {
     const contribution = await this.contributionRepository.findOne({
-      where: { anime: { id: animeId } },
+      where: { id: contributionId },
+      relations: ['anime'],
     });
+
     if (!contribution) {
-      throw new BadRequestException('Contribution not found');
+      throw new NotFoundException('Contribution not found');
+    }
+
+    const moderator = await this.userRepository.findOne({
+      where: { id: moderatorId },
+    });
+
+    if (!moderator) {
+      throw new BadRequestException('Moderator not found');
     }
 
     contribution.status = status;
+    contribution.moderator = moderator;
 
+    if (status === ContributionStatus.REJECTED && rejectionComment) {
+      contribution.rejectionComment = rejectionComment;
+    }
+
+    // Check if it's a new anime submission (anime not set)
     if (status === ContributionStatus.APPROVED) {
-      await this.animeRepository.update(
-        contribution.anime.id,
-        contribution.changeData,
-      );
+      if (!contribution.anime) {
+        // Create new anime for 'new' submissions
+        const newAnime = this.animeRepository.create(contribution.changeData);
+        const savedAnime = await this.animeRepository.save(newAnime);
+        contribution.anime = savedAnime;
+      } else {
+        // Update existing anime for 'edit' submissions
+        await this.animeRepository.update(
+          contribution.anime.id,
+          contribution.changeData,
+        );
+      }
     }
 
     return this.contributionRepository.save(contribution);
   }
 
-  async findPendingContributions(page: number, limit: number) {
-    const [result, total] = await this.contributionRepository.findAndCount({
-      where: { status: ContributionStatus.PENDING },
-      relations: ['anime', 'user'],
-      take: limit,
-      skip: (page - 1) * limit,
-    });
+  async findContributions({
+    page = 1,
+    limit = 20,
+    status,
+    userId,
+    animeId,
+  }: {
+    page: number;
+    limit: number;
+    status?: ContributionStatus;
+    userId?: string;
+    animeId?: string;
+  }) {
+    const queryBuilder = this.contributionRepository
+      .createQueryBuilder('contribution')
+      .leftJoinAndSelect('contribution.anime', 'anime')
+      .leftJoinAndSelect('contribution.user', 'user')
+      .leftJoinAndSelect('contribution.moderator', 'moderator');
 
-    return { result, total, page, limit };
+    if (status) {
+      queryBuilder.andWhere('contribution.status = :status', { status });
+    }
+
+    if (userId) {
+      queryBuilder.andWhere('user.id = :userId', { userId });
+    }
+
+    if (animeId) {
+      queryBuilder.andWhere('anime.id = :animeId', { animeId });
+    }
+
+    const [result, total] = await queryBuilder
+      .take(limit)
+      .skip((page - 1) * limit)
+      .orderBy('contribution.createdAt', 'DESC')
+      .getManyAndCount();
+
+    return {
+      items: result,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async getContributionById(contributionId: string) {
-    const contribution = await this.contributionRepository.findOne({
+    return this.contributionRepository.findOne({
       where: { id: contributionId },
-      relations: ['anime', 'user'],
+      relations: ['anime', 'user', 'moderator'],
     });
-
-    if (!contribution) {
-      throw new BadRequestException('Contribution not found');
-    }
-
-    return contribution;
   }
 }

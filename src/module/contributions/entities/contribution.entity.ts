@@ -4,6 +4,8 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from '@/module/users/entities/user.entity';
 import { Anime } from '@/module/animes/entities/anime.entity';
@@ -12,6 +14,7 @@ export enum ContributionStatus {
   PENDING = 'pending',
   APPROVED = 'approved',
   REJECTED = 'rejected',
+  DELETED = 'deleted',
 }
 
 @Entity('contributions')
@@ -19,11 +22,8 @@ export class Contribution {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  submission_type: string;
-
   @ManyToOne(() => Anime, (anime) => anime.contributions, {
-    nullable: false,
+    nullable: true,
     onDelete: 'CASCADE',
   })
   anime: Anime;
@@ -44,12 +44,21 @@ export class Contribution {
   })
   status: ContributionStatus;
 
+  @Column({ nullable: true })
+  rejectionComment: string;
+
   @ManyToOne(() => User, (user) => user.moderatedContributions, {
     nullable: true,
     onDelete: 'SET NULL',
   })
-  moderator?: User;
+  moderator: User;
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn({ nullable: true })
+  deletedAt: Date;
 }

@@ -9,8 +9,8 @@ export class Anime {
   @Column({ length: 255 })
   title: string;
 
-  @Column({ length: 255 })
-  genre: string;
+  @Column('text', { array: true })
+  genres: string[];
 
   @Column({ nullable: true })
   episodes: number;
@@ -24,7 +24,7 @@ export class Anime {
   @Column({ length: 255, nullable: true })
   studio?: string;
 
-  @OneToMany(() => Contribution, (contribution) => contribution.user)
+  @OneToMany(() => Contribution, (contribution) => contribution.anime)
   contributions: Contribution[];
 
   @OneToMany(() => Contribution, (contribution) => contribution.moderator)

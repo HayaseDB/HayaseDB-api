@@ -1,23 +1,3 @@
-import { IsOptional, IsString, IsArray } from 'class-validator';
+import { CreateAnimeDto } from '@/module/animes/dto/create-anime.dto';
 
-export class CreateContributionDto {
-  @IsOptional()
-  @IsString()
-  title?: string;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
-  @IsArray()
-  genres?: string[];
-
-  @IsOptional()
-  @IsString()
-  status?: string;
-
-  @IsOptional()
-  @IsString()
-  releaseDate?: string;
-}
+export class CreateContributionDto extends CreateAnimeDto {}

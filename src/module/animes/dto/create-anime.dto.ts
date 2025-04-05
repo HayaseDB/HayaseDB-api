@@ -4,8 +4,10 @@ import {
   IsString,
   IsNumber,
   IsDate,
+  IsArray,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateAnimeDto {
   @ApiProperty()
@@ -14,9 +16,9 @@ export class CreateAnimeDto {
   title: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  genre: string;
+  @IsArray()
+  @IsString({ each: true })
+  genres: string[];
 
   @ApiProperty()
   @IsNotEmpty()
@@ -26,6 +28,7 @@ export class CreateAnimeDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsDate()
+  @Type(() => Date)
   releaseDate: Date;
 
   @ApiProperty()

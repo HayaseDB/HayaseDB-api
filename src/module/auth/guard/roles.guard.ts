@@ -19,12 +19,16 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<Role[]>('roles', [
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>('roles', [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (!requiredRoles || requiredRoles.length === 0) {
+    const requiredRolesEnum = requiredRoles.map(
+      (role) => Role[role as keyof typeof Role],
+    );
+
+    if (!requiredRolesEnum || requiredRolesEnum.length === 0) {
       return true;
     }
 
@@ -34,10 +38,30 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated or role missing');
     }
 
-    if (!requiredRoles.includes(request.user.role)) {
-      throw new ForbiddenException('Insufficient permissions');
+    const userRole = request.user.role;
+
+    if (requiredRolesEnum.includes(Role.Admin)) {
+      if (userRole === Role.Admin) {
+        return true;
+      }
     }
 
-    return true;
+    if (requiredRolesEnum.includes(Role.Moderator)) {
+      if (userRole === Role.Moderator || userRole === Role.Admin) {
+        return true;
+      }
+    }
+
+    if (requiredRolesEnum.includes(Role.User)) {
+      if (
+        userRole === Role.User ||
+        userRole === Role.Moderator ||
+        userRole === Role.Admin
+      ) {
+        return true;
+      }
+    }
+
+    throw new ForbiddenException('Insufficient permissions');
   }
 }

@@ -21,7 +21,7 @@ export class AuthService {
   async login(
     email: string,
     password: string,
-  ): Promise<{ accessToken: string; userId: string }> {
+  ): Promise<{ accessToken: string; userId: string; username: string }> {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
@@ -32,7 +32,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    return { accessToken: this.generateToken(user), userId: user.id };
+    return {
+      accessToken: this.generateToken(user),
+      userId: user.id,
+      username: user.username,
+    };
   }
 
   /**
@@ -51,7 +55,7 @@ export class AuthService {
    * Generate a JWT token for the user.
    */
   private generateToken(user: User): string {
-    const payload = { id: user.id, email: user.email };
+    const payload = { userId: user.id };
     return this.jwtService.sign(payload);
   }
 }
