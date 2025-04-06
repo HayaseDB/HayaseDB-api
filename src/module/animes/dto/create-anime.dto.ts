@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsDate,
   IsArray,
+  IsUUID,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -35,4 +36,14 @@ export class CreateAnimeDto {
   @IsOptional()
   @IsString()
   studio?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  bannerImage?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  coverImage?: string;
 }

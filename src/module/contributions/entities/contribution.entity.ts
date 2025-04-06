@@ -33,8 +33,8 @@ export class Contribution {
   })
   user: User;
 
-  @Column({ type: 'jsonb' })
-  changeData: Record<string, any>;
+  @Column(() => Anime)
+  changeData: Anime;
 
   @Column({
     type: 'enum',

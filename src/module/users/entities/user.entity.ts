@@ -10,6 +10,7 @@ import {
 import { IsEmail } from 'class-validator';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
 import { generateUsername } from '@/module/users/utility';
+import { Media } from '@/module/media/entities/media.entity';
 
 export enum Role {
   Admin = 'admin',
@@ -25,11 +26,11 @@ export class User {
   @Column({ unique: true })
   username: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, select: false })
   @IsEmail()
   email: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @Column({
@@ -39,7 +40,7 @@ export class User {
   })
   role: Role;
 
-  @Column({ default: false })
+  @Column({ default: false, select: false })
   verified: boolean;
 
   @CreateDateColumn()
@@ -53,6 +54,9 @@ export class User {
 
   @OneToMany(() => Contribution, (contribution) => contribution.moderator)
   moderatedContributions: Contribution[];
+
+  @OneToMany(() => Media, (media) => media.author)
+  media: Media[];
 
   @BeforeInsert()
   setDefaultUsername() {

@@ -22,15 +22,47 @@ export class UsersService {
   }
 
   findOne(id: string): Promise<User | null> {
-    return this.usersRepository.findOneBy({ id: id });
+    return this.usersRepository.findOne({
+      where: { id },
+      select: [
+        'password',
+        'username',
+        'email',
+        'media',
+        'contributions',
+        'createdAt',
+        'verified',
+        'moderatedContributions',
+        'updatedAt',
+        'role',
+        'id',
+      ],
+    });
   }
 
   findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOneBy({ email: email });
+    return this.usersRepository.findOne({
+      where: { email: email },
+      select: [
+        'password',
+        'username',
+        'email',
+        'media',
+        'contributions',
+        'createdAt',
+        'verified',
+        'moderatedContributions',
+        'updatedAt',
+        'role',
+        'id',
+      ],
+    });
   }
-
   async verifyUser(id: string): Promise<User | null> {
-    const user = await this.usersRepository.findOneBy({ id });
+    const user = await this.usersRepository.findOne({
+      where: { id: id },
+      select: ['verified'],
+    });
     if (user) {
       user.verified = true;
       return this.usersRepository.save(user);

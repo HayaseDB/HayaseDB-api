@@ -1,7 +1,7 @@
 import {
-  Injectable,
   BadRequestException,
   ForbiddenException,
+  Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -39,7 +39,11 @@ export class ContributionsService {
     return await this.contributionRepository.save(contribution);
   }
 
-  async suggestEditToAnime(animeId: string, data: any, userId: string) {
+  async suggestEditToAnime(
+    animeId: string,
+    data: Partial<Anime>,
+    userId: string,
+  ) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -63,25 +67,45 @@ export class ContributionsService {
     });
 
     if (existingContribution) {
-      throw new BadRequestException(
-        'You already have a pending contribution for this anime',
+      const existingChangeData = existingContribution.changeData;
+
+      const conflictingFields = Object.keys(data).filter(
+        (key) => existingChangeData[key] !== data[key],
       );
+
+      if (conflictingFields.length > 0) {
+        throw new BadRequestException(
+          `Conflicting fields detected: ${conflictingFields.join(', ')}`,
+        );
+      }
+    }
+
+    const changeData: Partial<Anime> = Object.assign({}, anime);
+
+    for (const key of Object.keys(data)) {
+      if (Object.prototype.hasOwnProperty.call(anime, key)) {
+        changeData[key] = data[key];
+      }
     }
 
     const contribution = this.contributionRepository.create({
       anime,
       user,
-      changeData: data,
+      changeData,
       status: ContributionStatus.PENDING,
     });
 
-    return await this.contributionRepository.save(contribution);
+    const savedContribution =
+      await this.contributionRepository.save(contribution);
+
+    return this.contributionRepository.findOne({
+      where: { id: savedContribution.id },
+    });
   }
 
   async editContribution(contributionId: string, data: any, userId: string) {
     const contribution = await this.contributionRepository.findOne({
       where: { id: contributionId },
-      relations: ['user'],
     });
 
     if (!contribution) {
@@ -133,10 +157,9 @@ export class ContributionsService {
     if (status === ContributionStatus.ACCEPTED) {
       if (!contribution.anime) {
         const newAnime = this.animeRepository.create(contribution.changeData);
-        const savedAnime = await this.animeRepository.save(newAnime);
-        contribution.anime = savedAnime;
+        contribution.anime = await this.animeRepository.save(newAnime);
       } else {
-        await this.animeRepository.update(
+        return await this.animeRepository.update(
           contribution.anime.id,
           contribution.changeData,
         );

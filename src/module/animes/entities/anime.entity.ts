@@ -1,5 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
+import { Media } from '@/module/media/entities/media.entity';
 
 @Entity('animes')
 export class Anime {
@@ -26,4 +34,22 @@ export class Anime {
 
   @OneToMany(() => Contribution, (contribution) => contribution.moderator)
   moderatedContributions: Contribution[];
+
+  @ManyToOne(() => Media, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'SET NULL',
+    eager: true,
+  })
+  @JoinColumn({ name: 'bannerImage', referencedColumnName: 'id' })
+  bannerImage?: string;
+
+  @ManyToOne(() => Media, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'SET NULL',
+    eager: true,
+  })
+  @JoinColumn({ name: 'coverImage', referencedColumnName: 'id' })
+  coverImage?: string;
 }

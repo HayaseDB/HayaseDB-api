@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { AnimesService } from './animes.service';
 import { CreateAnimeDto } from '@/module/animes/dto/create-anime.dto';
 import { UpdateAnimeDto } from '@/module/animes/dto/update-anime.dto';
 import { Auth } from '@/module/auth/auth.decorator';
+import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import { FilterAnimeDto } from '@/module/animes/dto/filter-anime.dto';
 
 @Controller('animes')
 export class AnimesController {
@@ -22,9 +25,63 @@ export class AnimesController {
     return this.animesService.create(createAnimeDto);
   }
 
-  @Get()
-  findAll() {
-    return this.animesService.findAll();
+  @Post('search')
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number for pagination',
+    type: Number,
+    default: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of records per page',
+    type: Number,
+    default: 10,
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    description: 'Field to sort by',
+    enum: ['title', 'genre', 'releaseDate', 'rating'],
+    default: 'releaseDate',
+  })
+  @ApiQuery({
+    name: 'caseSensitive',
+    required: false,
+    description:
+      'Whether to perform a case-sensitive search. Default is false (case-insensitive).',
+    type: Boolean,
+    example: false,
+  })
+  @ApiBody({
+    required: false,
+    type: FilterAnimeDto,
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    description: 'Sort order',
+    enum: ['ASC', 'DESC'],
+    default: 'DESC',
+  })
+  async findAll(
+    @Body() filters: FilterAnimeDto,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('sortBy') sortBy: string = 'releaseDate',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('caseSensitive') caseSensitive: boolean = false,
+  ) {
+    return this.animesService.findAll({
+      filters,
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      caseSensitive,
+    });
   }
 
   @Get(':id')
