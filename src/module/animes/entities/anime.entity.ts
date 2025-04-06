@@ -1,32 +1,55 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
+import { Media } from '@/module/media/entities/media.entity';
 
 @Entity('animes')
 export class Anime {
-	@PrimaryGeneratedColumn('uuid')
-	id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-	@Column({ length: 255 })
-	title: string;
+  @Column({ length: 255 })
+  title: string;
 
-	@Column({ length: 255 })
-	genre: string;
+  @Column('text', { array: true })
+  genres: string[];
 
-	@Column()
-	episodes: number;
+  @Column({ nullable: true })
+  episodes?: number;
 
-	@Column({ type: 'date' })
-	releaseDate: Date;
+  @Column({ type: 'date' })
+  releaseDate?: Date;
 
-	@Column({ type: 'text', nullable: true })
-	synopsis?: string;
+  @Column({ length: 255, nullable: true })
+  studio?: string;
 
-	@Column({ length: 255, nullable: true })
-	studio?: string;
+  @OneToMany(() => Contribution, (contribution) => contribution.anime)
+  contributions: Contribution[];
 
-	@OneToMany(() => Contribution, (contribution) => contribution.user)
-	contributions: Contribution[];
+  @OneToMany(() => Contribution, (contribution) => contribution.moderator)
+  moderatedContributions: Contribution[];
 
-	@OneToMany(() => Contribution, (contribution) => contribution.moderator)
-	moderatedContributions: Contribution[];
+  @ManyToOne(() => Media, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'SET NULL',
+    eager: true,
+  })
+  @JoinColumn({ name: 'bannerImage', referencedColumnName: 'id' })
+  bannerImage?: string;
+
+  @ManyToOne(() => Media, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'SET NULL',
+    eager: true,
+  })
+  @JoinColumn({ name: 'coverImage', referencedColumnName: 'id' })
+  coverImage?: string;
 }

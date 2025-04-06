@@ -7,31 +7,108 @@ import { UpdateAnimeDto } from '@/module/animes/dto/update-anime.dto';
 
 @Injectable()
 export class AnimesService {
-	constructor(
-		@InjectRepository(Anime)
-		private animesRepository: Repository<Anime>,
-	) {}
+  constructor(
+    @InjectRepository(Anime)
+    private animesRepository: Repository<Anime>,
+  ) {}
 
-	create(createAnimeDto: CreateAnimeDto) {
-		const anime = this.animesRepository.create(createAnimeDto);
-		return this.animesRepository.save(anime);
-	}
+  create(createAnimeDto: CreateAnimeDto) {
+    const anime = this.animesRepository.create(createAnimeDto);
+    return this.animesRepository.save(anime);
+  }
 
-	findAll() {
-		return this.animesRepository.find();
-	}
+  async findAll(query: {
+    filters?: Record<string, any>;
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: 'ASC' | 'DESC';
+    caseSensitive?: boolean;
+  }) {
+    const {
+      filters = {},
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      sortOrder = 'ASC',
+      caseSensitive = false,
+    } = query;
 
-	findOne(id: string) {
-		return this.animesRepository.findOne({ where: { id } });
-	}
+    const take = Math.max(limit, 1);
+    const skip = Math.max(page - 1, 0) * take;
 
-	async update(id: string, updateAnimeDto: UpdateAnimeDto) {
-		await this.animesRepository.update(id, updateAnimeDto);
-		return this.findOne(id);
-	}
+    const qb = this.animesRepository.createQueryBuilder('anime');
+    const metadata = this.animesRepository.metadata;
+    const validColumns = metadata.columns.map((col) => col.propertyName);
+    const relations = metadata.relations;
 
-	async remove(id: string) {
-		await this.animesRepository.delete(id);
-		return { deleted: true };
-	}
+    relations.forEach((relation) => {
+      if (relation.isEager) {
+        qb.leftJoinAndSelect(
+          `anime.${relation.propertyName}`,
+          relation.propertyName,
+        );
+      }
+    });
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (
+        !validColumns.includes(key) ||
+        value === undefined ||
+        value === null ||
+        value === ''
+      )
+        return;
+
+      const paramKey = `filter_${key}`;
+
+      if (Array.isArray(value)) {
+        qb.andWhere(`anime.${key} && :${paramKey}`, { [paramKey]: value });
+      } else if (typeof value === 'string') {
+        if (caseSensitive) {
+          qb.andWhere(`anime.${key} LIKE :${paramKey}`, {
+            [paramKey]: `%${value}%`,
+          });
+        } else {
+          qb.andWhere(`LOWER(anime.${key}) LIKE LOWER(:${paramKey})`, {
+            [paramKey]: `%${value}%`,
+          });
+        }
+      } else {
+        qb.andWhere(`anime.${key} = :${paramKey}`, { [paramKey]: value });
+      }
+    });
+
+    const safeSortColumn = validColumns.includes(sortBy) ? sortBy : 'id';
+    const safeSortOrder = sortOrder?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    qb.orderBy(`anime.${safeSortColumn}`, safeSortOrder);
+
+    qb.skip(skip).take(take);
+
+    const [results, total] = await qb.getManyAndCount();
+
+    return {
+      data: results,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  findOne(id: string) {
+    return this.animesRepository.findOne({
+      where: { id },
+    });
+  }
+
+  async update(id: string, updateAnimeDto: UpdateAnimeDto) {
+    await this.animesRepository.update(id, updateAnimeDto);
+    return this.findOne(id);
+  }
+
+  async remove(id: string) {
+    await this.animesRepository.delete(id);
+    return { deleted: true };
+  }
 }

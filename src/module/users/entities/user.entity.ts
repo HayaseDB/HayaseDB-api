@@ -1,60 +1,67 @@
 import {
-	Entity,
-	PrimaryGeneratedColumn,
-	Column,
-	CreateDateColumn,
-	UpdateDateColumn,
-	BeforeInsert,
-	BeforeUpdate,
-	OneToMany,
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BeforeInsert,
+  OneToMany,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { IsEmail } from 'class-validator';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
+import { generateUsername } from '@/module/users/utility';
+import { Media } from '@/module/media/entities/media.entity';
 
 export enum Role {
-	Admin = 'admin',
-	User = 'user',
-	Moderator = 'moderator',
+  Admin = 'admin',
+  User = 'user',
+  Moderator = 'moderator',
 }
 
 @Entity('users')
 export class User {
-	@PrimaryGeneratedColumn('uuid')
-	id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-	@Column({ unique: true })
-	@IsEmail()
-	email: string;
+  @Column({ unique: true })
+  username: string;
 
-	@Column()
-	password: string;
+  @Column({ unique: true, select: false })
+  @IsEmail()
+  email: string;
 
-	@Column({
-		type: 'enum',
-		enum: Role,
-		default: Role.User,
-	})
-	role: Role;
+  @Column({ select: false })
+  password: string;
 
-	@Column({ default: false })
-	isEmailVerified: boolean;
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.User,
+  })
+  role: Role;
 
-	@CreateDateColumn()
-	createdAt: Date;
+  @Column({ default: false, select: false })
+  verified: boolean;
 
-	@UpdateDateColumn()
-	updatedAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-	@OneToMany(() => Contribution, (contribution) => contribution.user)
-	contributions: Contribution[];
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-	@OneToMany(() => Contribution, (contribution) => contribution.moderator)
-	moderatedContributions: Contribution[];
+  @OneToMany(() => Contribution, (contribution) => contribution.user)
+  contributions: Contribution[];
 
-	@BeforeInsert()
-	@BeforeUpdate()
-	async hashPassword() {
-		this.password = await bcrypt.hash(this.password, 10);
-	}
+  @OneToMany(() => Contribution, (contribution) => contribution.moderator)
+  moderatedContributions: Contribution[];
+
+  @OneToMany(() => Media, (media) => media.author)
+  media: Media[];
+
+  @BeforeInsert()
+  setDefaultUsername() {
+    if (!this.username) {
+      this.username = generateUsername();
+    }
+  }
 }

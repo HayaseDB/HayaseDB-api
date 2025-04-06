@@ -1,52 +1,63 @@
 import {
-	Entity,
-	PrimaryGeneratedColumn,
-	Column,
-	ManyToOne,
-	CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from '@/module/users/entities/user.entity';
 import { Anime } from '@/module/animes/entities/anime.entity';
 
 export enum ContributionStatus {
-	PENDING = 'pending',
-	APPROVED = 'approved',
-	REJECTED = 'rejected',
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected',
 }
 
 @Entity('contributions')
 export class Contribution {
-	@PrimaryGeneratedColumn('uuid')
-	id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-	@ManyToOne(() => Anime, (anime) => anime.contributions, {
-		nullable: false,
-		onDelete: 'CASCADE',
-	})
-	anime: Anime;
+  @ManyToOne(() => Anime, (anime) => anime.contributions, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  anime: Anime;
 
-	@ManyToOne(() => User, (user) => user.contributions, {
-		nullable: false,
-		onDelete: 'CASCADE',
-	})
-	user: User;
+  @ManyToOne(() => User, (user) => user.contributions, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  user: User;
 
-	@Column({ type: 'jsonb' })
-	changeData: Record<string, any>;
+  @Column(() => Anime)
+  changeData: Anime;
 
-	@Column({
-		type: 'enum',
-		enum: ContributionStatus,
-		default: ContributionStatus.PENDING,
-	})
-	status: ContributionStatus;
+  @Column({
+    type: 'enum',
+    enum: ContributionStatus,
+    default: ContributionStatus.PENDING,
+  })
+  status: ContributionStatus;
 
-	@ManyToOne(() => User, (user) => user.moderatedContributions, {
-		nullable: true,
-		onDelete: 'SET NULL',
-	})
-	moderator?: User;
+  @Column({ nullable: true })
+  rejectionComment: string;
 
-	@CreateDateColumn()
-	createdAt: Date;
+  @ManyToOne(() => User, (user) => user.moderatedContributions, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  moderator: User;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn({ nullable: true })
+  deletedAt: Date;
 }

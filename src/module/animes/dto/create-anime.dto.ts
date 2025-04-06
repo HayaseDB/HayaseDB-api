@@ -1,40 +1,49 @@
 import {
-	IsNotEmpty,
-	IsOptional,
-	IsString,
-	IsNumber,
-	IsDate,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsDate,
+  IsArray,
+  IsUUID,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateAnimeDto {
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsString()
-	title: string;
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  title: string;
 
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsString()
-	genre: string;
+  @ApiProperty()
+  @IsArray()
+  @IsString({ each: true })
+  genres: string[];
 
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsNumber()
-	episodes: number;
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  episodes: number;
 
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsDate()
-	releaseDate: Date;
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsDate()
+  @Type(() => Date)
+  releaseDate: Date;
 
-	@ApiProperty()
-	@IsOptional()
-	@IsString()
-	synopsis?: string;
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  studio?: string;
 
-	@ApiProperty()
-	@IsOptional()
-	@IsString()
-	studio?: string;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  bannerImage?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  coverImage?: string;
 }
