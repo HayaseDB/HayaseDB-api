@@ -6,6 +6,7 @@ import { pastel } from 'gradient-string';
 import chalk from 'chalk';
 import figlet from 'figlet';
 import { ValidationPipe } from '@nestjs/common';
+import { Response } from 'express';
 
 async function server() {
   const app = await NestFactory.create(AppModule);
@@ -28,7 +29,14 @@ async function server() {
   SwaggerModule.setup('doc', app, document);
   const configService = app.get(ConfigService);
   const port: number = configService.getOrThrow('app.port');
-  await app.listen(port);
+
+  app.use('/doc.json', (req, res: Response) => {
+    res.json(document);
+  });
+
+
+    await app.listen(port);
+
 
   return app;
 }
