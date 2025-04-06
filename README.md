@@ -1,3 +1,6 @@
+New Approach for Hayasedb api
+documentation comming soon
+
 # Project Commands
 
 ## Basic Commands
