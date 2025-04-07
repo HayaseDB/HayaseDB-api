@@ -60,8 +60,7 @@ export class UsersService {
   }
   async verifyUser(id: string): Promise<User | null> {
     const user = await this.usersRepository.findOne({
-      where: { id: id },
-      select: ['verified'],
+      where: { id: id }
     });
     if (user) {
       user.verified = true;

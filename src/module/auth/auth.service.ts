@@ -108,6 +108,32 @@ export class AuthService {
   }
 
   /**
+   * Resend verify email
+   */
+  async resendVerifyByEmail(email: string) {
+    const existingUser = await this.usersService.findByEmail(email);
+
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+    if (existingUser.verified) {
+      throw new BadRequestException('User already verified');
+    }
+
+    const verificationToken = this.generateVerificationToken(existingUser);
+
+    await this.mailerService.sendVerificationEmail(
+        existingUser.email,
+        verificationToken,
+    );
+    return {
+      success: true,
+      message: 'Successfully Send Verification Email',
+    }
+  }
+
+
+  /**
    * Generate a JWT token for authentication.
    * This token is used for login sessions.
    */

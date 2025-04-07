@@ -73,4 +73,10 @@ export class AuthController {
       message,
     };
   }
+
+  @Get('verify/resend')
+  @HttpCode(HttpStatus.OK)
+  async resend(@Query('email') email: string) {
+     return await this.authService.resendVerifyByEmail(email);
+  }
 }
