@@ -11,7 +11,7 @@ import {
   ContributionStatus,
 } from './entities/contribution.entity';
 import { Anime } from '../animes/entities/anime.entity';
-import { User } from '../users/entities/user.entity';
+import {Role, User} from '../users/entities/user.entity';
 
 @Injectable()
 export class ContributionsService {
@@ -80,7 +80,7 @@ export class ContributionsService {
       }
     }
 
-    const changeData: Partial<Anime> = Object.assign({}, anime);
+    const changeData: Anime = Object.assign({}, anime);
 
     for (const key of Object.keys(data)) {
       if (Object.prototype.hasOwnProperty.call(anime, key)) {
@@ -102,25 +102,30 @@ export class ContributionsService {
       where: { id: savedContribution.id },
     });
   }
-
-  async editContribution(contributionId: string, data: any, userId: string) {
+  async updateContribution(contributionId: any, data: any, user: User) {
     const contribution = await this.contributionRepository.findOne({
       where: { id: contributionId },
+      relations: ['user'],
     });
 
     if (!contribution) {
-      throw new NotFoundException('Contribution not found');
+      throw new BadRequestException('Contribution not found');
     }
 
-    if (contribution.user.id !== userId) {
-      throw new ForbiddenException('You can only edit your own contributions');
+    if (contribution.user.id !== user.id && user.role !== Role.Admin && user.role !== Role.Moderator) {
+      throw new ForbiddenException('You are not allowed to update this contribution');
     }
 
-    if (contribution.status !== ContributionStatus.PENDING) {
-      throw new BadRequestException('Only pending contributions can be edited');
-    }
+    const changeData: Anime = Object.assign({}, contribution.changeData);
 
-    contribution.changeData = data;
+    for (const key of Object.keys(data)) {
+      if (Object.prototype.hasOwnProperty.call(contribution.changeData, key)) {
+        changeData[key] = data[key];
+      }
+    }
+    contribution.changeData = changeData
+    contribution.status = ContributionStatus.PENDING;
+
     return await this.contributionRepository.save(contribution);
   }
 
@@ -220,5 +225,16 @@ export class ContributionsService {
       where: { id: contributionId },
       relations: ['anime', 'user', 'moderator'],
     });
+  }
+
+  async deleteContributionById(contributionId: string, user: User) {
+    const contribution = await this.contributionRepository.findOne({
+      where: { id: contributionId },
+      relations: ['user']
+    });
+    if (!contribution || !user || contribution.user.id !== user.id && user.role !== Role.Admin && user.role !== Role.Moderator) {
+      throw new NotFoundException('Contribution not found');
+    }
+    return this.contributionRepository.remove(contribution);
   }
 }

@@ -7,7 +7,7 @@ import {
   Post,
   Query,
   NotFoundException,
-  BadRequestException,
+  BadRequestException, Delete, HttpStatus, HttpCode, Put,
 } from '@nestjs/common';
 import { ContributionsService } from './contributions.service';
 import { ContributionStatus } from './entities/contribution.entity';
@@ -19,6 +19,7 @@ import { CreateContributionDto } from '@/module/contributions/dto/create-contrib
 import { EditContributionDto } from '@/module/contributions/dto/edit-contribution.dto';
 import { ContributionQueryDto } from '@/module/contributions/dto/query.dto';
 import {ContributionMeQueryDto} from "@/module/contributions/dto/query-me.dto";
+import {UpdateContributionDto} from "@/module/contributions/dto/update-contribution.dto";
 
 @Controller('contributions')
 export class ContributionsController {
@@ -33,6 +34,20 @@ export class ContributionsController {
     return await this.contributionService.createContribution(
       createContributionDto,
       user.id,
+    );
+  }
+
+  @Patch(':contributionId')
+  @Auth('User')
+  async updateContribution(
+      @Param('contributionId') contributionId: string,
+      @Body() updateContributionDto: UpdateContributionDto,
+      @GetUser() user: User,
+  ) {
+    return await this.contributionService.updateContribution(
+        contributionId,
+        updateContributionDto,
+        user,
     );
   }
 
@@ -101,5 +116,16 @@ export class ContributionsController {
       );
     }
     return contribution;
+  }
+
+
+  @Delete(':contributionId')
+  @Auth('User')
+  async deleteContributionById(@Param('contributionId') contributionId: string, @GetUser() user: User) {
+    await this.contributionService.deleteContributionById(contributionId, user);
+    return {
+      success: true,
+      message: `Contribution was successfully deleted`,
+    };
   }
 }
