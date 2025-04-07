@@ -2,7 +2,7 @@ import { IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ContributionStatus } from '@/module/contributions/entities/contribution.entity';
 
-export class ContributionQueryDto {
+export class ContributionMeQueryDto {
   @ApiProperty({
     default: 1,
     minimum: 1,
@@ -26,12 +26,6 @@ export class ContributionQueryDto {
   })
   @IsOptional()
   status?: ContributionStatus;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsOptional()
-  userId?: string;
 
   @ApiProperty({
     required: false,

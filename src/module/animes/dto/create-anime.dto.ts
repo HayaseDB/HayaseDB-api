@@ -41,12 +41,6 @@ export class CreateAnimeDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  endDate?: Date;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
   @IsString()
   trailerUrl?: string;
 

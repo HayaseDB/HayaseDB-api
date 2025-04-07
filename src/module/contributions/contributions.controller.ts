@@ -18,6 +18,7 @@ import { ApiParam } from '@nestjs/swagger';
 import { CreateContributionDto } from '@/module/contributions/dto/create-contribution.dto';
 import { EditContributionDto } from '@/module/contributions/dto/edit-contribution.dto';
 import { ContributionQueryDto } from '@/module/contributions/dto/query.dto';
+import {ContributionMeQueryDto} from "@/module/contributions/dto/query-me.dto";
 
 @Controller('contributions')
 export class ContributionsController {
@@ -78,6 +79,16 @@ export class ContributionsController {
   async findContributions(@Query() query: ContributionQueryDto) {
     return await this.contributionService.findContributions(query);
   }
+
+  @Get('me')
+  @Auth('User')
+  async findContributionsMe(@Query() query: ContributionMeQueryDto, @GetUser() user: User) {
+    return await this.contributionService.findContributions({
+      ...query,
+      userId: user.id,
+    });
+  }
+
 
   @Get(':contributionId')
   @Auth('Moderator')

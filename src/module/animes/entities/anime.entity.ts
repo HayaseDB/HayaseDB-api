@@ -36,20 +36,11 @@ export class Anime {
   @Column('text', { array: true, nullable: true })
   genres?: string[];
 
-  @Column({ nullable: true })
-  episodes?: number;
-
   @Column({ type: 'date', nullable: true })
   releaseDate?: Date;
 
   @Column({ length: 255, nullable: true })
   studio?: string;
-
-  @Column({ nullable: true, type: 'uuid' })
-  bannerImage?: string;
-
-  @Column({ nullable: true, type: 'uuid' })
-  coverImage?: string;
 
   @Column({ nullable: true, type: 'text' })
   description?: string;
@@ -67,9 +58,6 @@ export class Anime {
     nullable: true,
   })
   type?: AnimeType;
-
-  @Column({ type: 'date', nullable: true })
-  endDate?: Date;
 
   @Column({ length: 255, nullable: true })
   trailerUrl?: string;
@@ -96,7 +84,7 @@ export class Anime {
     eager: true,
   })
   @JoinColumn({ name: 'bannerImage', referencedColumnName: 'id' })
-  bannerImageEntity?: Media;
+  bannerImage?: string;
 
   @ManyToOne(() => Media, {
     nullable: true,
@@ -105,5 +93,5 @@ export class Anime {
     eager: true,
   })
   @JoinColumn({ name: 'coverImage', referencedColumnName: 'id' })
-  coverImageEntity?: Media;
+  coverImage?: string;
 }
