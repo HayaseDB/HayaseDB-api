@@ -11,11 +11,18 @@ import { IsEmail } from 'class-validator';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
 import { generateUsername } from '@/module/users/utility';
 import { Media } from '@/module/media/entities/media.entity';
+import {Key} from "@/module/key/entities/key.entity";
 
 export enum Role {
   Admin = 'admin',
   User = 'user',
   Moderator = 'moderator',
+}
+
+export enum Plan {
+  Free = 'admin',
+  Premium = 'premium',
+  Enterprise = 'enterprise',
 }
 
 @Entity('users')
@@ -39,6 +46,16 @@ export class User {
     default: Role.User,
   })
   role: Role;
+
+  @Column({
+    type: 'enum',
+    enum: Plan,
+    default: Plan.Free,
+  })
+  plan: Plan;
+
+  @OneToMany(() => Key, key => key.user)
+  keys: Key[];
 
   @Column({ default: false, select: false })
   verified: boolean;

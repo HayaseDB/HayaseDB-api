@@ -13,7 +13,7 @@ import { Response } from 'express';
 import { MediaService } from './media.service';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import sharp from 'sharp';
-import { Auth, GetUser } from '@/module/auth/auth.decorator';
+import { Auth, GetUser } from '@/module/auth/decorator/auth.decorator';
 import { User } from '@/module/users/entities/user.entity';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;

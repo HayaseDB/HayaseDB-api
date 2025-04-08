@@ -9,8 +9,11 @@ import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from '@/module/auth/strategy/jwt.strategy';
 import { MailerModule } from '@/module/mailer/mailer.module';
+import {KeyModule} from "@/module/key/key.module";
+import {KeyStrategy} from "@/module/auth/strategy/key.strategy";
 @Module({
   imports: [
+    KeyModule,
     UsersModule,
     MailerModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -25,7 +28,7 @@ import { MailerModule } from '@/module/mailer/mailer.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, KeyStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

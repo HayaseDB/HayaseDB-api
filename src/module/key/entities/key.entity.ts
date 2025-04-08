@@ -1,0 +1,20 @@
+import {Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import {User} from "@/module/users/entities/user.entity";
+
+@Entity('keys')
+export class Key {
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
+
+    @Column({ unique: true })
+    key: string;
+
+    @Column({ nullable: true })
+    name: string;
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @ManyToOne(() => User, user => user.keys)
+    user: User;
+}

@@ -22,8 +22,12 @@ async function server() {
     .setTitle('HayaseDB API')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-      'access-token',
+      'token',
     )
+      .addApiKey(
+          { type: 'apiKey'},
+          'key',
+      )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('doc', app, document);

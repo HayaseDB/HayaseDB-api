@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ContributionsService } from './contributions.service';
 import { ContributionStatus } from './entities/contribution.entity';
-import { Auth, GetUser } from '@/module/auth/auth.decorator';
+import { Auth, GetUser } from '@/module/auth/decorator/auth.decorator';
 import { User } from '@/module/users/entities/user.entity';
 import { UpdateContributionStatusDto } from './dto/update-contribution-status.dto';
 import { ApiParam } from '@nestjs/swagger';

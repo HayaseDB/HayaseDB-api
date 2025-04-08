@@ -11,7 +11,7 @@ import {
 import { AnimesService } from './animes.service';
 import { CreateAnimeDto } from '@/module/animes/dto/create-anime.dto';
 import { UpdateAnimeDto } from '@/module/animes/dto/update-anime.dto';
-import { Auth } from '@/module/auth/auth.decorator';
+import { Auth } from '@/module/auth/decorator/auth.decorator';
 import { ApiBody, ApiQuery } from '@nestjs/swagger';
 import { FilterAnimeDto } from '@/module/animes/dto/filter-anime.dto';
 

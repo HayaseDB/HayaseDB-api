@@ -28,7 +28,7 @@ export class AuthService {
   async login(
     email: string,
     password: string,
-  ): Promise<{ accessToken: string; userId: string; username: string }> {
+  ): Promise<{ token: string; userId: string; username: string }> {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
@@ -44,7 +44,7 @@ export class AuthService {
     }
 
     return {
-      accessToken: this.generateToken(user),
+      token: this.generateToken(user),
       userId: user.id,
       username: user.username,
     };

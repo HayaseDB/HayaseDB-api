@@ -11,7 +11,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { Auth, GetUser } from '@/module/auth/auth.decorator';
+import { Auth, GetUser } from '@/module/auth/decorator/auth.decorator';
 import { User } from '@/module/users/entities/user.entity';
 
 @ApiTags('Auth')
@@ -29,7 +29,7 @@ export class AuthController {
 
     return {
       message: 'Login Successfully',
-      accessToken: loginResult.accessToken,
+      token: loginResult.token,
       userId: loginResult.userId,
       username: loginResult.username,
     };
