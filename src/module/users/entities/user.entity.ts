@@ -20,7 +20,7 @@ export enum Role {
 }
 
 export enum Plan {
-  Free = 'admin',
+  Free = 'free',
   Premium = 'premium',
   Enterprise = 'enterprise',
 }

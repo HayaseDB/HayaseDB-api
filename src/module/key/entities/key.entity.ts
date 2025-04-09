@@ -17,4 +17,10 @@ export class Key {
 
     @ManyToOne(() => User, user => user.keys)
     user: User;
+
+    @Column({ default: 0 })
+    requestCount: number;
+
+    @Column({ nullable: true, type: 'timestamp' })
+    lastUsedAt: Date;
 }

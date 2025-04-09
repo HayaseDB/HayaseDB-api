@@ -59,8 +59,15 @@ export class KeyService {
     async validateKey(key: string): Promise<Key | null> {
             return await this.keyRepository.findOne({
                 where: { key },
+                relations: ['user'],
             });
+    }
 
+    async updateKeyUsage(keyId: string, requestCount: number, lastUsedAt: Date): Promise<void> {
+        await this.keyRepository.update(keyId, {
+            requestCount,
+            lastUsedAt,
+        });
     }
 
 

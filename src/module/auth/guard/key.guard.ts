@@ -1,16 +1,22 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import {ExecutionContext, Injectable} from '@nestjs/common';
+import {AuthGuard} from '@nestjs/passport';
 
 @Injectable()
 export class KeyGuard extends AuthGuard('key') {
-    async canActivate(context: ExecutionContext): Promise<boolean> {
+    async canActivate(context: ExecutionContext): Promise<any> {
         const request = context.switchToHttp().getRequest();
 
-        const apiKey = request.headers['key'];
+        const keyHeader = request.headers['key'];
 
-        if (!apiKey) {
+        if (!keyHeader) {
             return true;
         }
-        return (await super.canActivate(context)) as boolean;
+
+            const result = await super.canActivate(context);
+            if (result) {
+                request.key = request.user;
+            }
+            return result;
+
     }
 }

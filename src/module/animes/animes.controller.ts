@@ -14,6 +14,8 @@ import { UpdateAnimeDto } from '@/module/animes/dto/update-anime.dto';
 import { Auth } from '@/module/auth/decorator/auth.decorator';
 import { ApiBody, ApiQuery } from '@nestjs/swagger';
 import { FilterAnimeDto } from '@/module/animes/dto/filter-anime.dto';
+import {GetKey, KeyAuth} from "@/module/auth/decorator/key.decorator";
+import {Key} from "@/module/key/entities/key.entity";
 
 @Controller('animes')
 export class AnimesController {
@@ -26,6 +28,7 @@ export class AnimesController {
   }
 
   @Post('search')
+  @KeyAuth()
   @ApiQuery({
     name: 'page',
     required: false,
