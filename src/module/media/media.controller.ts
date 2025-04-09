@@ -6,7 +6,7 @@ import {
   Get,
   Param,
   Res,
-  BadRequestException,
+  BadRequestException, Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -120,5 +120,17 @@ export class MediaController {
     res.set('Content-Disposition', `inline; filename="${media.filename}"`);
 
     return res.send(media.fileBuffer);
+  }
+
+  @Delete(':id')
+  async deleteMediaById(@Param('id') id: string, @Res() res: Response) {
+    const media = await this.mediaService.deleteMediaById(id);
+    if (!media.affected) {
+      throw new BadRequestException('Media not found');
+    }
+    return res.json({
+      success: true,
+      message: 'Media deleted successfully',
+    })
   }
 }

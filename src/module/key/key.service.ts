@@ -3,7 +3,6 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {Key} from './entities/key.entity';
 import {User} from '@/module/users/entities/user.entity';
-import {v4 as uuidv4} from 'uuid';
 
 @Injectable()
 export class KeyService {
@@ -15,9 +14,7 @@ export class KeyService {
     async createKey(user: User, name?: string): Promise<Key> {
         const newKey = new Key();
         newKey.user = user;
-        newKey.key = uuidv4();
         newKey.name = name || 'Default API Key';
-
         return await this.keyRepository.save(newKey);
     }
 
@@ -34,9 +31,8 @@ export class KeyService {
         if (key.user.id !== user.id) {
             throw new NotFoundException('This API key does not belong to the authenticated user.');
         }
+        key.generateKey()
 
-
-        key.key = uuidv4();
 
         await this.keyRepository.save(key);
 

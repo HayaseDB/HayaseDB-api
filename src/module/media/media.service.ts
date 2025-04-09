@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {DeleteResult, Repository} from 'typeorm';
 import { Media } from './entities/media.entity';
 import { User } from '@/module/users/entities/user.entity';
 
@@ -33,10 +33,18 @@ export class MediaService {
     return this.mediaRepository.findOne({ where: { id: mediaId } });
   }
 
+
+
   async getFilebyId(mediaId: string): Promise<Media | null> {
     return this.mediaRepository.findOne({
       where: { id: mediaId },
       select: ['id', 'filename', 'filetype', 'fileBuffer'],
+    });
+  }
+
+  async deleteMediaById(mediaId: string): Promise<DeleteResult> {
+    return this.mediaRepository.delete({
+    id: mediaId
     });
   }
 }

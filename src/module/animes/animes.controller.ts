@@ -88,6 +88,7 @@ export class AnimesController {
   }
 
   @Get(':id')
+  @KeyAuth()
   findOne(@Param('id') id: string) {
     return this.animesService.findOne(id);
   }
