@@ -6,12 +6,13 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   OneToMany,
+  AfterLoad,
 } from 'typeorm';
 import { IsEmail } from 'class-validator';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
 import { generateUsername } from '@/module/users/utility';
 import { Media } from '@/module/media/entities/media.entity';
-import {Key} from "@/module/key/entities/key.entity";
+import { Key } from '@/module/key/entities/key.entity';
 
 export enum Role {
   Admin = 'admin',
@@ -54,7 +55,7 @@ export class User {
   })
   plan: Plan;
 
-  @OneToMany(() => Key, key => key.user)
+  @OneToMany(() => Key, (key) => key.user)
   keys: Key[];
 
   @Column({ default: false, select: false })
@@ -75,10 +76,23 @@ export class User {
   @OneToMany(() => Media, (media) => media.author)
   media: Media[];
 
+  @Column('bytea', { select: false, nullable: true })
+  profilePicture: Buffer;
+
+  pfp: string;
+
   @BeforeInsert()
   setDefaultUsername() {
     if (!this.username) {
       this.username = generateUsername();
+    }
+  }
+
+  @AfterLoad()
+  generateUrl() {
+    const baseUrl = process.env.APP_BASE_URL;
+    if (baseUrl) {
+      this.pfp = `${baseUrl}/users/pfp/${this.id}`;
     }
   }
 }

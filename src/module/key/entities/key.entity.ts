@@ -1,39 +1,50 @@
-import {BeforeInsert, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
-import {User} from "@/module/users/entities/user.entity";
+import {
+  BeforeInsert,
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { User } from '@/module/users/entities/user.entity';
 
 @Entity('keys')
 export class Key {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column({ unique: true })
-    key: string;
+  @Column({ unique: true })
+  key: string;
 
-    @Column({ nullable: true })
-    name: string;
+  @Column({ nullable: true })
+  name: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @ManyToOne(() => User, user => user.keys)
-    user: User;
+  @ManyToOne(() => User, (user) => user.keys)
+  user: User;
 
-    @Column({ default: 0 })
-    requestCount: number;
+  @Column({ default: 0 })
+  requestCount: number;
 
-    @Column({ nullable: true, type: 'timestamp' })
-    lastUsedAt: Date;
+  @Column({ default: 0 })
+  requestCountTotal: number;
 
-    @BeforeInsert()
-    generateKey() {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        const charactersLength = characters.length;
-        let result = '';
+  @Column({ nullable: true, type: 'timestamp' })
+  lastUsedAt: Date;
 
-        for (let i = 0; i < 69; i++) {
-            const randomIndex = Math.floor(Math.random() * charactersLength);
-            result += characters[randomIndex];
-        }
-        this.key = result;
+  @BeforeInsert()
+  generateKey() {
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let result = '';
+
+    for (let i = 0; i < 69; i++) {
+      const randomIndex = Math.floor(Math.random() * charactersLength);
+      result += characters[randomIndex];
     }
+    this.key = result;
+  }
 }

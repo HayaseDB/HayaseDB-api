@@ -1,11 +1,5 @@
 export const generateUsername = (): string => {
-  const animeCharacters = [
-    'Nagatoro',
-    'Senpai',
-    'Gamo-chan',
-    'Yoshi',
-    'Sakura',
-  ];
+  const animeCharacters = ['Nagatoro', 'Senpai', 'Gamo', 'Yoshi', 'Sakura'];
 
   const randomCharacter =
     animeCharacters[Math.floor(Math.random() * animeCharacters.length)];

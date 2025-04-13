@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { User } from '@/module/users/entities/user.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -11,13 +13,11 @@ export class UsersService {
   ) {}
 
   create(email: string, password: string): Promise<User> {
-    const user = new User();
-    user.email = email;
-    user.password = password;
+    const user = this.usersRepository.create({ email, password });
     return this.usersRepository.save(user);
   }
 
-  async findAll(): Promise<User[] | null> {
+  findAll(): Promise<User[]> {
     return this.usersRepository.find();
   }
 
@@ -25,48 +25,95 @@ export class UsersService {
     return this.usersRepository.findOne({
       where: { id },
       select: [
-        'password',
+        'id',
         'username',
         'email',
+        'password',
         'media',
         'contributions',
         'createdAt',
+        'updatedAt',
         'verified',
         'moderatedContributions',
-        'updatedAt',
         'role',
-        'id',
       ],
     });
   }
 
   findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
-      where: { email: email },
+      where: { email },
       select: [
-        'password',
+        'id',
         'username',
         'email',
+        'password',
         'media',
         'contributions',
         'createdAt',
+        'updatedAt',
         'verified',
         'moderatedContributions',
-        'updatedAt',
         'role',
-        'id',
       ],
     });
   }
-  async verifyUser(id: string): Promise<User | null> {
-    const user = await this.usersRepository.findOne({
-      where: { id: id }
+
+  getProfile(id: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { id },
+      select: [
+        'id',
+        'username',
+        'media',
+        'contributions',
+        'createdAt',
+        'updatedAt',
+        'verified',
+        'role',
+      ],
     });
-    if (user) {
-      user.verified = true;
-      return this.usersRepository.save(user);
+  }
+
+  async verifyUser(id: string): Promise<User | null> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) return null;
+
+    user.verified = true;
+    return this.usersRepository.save(user);
+  }
+
+  async update(user: User): Promise<User | null> {
+    await this.usersRepository.save(user);
+    return this.getProfile(user.id);
+  }
+
+  async updateProfile(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User | null> {
+    await this.usersRepository.update(userId, updateUserDto);
+    return this.getProfile(userId);
+  }
+
+  async updateProfilePicture(
+    userId: string,
+    buffer: Buffer,
+  ): Promise<User | null> {
+    await this.usersRepository.update(userId, { profilePicture: buffer });
+    return this.getProfile(userId);
+  }
+
+  async getPfpById(id: string): Promise<Buffer | null> {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { id },
+        select: ['profilePicture'],
+      });
+      return user?.profilePicture ?? null;
+    } catch {
+      return null;
     }
-    return null;
   }
 
   async remove(id: string): Promise<void> {

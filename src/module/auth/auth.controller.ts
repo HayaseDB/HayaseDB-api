@@ -31,6 +31,7 @@ export class AuthController {
       message: 'Login Successfully',
       token: loginResult.token,
       userId: loginResult.userId,
+      email: loginResult.email,
       username: loginResult.username,
     };
   }
@@ -51,7 +52,7 @@ export class AuthController {
     };
   }
 
-  @Post('me')
+  @Get('me')
   @HttpCode(HttpStatus.OK)
   @Auth()
   me(@GetUser() user: User) {
@@ -59,6 +60,7 @@ export class AuthController {
       message: 'User details retrieved successfully',
       user: {
         userId: user.id,
+        email: user.email,
         username: user.username,
         role: user.role,
       },
@@ -77,6 +79,6 @@ export class AuthController {
   @Get('verify/resend')
   @HttpCode(HttpStatus.OK)
   async resend(@Query('email') email: string) {
-     return await this.authService.resendVerifyByEmail(email);
+    return await this.authService.resendVerifyByEmail(email);
   }
 }

@@ -34,7 +34,7 @@ export class Contribution {
   user: User;
 
   @Column(() => Anime)
-  changeData: Anime;
+  changeData: { [p: string]: any };
 
   @Column({
     type: 'enum',

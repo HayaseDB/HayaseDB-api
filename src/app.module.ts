@@ -20,7 +20,7 @@ import { KeyModule } from '@/module/key/key.module';
     ContributionsModule,
     MailerModule,
     MediaModule,
-    KeyModule
+    KeyModule,
   ],
   controllers: [AppController],
 })

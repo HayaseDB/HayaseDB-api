@@ -12,35 +12,33 @@ async function server() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, // ✅ enables transformation
-      whitelist: true, // ✅ strips unknown props
-      forbidNonWhitelisted: true, // ❗ optional: throws if unknown props
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
     }),
   );
-  // Swagger Setup for api documentation
   const config = new DocumentBuilder()
     .setTitle('HayaseDB API')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       'token',
     )
-      .addApiKey(
-          { type: 'apiKey'},
-          'key',
-      )
+    .addApiKey({ type: 'apiKey' }, 'key')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('doc', app, document);
   const configService = app.get(ConfigService);
   const port: number = configService.getOrThrow('app.port');
+  app.enableCors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  });
 
   app.use('/doc.json', (req, res: Response) => {
     res.json(document);
   });
 
-
-    await app.listen(port);
-
+  await app.listen(port);
 
   return app;
 }

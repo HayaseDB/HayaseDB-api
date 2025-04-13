@@ -28,7 +28,12 @@ export class AuthService {
   async login(
     email: string,
     password: string,
-  ): Promise<{ token: string; userId: string; username: string }> {
+  ): Promise<{
+    token: string;
+    userId: string;
+    username: string;
+    email: string;
+  }> {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
@@ -45,6 +50,7 @@ export class AuthService {
 
     return {
       token: this.generateToken(user),
+      email: user.email,
       userId: user.id,
       username: user.username,
     };
@@ -123,15 +129,14 @@ export class AuthService {
     const verificationToken = this.generateVerificationToken(existingUser);
 
     await this.mailerService.sendVerificationEmail(
-        existingUser.email,
-        verificationToken,
+      existingUser.email,
+      verificationToken,
     );
     return {
       success: true,
       message: 'Successfully Send Verification Email',
-    }
+    };
   }
-
 
   /**
    * Generate a JWT token for authentication.

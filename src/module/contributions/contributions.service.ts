@@ -11,7 +11,7 @@ import {
   ContributionStatus,
 } from './entities/contribution.entity';
 import { Anime } from '../animes/entities/anime.entity';
-import {Role, User} from '../users/entities/user.entity';
+import { Role, User } from '../users/entities/user.entity';
 
 @Injectable()
 export class ContributionsService {
@@ -102,7 +102,11 @@ export class ContributionsService {
       where: { id: savedContribution.id },
     });
   }
-  async updateContribution(contributionId: any, data: any, user: User) {
+  async updateContribution(
+    contributionId: string,
+    data: Record<string, any>,
+    user: User,
+  ) {
     const contribution = await this.contributionRepository.findOne({
       where: { id: contributionId },
       relations: ['user'],
@@ -112,18 +116,25 @@ export class ContributionsService {
       throw new BadRequestException('Contribution not found');
     }
 
-    if (contribution.user.id !== user.id && user.role !== Role.Admin && user.role !== Role.Moderator) {
-      throw new ForbiddenException('You are not allowed to update this contribution');
+    if (
+      contribution.user.id !== user.id &&
+      user.role !== Role.Admin &&
+      user.role !== Role.Moderator
+    ) {
+      throw new ForbiddenException(
+        'You are not allowed to update this contribution',
+      );
     }
 
-    const changeData: Anime = Object.assign({}, contribution.changeData);
+    const changeData = { ...(contribution.changeData as Record<string, any>) };
 
     for (const key of Object.keys(data)) {
       if (Object.prototype.hasOwnProperty.call(contribution.changeData, key)) {
         changeData[key] = data[key];
       }
     }
-    contribution.changeData = changeData
+
+    contribution.changeData = changeData;
     contribution.status = ContributionStatus.PENDING;
 
     return await this.contributionRepository.save(contribution);
@@ -230,9 +241,15 @@ export class ContributionsService {
   async deleteContributionById(contributionId: string, user: User) {
     const contribution = await this.contributionRepository.findOne({
       where: { id: contributionId },
-      relations: ['user']
+      relations: ['user'],
     });
-    if (!contribution || !user || contribution.user.id !== user.id && user.role !== Role.Admin && user.role !== Role.Moderator) {
+    if (
+      !contribution ||
+      !user ||
+      (contribution.user.id !== user.id &&
+        user.role !== Role.Admin &&
+        user.role !== Role.Moderator)
+    ) {
       throw new NotFoundException('Contribution not found');
     }
     return this.contributionRepository.remove(contribution);

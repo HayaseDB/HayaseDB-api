@@ -6,7 +6,8 @@ import {
   Get,
   Param,
   Res,
-  BadRequestException, Delete,
+  BadRequestException,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -131,6 +132,6 @@ export class MediaController {
     return res.json({
       success: true,
       message: 'Media deleted successfully',
-    })
+    });
   }
 }
