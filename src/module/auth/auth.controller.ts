@@ -59,6 +59,7 @@ export class AuthController {
     return {
       message: 'User details retrieved successfully',
       user: {
+        pfp: user.pfp,
         userId: user.id,
         email: user.email,
         username: user.username,

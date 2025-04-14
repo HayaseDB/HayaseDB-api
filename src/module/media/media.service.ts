@@ -40,6 +40,11 @@ export class MediaService {
     });
   }
 
+
+  async countMedia(): Promise<number> {
+    return this.mediaRepository.count();
+  }
+
   async deleteMediaById(mediaId: string): Promise<DeleteResult> {
     return this.mediaRepository.delete({
       id: mediaId,

@@ -9,6 +9,7 @@ import { AppController } from './app.controller';
 import { MailerModule } from './module/mailer/mailer.module';
 import { MediaModule } from './module/media/media.module';
 import { KeyModule } from '@/module/key/key.module';
+import { StatsModule } from './module/stats/stats.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { KeyModule } from '@/module/key/key.module';
     MailerModule,
     MediaModule,
     KeyModule,
+    StatsModule,
   ],
   controllers: [AppController],
 })

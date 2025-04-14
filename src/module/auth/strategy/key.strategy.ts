@@ -37,7 +37,11 @@ export class KeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, 'key') {
     const userPlan = key.user?.plan;
 
     const rateLimit = RATE_LIMITS[userPlan] ?? RATE_LIMITS[Plan.Free];
+    const now = new Date();
 
+    if (key.lastUsedAt && this.isNewMinute(key.lastUsedAt, now)) {
+      key.requestCount = 0;
+    }
     if (key.requestCount > rateLimit) {
       throw new HttpException(
         {
@@ -49,17 +53,14 @@ export class KeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, 'key') {
       );
     }
 
-    const now = new Date();
 
-    if (key.lastUsedAt && this.isNewMinute(key.lastUsedAt, now)) {
-      key.requestCount = 0;
-    }
+
     key.requestCountTotal += 1;
 
     key.requestCount += 1;
     key.lastUsedAt = now;
 
-    await this.keyService.updateKeyUsage(key.id, key.requestCount, now);
+    await this.keyService.updateKeyUsage(key.id, key.requestCount, key.requestCountTotal, now);
 
     return key;
   }

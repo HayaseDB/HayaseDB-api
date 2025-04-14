@@ -1,15 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import {BadRequestException, Injectable} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { User } from '@/module/users/entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {Pfp} from "@/module/users/entities/pfp.entity";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Pfp)
+    private readonly pfpRepository: Repository<Pfp>,
   ) {}
 
   create(email: string, password: string): Promise<User> {
@@ -97,23 +100,47 @@ export class UsersService {
   }
 
   async updateProfilePicture(
-    userId: string,
-    buffer: Buffer,
+      userId: string,
+      buffer: Buffer,
   ): Promise<User | null> {
-    await this.usersRepository.update(userId, { profilePicture: buffer });
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['pfp'],
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.pfp) {
+      await this.pfpRepository.remove(user.pfp);
+    }
+
+    const newPfp = this.pfpRepository.create({
+      data: buffer,
+      user: user,
+    });
+
+    await this.pfpRepository.save(newPfp);
+
     return this.getProfile(userId);
   }
 
-  async getPfpById(id: string): Promise<Buffer | null> {
+
+  async getPfpById(pfpId: string): Promise<Buffer | null> {
     try {
-      const user = await this.usersRepository.findOne({
-        where: { id },
-        select: ['profilePicture'],
+      const pfp = await this.pfpRepository.findOne({
+        where: { id: pfpId },
+        select: ['data'],
       });
-      return user?.profilePicture ?? null;
+      return pfp?.data ?? null;
     } catch {
       return null;
     }
+  }
+
+  async countUsers(): Promise<number> {
+    return this.usersRepository.count();
   }
 
   async remove(id: string): Promise<void> {

@@ -102,6 +102,10 @@ export class AnimesService {
     });
   }
 
+  async countAnime(): Promise<number> {
+    return this.animesRepository.count();
+  }
+
   async update(id: string, updateAnimeDto: UpdateAnimeDto) {
     await this.animesRepository.update(id, updateAnimeDto);
     return this.findOne(id);

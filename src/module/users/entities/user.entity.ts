@@ -6,13 +6,14 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   OneToMany,
-  AfterLoad,
+  AfterLoad, OneToOne,
 } from 'typeorm';
 import { IsEmail } from 'class-validator';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
 import { generateUsername } from '@/module/users/utility';
 import { Media } from '@/module/media/entities/media.entity';
 import { Key } from '@/module/key/entities/key.entity';
+import {Pfp} from "@/module/users/entities/pfp.entity";
 
 export enum Role {
   Admin = 'admin',
@@ -35,7 +36,7 @@ export class User {
   username: string;
 
   @Column({ unique: true, select: false })
-  @IsEmail()
+  @IsEmail({}, { message: 'Please provide a valid email address.' })
   email: string;
 
   @Column({ select: false })
@@ -76,23 +77,17 @@ export class User {
   @OneToMany(() => Media, (media) => media.author)
   media: Media[];
 
-  @Column('bytea', { select: false, nullable: true })
-  profilePicture: Buffer;
 
-  pfp: string;
+  @OneToOne(() => Pfp, (pfp) => pfp.user, {
+    cascade: true,
+    eager: true,
+  })
+  pfp: Pfp;
 
   @BeforeInsert()
   setDefaultUsername() {
     if (!this.username) {
       this.username = generateUsername();
-    }
-  }
-
-  @AfterLoad()
-  generateUrl() {
-    const baseUrl = process.env.APP_BASE_URL;
-    if (baseUrl) {
-      this.pfp = `${baseUrl}/users/pfp/${this.id}`;
     }
   }
 }

@@ -8,5 +8,6 @@ import { Anime } from '@/module/animes/entities/anime.entity';
   imports: [TypeOrmModule.forFeature([Anime])],
   controllers: [AnimesController],
   providers: [AnimesService],
+  exports: [AnimesService],
 })
 export class AnimesModule {}

@@ -10,7 +10,7 @@ export class UpdateUserDto {
   })
   @IsString()
   @IsOptional()
-  @Length(3, 20)
+  @Length(3, 20, { message: 'Username needs to be at least 3 characters' })
   username?: string;
 
   @ApiPropertyOptional({
@@ -29,6 +29,6 @@ export class UpdateUserDto {
   })
   @IsString()
   @IsOptional()
-  @Length(6, 20)
+  @Length(6, 20, { message: 'Password needs to be at least 6 characters' })
   password?: string;
 }
