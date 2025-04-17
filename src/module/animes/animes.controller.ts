@@ -6,7 +6,7 @@ import {
   Patch,
   Param,
   Delete,
-  Query,
+  Query, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { AnimesService } from './animes.service';
 import { CreateAnimeDto } from '@/module/animes/dto/create-anime.dto';
@@ -27,6 +27,7 @@ export class AnimesController {
   }
 
   @Post('search')
+  @HttpCode(HttpStatus.OK)
   @KeyAuth()
   @ApiQuery({
     name: 'page',

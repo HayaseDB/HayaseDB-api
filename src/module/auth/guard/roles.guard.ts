@@ -13,7 +13,6 @@ interface AuthenticatedRequest extends Request {
     role?: Role;
   };
 }
-
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
@@ -24,11 +23,7 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    const requiredRolesEnum = requiredRoles.map(
-      (role) => Role[role as keyof typeof Role],
-    );
-
-    if (!requiredRolesEnum || requiredRolesEnum.length === 0) {
+    if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
 
@@ -40,26 +35,26 @@ export class RolesGuard implements CanActivate {
 
     const userRole = request.user.role;
 
-    if (requiredRolesEnum.includes(Role.Admin)) {
-      if (userRole === Role.Admin) {
-        return true;
-      }
+    const requiredRolesEnum = requiredRoles.map(
+        (role) => Role[role as keyof typeof Role],
+    );
+
+    if (requiredRolesEnum.includes(Role.Admin) && userRole === Role.Admin) {
+      return true;
     }
 
-    if (requiredRolesEnum.includes(Role.Moderator)) {
-      if (userRole === Role.Moderator || userRole === Role.Admin) {
-        return true;
-      }
+    if (
+        requiredRolesEnum.includes(Role.Moderator) &&
+        (userRole === Role.Moderator || userRole === Role.Admin)
+    ) {
+      return true;
     }
 
-    if (requiredRolesEnum.includes(Role.User)) {
-      if (
-        userRole === Role.User ||
-        userRole === Role.Moderator ||
-        userRole === Role.Admin
-      ) {
-        return true;
-      }
+    if (
+        requiredRolesEnum.includes(Role.User) &&
+        (userRole === Role.User || userRole === Role.Moderator || userRole === Role.Admin)
+    ) {
+      return true;
     }
 
     throw new ForbiddenException('Insufficient permissions');

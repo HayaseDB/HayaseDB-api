@@ -83,22 +83,34 @@ export class MediaController {
   }
 
   @Get(':id/meta')
-  async getMediaMeta(@Param('id') id: string, @Res() res: Response) {
+  @Auth('Admin')
+  async getMediaMeta(
+      @Param('id') id: string,
+      @Res() res: Response,
+      @GetUser() user: User
+  ) {
     const media = await this.mediaService.findById(id);
 
     if (!media) {
       return res.status(404).json({ message: 'Media not found' });
     }
-    return res.json({
+
+    const response: any = {
       id: media.id,
       url: media.url,
       filename: media.filename,
       filetype: media.filetype,
       createdAt: media.createdAt,
       size: media.size,
-      author: media.author,
-    });
+    };
+
+    if (user && user?.role === 'moderator' || user?.role === 'admin') {
+      response.author = media.author;
+    }
+
+    return res.json(response);
   }
+
 
   @Get(':id')
   async getMediaById(@Param('id') id: string, @Res() res: Response) {
@@ -124,6 +136,7 @@ export class MediaController {
   }
 
   @Delete(':id')
+  @Auth('Admin')
   async deleteMediaById(@Param('id') id: string, @Res() res: Response) {
     const media = await this.mediaService.deleteMediaById(id);
     if (!media.affected) {

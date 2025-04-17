@@ -23,14 +23,12 @@ export class MediaService {
     media.fileBuffer = fileBuffer;
     media.author = user;
     const savedMedia = await this.mediaRepository.save(media);
-
-    savedMedia.generateUrl();
-
+    
     return savedMedia;
   }
 
   async findById(mediaId: string): Promise<Media | null> {
-    return this.mediaRepository.findOne({ where: { id: mediaId } });
+    return this.mediaRepository.findOne({ where: { id: mediaId }, relations: ['author'] });
   }
 
   async getFilebyId(mediaId: string): Promise<Media | null> {

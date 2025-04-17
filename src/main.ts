@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -7,9 +9,11 @@ import chalk from 'chalk';
 import figlet from 'figlet';
 import { ValidationPipe } from '@nestjs/common';
 import { Response } from 'express';
+import {NestExpressApplication} from "@nestjs/platform-express";
 
 async function server() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('trust proxy', 'loopback');
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -25,8 +29,15 @@ async function server() {
     )
     .addApiKey({ type: 'apiKey' }, 'key')
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('doc', app, document);
+  SwaggerModule.setup('doc', app, document, {
+      jsonDocumentUrl: 'doc.json',
+      yamlDocumentUrl: 'doc.yaml',
+      swaggerOptions: {
+          persistAuthorization: true,
+      },
+  });
   const configService = app.get(ConfigService);
   const port: number = configService.getOrThrow('app.port');
   app.enableCors({
@@ -34,9 +45,6 @@ async function server() {
     credentials: true,
   });
 
-  app.use('/doc.json', (req, res: Response) => {
-    res.json(document);
-  });
 
   await app.listen(port);
 

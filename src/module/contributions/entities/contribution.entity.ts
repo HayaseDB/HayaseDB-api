@@ -21,27 +21,19 @@ export class Contribution {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Anime, (anime) => anime.contributions, {
-    nullable: true,
-    onDelete: 'CASCADE',
-  })
-  anime: Anime;
-
-  @ManyToOne(() => User, (user) => user.contributions, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
-  user: User;
-
-  @Column(() => Anime)
-  changeData: { [p: string]: any };
-
   @Column({
     type: 'enum',
     enum: ContributionStatus,
     default: ContributionStatus.PENDING,
   })
   status: ContributionStatus;
+
+  @ManyToOne(() => User, (user) => user.contributions, {
+    nullable: false,
+    onDelete: 'CASCADE',
+    eager: true,
+  })
+  user: User;
 
   @Column({ nullable: true })
   rejectionComment: string;
@@ -60,4 +52,14 @@ export class Contribution {
 
   @DeleteDateColumn({ nullable: true })
   deletedAt: Date;
+
+  @Column(() => Anime)
+  data: { [p: string]: any };
+
+  @ManyToOne(() => Anime, (anime) => anime.contributions, {
+    nullable: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  anime: Anime;
 }

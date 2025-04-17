@@ -7,7 +7,7 @@ import {
   AfterLoad,
   BeforeInsert,
   ManyToOne,
-  JoinColumn,
+  JoinColumn, BeforeUpdate,
 } from 'typeorm';
 import { User } from '@/module/users/entities/user.entity';
 
@@ -23,7 +23,7 @@ export class Media {
     nullable: true,
     cascade: true,
     onDelete: 'SET NULL',
-    eager: true,
+    eager: false,
   })
   @JoinColumn({ name: 'authorId' })
   author: User;
@@ -51,6 +51,7 @@ export class Media {
       this.size = this.fileBuffer.length;
     }
   }
+
 
   @AfterLoad()
   generateUrl() {
