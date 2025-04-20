@@ -38,9 +38,9 @@ async function server() {
     },
   });
   const configService = app.get(ConfigService);
-  const port: number = configService.getOrThrow('app.port');
+    const port: number = configService.getOrThrow('app.port');
   app.enableCors({
-    origin: 'https://api.hayasedb.com',
+    origin: 'https://hayasedb.com',
     credentials: true,
   });
 
