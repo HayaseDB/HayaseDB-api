@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
+import {join} from 'path';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -20,8 +20,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         logging: configService.get<boolean>('database.logging'),
         autoLoadEntities: true,
         entities: [__dirname + '/src/modules/**/*.entity{.ts,.js}'],
-        migrations: [__dirname + '/database/migrations/*.ts'],
-        migrationsRun: true,
+        migrations: [join(__dirname, '/../', 'database/migrations/**/*{.ts,.js}')],
+        migrationsRun: !configService.get<boolean>('database.synchronize'),
       }),
       inject: [ConfigService],
     }),
