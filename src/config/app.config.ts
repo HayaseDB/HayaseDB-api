@@ -7,5 +7,6 @@ export default registerAs('app', () => {
     port: configService.get<string>('APP_PORT'),
     env: configService.get<string>('APP_NODE_ENV'),
     base_url: configService.get<string>('APP_BASE_URL'),
+    web_url: configService.get<string>('APP_WEB_URL'),
   };
 });

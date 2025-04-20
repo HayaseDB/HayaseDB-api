@@ -39,10 +39,12 @@ async function server() {
   });
   const configService = app.get(ConfigService);
     const port: number = configService.getOrThrow('app.port');
-  app.enableCors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-  });
+    const corsOrigin: string = configService.getOrThrow('app.web_url');
+
+    app.enableCors({
+        origin: corsOrigin,
+        credentials: true,
+    });
 
   await app.listen(port);
 
