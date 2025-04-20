@@ -40,7 +40,7 @@ async function server() {
   const configService = app.get(ConfigService);
     const port: number = configService.getOrThrow('app.port');
   app.enableCors({
-    origin: 'https://hayasedb.com',
+    origin: 'http://localhost:5173',
     credentials: true,
   });
 

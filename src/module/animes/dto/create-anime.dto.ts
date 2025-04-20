@@ -10,7 +10,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { AnimeStatus, AnimeType } from '@/module/animes/entities/anime.entity';
-import { IsYouTubeUrl } from '@/module/animes/validator/url.validator';
+import {IsYouTubeUrl} from '@/module/animes/validator/url.validator';
 
 export class CreateAnimeDto {
   @ApiProperty()
