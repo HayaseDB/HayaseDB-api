@@ -1,4 +1,4 @@
-import { IsDate, IsOptional, IsString } from 'class-validator';
+import {IsDate, IsOptional, IsString, IsUUID} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -27,4 +27,12 @@ export class FilterAnimeDto {
     required: false,
   })
   releaseDate?: string;
+
+
+  @IsOptional()
+  @IsUUID()
+  @ApiProperty({
+    required: false,
+  })
+  id?: string;
 }

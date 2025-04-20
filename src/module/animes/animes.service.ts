@@ -18,7 +18,6 @@ export class AnimesService {
     const anime = this.animesRepository.create(createAnimeDto);
     return this.animesRepository.save(anime);
   }
-
   async findAll(query: {
     filters?: Record<string, any>;
     page?: number;
@@ -46,25 +45,24 @@ export class AnimesService {
 
     relations.forEach((relation) => {
       if (relation.isEager) {
-        qb.leftJoinAndSelect(
-          `anime.${relation.propertyName}`,
-          relation.propertyName,
-        );
+        qb.leftJoinAndSelect(`anime.${relation.propertyName}`, relation.propertyName);
       }
     });
 
     Object.entries(filters).forEach(([key, value]) => {
       if (
-        !validColumns.includes(key) ||
-        value === undefined ||
-        value === null ||
-        value === ''
+          !validColumns.includes(key) ||
+          value === undefined ||
+          value === null ||
+          value === ''
       )
         return;
 
       const paramKey = `filter_${key}`;
 
-      if (Array.isArray(value)) {
+      if (key === 'id') {
+        qb.andWhere(`anime.${key} = :${paramKey}`, { [paramKey]: String(value) });
+      } else if (Array.isArray(value)) {
         qb.andWhere(`anime.${key} && :${paramKey}`, { [paramKey]: value });
       } else if (typeof value === 'string') {
         if (caseSensitive) {
@@ -97,6 +95,7 @@ export class AnimesService {
       totalPages: Math.ceil(total / limit),
     };
   }
+
 
   async findOne(id: string) {
     const anime = await this.animesRepository.findOne({
