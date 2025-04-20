@@ -156,14 +156,12 @@ export class UsersController {
 
     res.set({
       'Content-Type': 'image/jpeg',
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-      Pragma: 'no-cache',
-      Expires: '0',
-      'Surrogate-Control': 'no-store',
-      'Accept-Ranges': 'bytes',
+      'Cache-Control': 'public, max-age=31536000, immutable',
       'Content-Disposition': `inline; filename="${id}.jpeg"`,
+      'Accept-Ranges': 'bytes',
     });
 
     return res.send(pfp);
   }
+
 }
