@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { User } from '@/module/users/entities/user.entity';
 import { MailerService } from '../mailer/mailer.service';
 import { DataSource } from 'typeorm';

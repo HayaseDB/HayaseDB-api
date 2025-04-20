@@ -25,6 +25,7 @@
     "migration:revert": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:revert"
   },
   "dependencies": {
+    "@css-inline/css-inline": "^0.14.3",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.1",
@@ -37,7 +38,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "@types/figlet": "^1.7.0",
     "@types/gradient-string": "^1.1.6",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
     "chalk": "^5.4.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
@@ -54,7 +55,7 @@
     "pg": "^8.14.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "sharp": "^0.34.0",
+    "sharp": "^0.34.1",
     "typeorm": "^0.3.21",
     "uuid": "^11.1.0"
   },
@@ -63,7 +64,6 @@
     "@nestjs/cli": "^11.0.0",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.7",
-    "@types/bcrypt": "^5.0.2",
     "@types/lodash": "^4.17.16",
     "@types/multer": "^1.4.12",
     "@types/passport-jwt": "^4.0.1",

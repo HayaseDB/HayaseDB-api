@@ -12,12 +12,9 @@ services:
       - "${APP_PORT:-3000}:3000"
     depends_on:
       - postgres
-    networks:
-      - hayasedb-api
     restart: unless-stopped
 
   postgres:
-    container_name: hayasedb-api-postgres
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
@@ -28,13 +25,7 @@ services:
       - postgres_data:/data/postgres
     ports:
       - "${DATABASE_PORT:-5432}:5432"
-    networks:
-      - hayasedb-api
     restart: unless-stopped
-
-networks:
-  hayasedb-api:
-    driver: bridge
 
 volumes:
   postgres_data:
