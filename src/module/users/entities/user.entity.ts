@@ -59,7 +59,7 @@ export class User {
   @OneToMany(() => Key, (key) => key.user)
   keys: Key[];
 
-  @Column({ default: true, select: false })
+  @Column({ default: false, select: false })
   verified: boolean;
 
   @Column({ default: false, select: false })
