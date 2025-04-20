@@ -53,14 +53,17 @@ export class KeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, 'key') {
       );
     }
 
-
-
     key.requestCountTotal += 1;
 
     key.requestCount += 1;
     key.lastUsedAt = now;
 
-    await this.keyService.updateKeyUsage(key.id, key.requestCount, key.requestCountTotal, now);
+    await this.keyService.updateKeyUsage(
+      key.id,
+      key.requestCount,
+      key.requestCountTotal,
+      now,
+    );
 
     return key;
   }

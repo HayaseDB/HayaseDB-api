@@ -23,12 +23,15 @@ export class MediaService {
     media.fileBuffer = fileBuffer;
     media.author = user;
     const savedMedia = await this.mediaRepository.save(media);
-    
+
     return savedMedia;
   }
 
   async findById(mediaId: string): Promise<Media | null> {
-    return this.mediaRepository.findOne({ where: { id: mediaId }, relations: ['author'] });
+    return this.mediaRepository.findOne({
+      where: { id: mediaId },
+      relations: ['author'],
+    });
   }
 
   async getFilebyId(mediaId: string): Promise<Media | null> {
@@ -37,7 +40,6 @@ export class MediaService {
       select: ['id', 'filename', 'filetype', 'fileBuffer'],
     });
   }
-
 
   async countMedia(): Promise<number> {
     return this.mediaRepository.count();

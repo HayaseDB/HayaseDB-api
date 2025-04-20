@@ -15,7 +15,7 @@ import { MediaService } from './media.service';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import sharp from 'sharp';
 import { Auth, GetUser } from '@/module/auth/decorator/auth.decorator';
-import { User } from '@/module/users/entities/user.entity';
+import { Role, User } from '@/module/users/entities/user.entity';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = [
@@ -85,9 +85,9 @@ export class MediaController {
   @Get(':id/meta')
   @Auth('Admin')
   async getMediaMeta(
-      @Param('id') id: string,
-      @Res() res: Response,
-      @GetUser() user: User
+    @Param('id') id: string,
+    @Res() res: Response,
+    @GetUser() user: User,
   ) {
     const media = await this.mediaService.findById(id);
 
@@ -104,13 +104,12 @@ export class MediaController {
       size: media.size,
     };
 
-    if (user && user?.role === 'moderator' || user?.role === 'admin') {
+    if ((user && user?.role === Role.Moderator) || user?.role === Role.Admin) {
       response.author = media.author;
     }
 
     return res.json(response);
   }
-
 
   @Get(':id')
   async getMediaById(@Param('id') id: string, @Res() res: Response) {

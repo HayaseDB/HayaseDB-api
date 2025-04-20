@@ -36,7 +36,7 @@ export class RolesGuard implements CanActivate {
     const userRole = request.user.role;
 
     const requiredRolesEnum = requiredRoles.map(
-        (role) => Role[role as keyof typeof Role],
+      (role) => Role[role as keyof typeof Role],
     );
 
     if (requiredRolesEnum.includes(Role.Admin) && userRole === Role.Admin) {
@@ -44,15 +44,17 @@ export class RolesGuard implements CanActivate {
     }
 
     if (
-        requiredRolesEnum.includes(Role.Moderator) &&
-        (userRole === Role.Moderator || userRole === Role.Admin)
+      requiredRolesEnum.includes(Role.Moderator) &&
+      (userRole === Role.Moderator || userRole === Role.Admin)
     ) {
       return true;
     }
 
     if (
-        requiredRolesEnum.includes(Role.User) &&
-        (userRole === Role.User || userRole === Role.Moderator || userRole === Role.Admin)
+      requiredRolesEnum.includes(Role.User) &&
+      (userRole === Role.User ||
+        userRole === Role.Moderator ||
+        userRole === Role.Admin)
     ) {
       return true;
     }

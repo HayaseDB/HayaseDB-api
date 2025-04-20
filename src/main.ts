@@ -8,8 +8,7 @@ import { pastel } from 'gradient-string';
 import chalk from 'chalk';
 import figlet from 'figlet';
 import { ValidationPipe } from '@nestjs/common';
-import { Response } from 'express';
-import {NestExpressApplication} from "@nestjs/platform-express";
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function server() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -32,11 +31,11 @@ async function server() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('doc', app, document, {
-      jsonDocumentUrl: 'doc.json',
-      yamlDocumentUrl: 'doc.yaml',
-      swaggerOptions: {
-          persistAuthorization: true,
-      },
+    jsonDocumentUrl: 'doc.json',
+    yamlDocumentUrl: 'doc.yaml',
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
   });
   const configService = app.get(ConfigService);
   const port: number = configService.getOrThrow('app.port');
@@ -44,7 +43,6 @@ async function server() {
     origin: 'http://localhost:5173',
     credentials: true,
   });
-
 
   await app.listen(port);
 

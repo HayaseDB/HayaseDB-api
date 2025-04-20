@@ -6,14 +6,14 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   OneToMany,
-  AfterLoad, OneToOne,
+  OneToOne,
 } from 'typeorm';
 import { IsEmail } from 'class-validator';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
 import { generateUsername } from '@/module/users/utility';
 import { Media } from '@/module/media/entities/media.entity';
 import { Key } from '@/module/key/entities/key.entity';
-import {Pfp} from "@/module/users/entities/pfp.entity";
+import { Pfp } from '@/module/users/entities/pfp.entity';
 
 export enum Role {
   Admin = 'admin',
@@ -59,8 +59,11 @@ export class User {
   @OneToMany(() => Key, (key) => key.user)
   keys: Key[];
 
-  @Column({ default: false, select: false })
+  @Column({ default: true, select: false })
   verified: boolean;
+
+  @Column({ default: false, select: false })
+  banned: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -76,7 +79,6 @@ export class User {
 
   @OneToMany(() => Media, (media) => media.author)
   media: Media[];
-
 
   @OneToOne(() => Pfp, (pfp) => pfp.user, {
     cascade: true,

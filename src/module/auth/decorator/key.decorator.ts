@@ -6,10 +6,13 @@ import {
 } from '@nestjs/common';
 import { KeyGuard } from '../guard/key.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import {ThrottleGuard} from "@/module/auth/guard/throttle.guard";
+import { ThrottleGuard } from '@/module/auth/guard/throttle.guard';
 
 export function KeyAuth() {
-  return applyDecorators(UseGuards(KeyGuard, ThrottleGuard), ApiBearerAuth('key'));
+  return applyDecorators(
+    UseGuards(KeyGuard, ThrottleGuard),
+    ApiBearerAuth('key'),
+  );
 }
 
 export const GetKey = createParamDecorator(

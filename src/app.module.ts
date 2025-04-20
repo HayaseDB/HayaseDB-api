@@ -10,6 +10,7 @@ import { MailerModule } from './module/mailer/mailer.module';
 import { MediaModule } from './module/media/media.module';
 import { KeyModule } from '@/module/key/key.module';
 import { StatsModule } from './module/stats/stats.module';
+import { EnrichmentModule } from './module/enrichment/enrichment.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { StatsModule } from './module/stats/stats.module';
     MediaModule,
     KeyModule,
     StatsModule,
+    EnrichmentModule,
   ],
   controllers: [AppController],
 })

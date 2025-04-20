@@ -4,12 +4,14 @@ import { Repository } from 'typeorm';
 import { CreateAnimeDto } from '@/module/animes/dto/create-anime.dto';
 import { Anime } from '@/module/animes/entities/anime.entity';
 import { UpdateAnimeDto } from '@/module/animes/dto/update-anime.dto';
+import { EnrichmentService } from '@/module/enrichment/enrichment.service';
 
 @Injectable()
 export class AnimesService {
   constructor(
     @InjectRepository(Anime)
     private animesRepository: Repository<Anime>,
+    private readonly enrichmentService: EnrichmentService,
   ) {}
 
   create(createAnimeDto: CreateAnimeDto) {
@@ -96,10 +98,12 @@ export class AnimesService {
     };
   }
 
-  findOne(id: string) {
-    return this.animesRepository.findOne({
+  async findOne(id: string) {
+    const anime = await this.animesRepository.findOne({
       where: { id },
     });
+
+    return this.enrichmentService.enrichFields(anime, Anime);
   }
 
   async countAnime(): Promise<number> {

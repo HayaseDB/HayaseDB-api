@@ -108,7 +108,7 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    await this.usersService.verifyUser(user.id);
+    await this.usersService.updateVerified(user.id, true);
 
     return 'User verified successfully';
   }

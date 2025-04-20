@@ -8,9 +8,9 @@ import {
 } from 'typeorm';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
 import { Media } from '@/module/media/entities/media.entity';
-import {Label} from "@/module/animes/decorator/label.decorator";
-import {Type} from "@/module/animes/decorator/type.decorator";
-import {Required} from "@/module/animes/decorator/required.decorator";
+import { Label } from '@/module/animes/decorator/label.decorator';
+import { Type } from '@/module/animes/decorator/type.decorator';
+import { Required } from '@/module/animes/decorator/required.decorator';
 
 export enum AnimeStatus {
   AIRING = 'Airing',
@@ -21,7 +21,7 @@ export enum AnimeStatus {
 }
 
 export enum AnimeType {
-  TV = 'TV',
+  Show = 'Show',
   MOVIE = 'Movie',
   OVA = 'OVA',
   ONA = 'ONA',
@@ -36,33 +36,33 @@ export class Anime {
   id: string;
 
   @Column({ length: 255 })
-  @Label("Title")
+  @Label('Title')
   @Required()
   title: string;
 
   @Column('text', { array: true, nullable: true })
-  @Label("Genres")
+  @Label('Genres')
   genres?: string[];
-
-  @Column({ type: 'date', nullable: true })
-  @Label("Release date")
-  releaseDate?: Date;
-
-  @Column({ length: 255, nullable: true })
-  @Label("Studio")
-  studio?: string;
 
   @Column({ nullable: true, type: 'text' })
   @Type('Text')
-  @Label("Description")
+  @Label('Description')
   description?: string;
+
+  @Column({ type: 'date', nullable: true })
+  @Label('Release date')
+  releaseDate?: Date;
+
+  @Column({ length: 255, nullable: true })
+  @Label('Studio')
+  studio?: string;
 
   @Column({
     type: 'enum',
     enum: AnimeStatus,
     nullable: true,
   })
-  @Label("Status")
+  @Label('Status')
   @Type('Enum')
   status?: AnimeStatus;
 
@@ -71,33 +71,23 @@ export class Anime {
     enum: AnimeType,
     nullable: true,
   })
-  @Label("Type")
+  @Label('Type')
   @Type('Enum')
   type?: AnimeType;
 
   @Column({ length: 255, nullable: true })
-  @Label("Trailer")
+  @Label('Trailer')
   @Type('Url')
-  trailerUrl?: string;
+  trailer?: string;
 
   @Column({ length: 255, nullable: true })
-  @Label("Main Director")
-  mainDirector?: string;
+  @Label('Author')
+  author?: string;
 
   @Column({ length: 255, nullable: true })
-  @Label("Music Composer")
-  musicComposer?: string;
-
-  @Column({ length: 255, nullable: true })
-  @Label("Official Website")
+  @Label('Official Website')
   @Type('Url')
-  officialWebsiteUrl?: string;
-
-  @OneToMany(() => Contribution, (contribution) => contribution.anime)
-  contributions: Contribution[];
-
-  @OneToMany(() => Contribution, (contribution) => contribution.moderator,)
-  moderatedContributions: Contribution[];
+  website?: string;
 
   @ManyToOne(() => Media, {
     nullable: true,
@@ -107,7 +97,7 @@ export class Anime {
   })
   @JoinColumn({ name: 'bannerImage', referencedColumnName: 'id' })
   @Type('Image')
-  @Label("Banner Image")
+  @Label('Banner Image')
   bannerImage?: string;
 
   @ManyToOne(() => Media, {
@@ -118,6 +108,12 @@ export class Anime {
   })
   @JoinColumn({ name: 'coverImage', referencedColumnName: 'id' })
   @Type('Image')
-  @Label("Cover Image")
+  @Label('Cover Image')
   coverImage?: string;
+
+  @OneToMany(() => Contribution, (contribution) => contribution.anime)
+  contributions: Contribution[];
+
+  @OneToMany(() => Contribution, (contribution) => contribution.moderator)
+  moderatedContributions: Contribution[];
 }

@@ -11,7 +11,7 @@ import { JwtStrategy } from '@/module/auth/strategy/jwt.strategy';
 import { MailerModule } from '@/module/mailer/mailer.module';
 import { KeyModule } from '@/module/key/key.module';
 import { KeyStrategy } from '@/module/auth/strategy/key.strategy';
-import {minutes, ThrottlerModule} from "@nestjs/throttler";
+import { minutes, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -33,7 +33,7 @@ import {minutes, ThrottlerModule} from "@nestjs/throttler";
         name: 'default',
         ttl: minutes(1),
         limit: 100,
-      }
+      },
     ]),
   ],
   controllers: [AuthController],

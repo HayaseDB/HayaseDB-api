@@ -1,11 +1,15 @@
-import {BadRequestException, Injectable} from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { User } from '@/module/users/entities/user.entity';
+import { Role, User } from '@/module/users/entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {Pfp} from "@/module/users/entities/pfp.entity";
-
+import { Pfp } from '@/module/users/entities/pfp.entity';
+import { validate as isUuid } from 'uuid';
 @Injectable()
 export class UsersService {
   constructor(
@@ -20,8 +24,69 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+  async findAll(filters: {
+    page: number;
+    limit: number;
+    role?: Role;
+    verified?: boolean;
+    search?: string;
+    sortColumn?: string;
+    sortDirection?: 'ASC' | 'DESC';
+  }) {
+    const {
+      page,
+      limit,
+      role,
+      verified,
+      search,
+      sortColumn = 'createdAt',
+      sortDirection = 'DESC',
+    } = filters;
+
+    const queryBuilder = this.usersRepository.createQueryBuilder('user');
+
+    if (role) {
+      queryBuilder.andWhere('user.role = :role', { role });
+    }
+
+    if (verified !== undefined) {
+      queryBuilder.andWhere('user.verified = :verified', { verified });
+    }
+
+    if (search) {
+      const normalizedSearch = search.trim().toLowerCase();
+      if (isUuid(search)) {
+        queryBuilder.andWhere('user.id = :id', { id: search });
+      } else {
+        queryBuilder.andWhere(
+          '(LOWER(user.username) LIKE :search OR LOWER(user.email) LIKE :search)',
+          { search: `%${normalizedSearch}%` },
+        );
+      }
+    }
+    queryBuilder.leftJoinAndSelect('user.pfp', 'pfp');
+
+    queryBuilder.orderBy(`user.${sortColumn}`, sortDirection);
+    queryBuilder.skip((page - 1) * limit).take(limit);
+    queryBuilder.select([
+      'user.username',
+      'user.email',
+      'user.role',
+      'user.verified',
+      'user.createdAt',
+      'user.id',
+      'pfp',
+    ]);
+
+    const [users, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      users,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   findOne(id: string): Promise<User | null> {
@@ -62,28 +127,60 @@ export class UsersService {
     });
   }
 
-  getProfile(id: string): Promise<User | null> {
+  getProfile(id: string, user?: User): Promise<User | null> {
+    const selectFields: (keyof User)[] = [
+      'id',
+      'username',
+      'media',
+      'contributions',
+      'createdAt',
+      'role',
+    ];
+
+    if (user && (user.role === Role.Admin || user.role === Role.Moderator)) {
+      selectFields.push('verified', 'updatedAt', 'email', 'banned');
+    }
+
     return this.usersRepository.findOne({
       where: { id },
-      select: [
-        'id',
-        'username',
-        'media',
-        'contributions',
-        'createdAt',
-        'updatedAt',
-        'verified',
-        'role',
-      ],
+      select: selectFields,
     });
   }
 
-  async verifyUser(id: string): Promise<User | null> {
+  async updateVerified(
+    id: string,
+    verified: boolean,
+  ): Promise<{ message: string; success: true }> {
     const user = await this.usersRepository.findOne({ where: { id } });
-    if (!user) return null;
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-    user.verified = true;
-    return this.usersRepository.save(user);
+    user.verified = verified;
+    await this.usersRepository.save(user);
+
+    return {
+      success: true,
+      message: `User ${verified ? 'verified' : 'unverified'} successfully`,
+    };
+  }
+
+  async updateBanned(
+    id: string,
+    banned: boolean,
+  ): Promise<{ message: string; success: true }> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.banned = banned;
+    await this.usersRepository.save(user);
+
+    return {
+      success: true,
+      message: `User has been ${banned ? 'banned' : 'unbanned'} successfully`,
+    };
   }
 
   async update(user: User): Promise<User | null> {
@@ -100,8 +197,8 @@ export class UsersService {
   }
 
   async updateProfilePicture(
-      userId: string,
-      buffer: Buffer,
+    userId: string,
+    buffer: Buffer,
   ): Promise<User | null> {
     const user = await this.usersRepository.findOne({
       where: { id: userId },
@@ -125,7 +222,6 @@ export class UsersService {
 
     return this.getProfile(userId);
   }
-
 
   async getPfpById(pfpId: string): Promise<Buffer | null> {
     try {

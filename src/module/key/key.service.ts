@@ -69,12 +69,11 @@ export class KeyService {
 
   async countRequests(): Promise<number> {
     const total = await this.keyRepository
-        .createQueryBuilder('key')
-        .select('SUM(key.requestCountTotal)', 'sum')
-        .getRawOne();
+      .createQueryBuilder('key')
+      .select('SUM(key.requestCountTotal)', 'sum')
+      .getRawOne();
     return Number(total.sum);
   }
-
 
   async deleteKey(id: string, user: User): Promise<void> {
     const key = await this.keyRepository.findOne({

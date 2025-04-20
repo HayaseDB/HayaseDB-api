@@ -6,7 +6,9 @@ import {
   Patch,
   Param,
   Delete,
-  Query, HttpCode, HttpStatus,
+  Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { AnimesService } from './animes.service';
 import { CreateAnimeDto } from '@/module/animes/dto/create-anime.dto';
