@@ -5,7 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Query,
+  Query, UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -56,6 +56,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Auth()
   me(@GetUser() user: User) {
+    if (!user) {
+      throw new UnauthorizedException('User not authorized');
+    }
+
     return {
       message: 'User details retrieved successfully',
       user: {
