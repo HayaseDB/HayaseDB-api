@@ -285,20 +285,24 @@ export class ContributionsService {
     return anime;
   }
   private async applyAcceptedContribution(
-      contribution: Contribution,
+    contribution: Contribution,
   ): Promise<
-      Contribution | { id: string; affected?: number; contribution: Contribution }
+    Contribution | { id: string; affected?: number; contribution: Contribution }
   > {
     if (!contribution.anime) {
       const newAnime = this.animeRepository.create(contribution.data);
       contribution.anime = await this.animeRepository.save(newAnime);
     } else {
-      const { createdAt, ...animeUpdateData } = contribution.data;
-      const result = await this.animeRepository.update(contribution.anime.id, animeUpdateData);
+      const animeUpdateData = contribution.data;
+      delete animeUpdateData.createdAt;
+
+      const result = await this.animeRepository.update(
+        contribution.anime.id,
+        animeUpdateData,
+      );
       return { id: contribution.id, affected: result.affected, contribution };
     }
 
     return this.contributionRepository.save(contribution);
   }
-
 }

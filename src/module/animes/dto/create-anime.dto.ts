@@ -9,8 +9,15 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { AnimeStatus, AnimeType } from '@/module/animes/entities/anime.entity';
-import {IsYouTubeUrl} from '@/module/animes/validator/url.validator';
+import {
+  AgeRating,
+  AnimeStatus,
+  AnimeType,
+} from '@/module/animes/entities/anime.entity';
+import {
+  IsCrunchyrollUrl,
+  IsYouTubeUrl,
+} from '@/module/animes/validator/url.validator';
 
 export class CreateAnimeDto {
   @ApiProperty()
@@ -65,6 +72,17 @@ export class CreateAnimeDto {
   @IsOptional()
   @IsString()
   website?: string;
+
+  @ApiProperty({ required: false, enum: AgeRating })
+  @IsOptional()
+  @IsEnum(AgeRating)
+  ageRating?: AgeRating;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @IsCrunchyrollUrl({ message: 'Crunchyroll URL must be a valid' })
+  crunchyroll?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

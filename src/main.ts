@@ -9,7 +9,6 @@ import chalk from 'chalk';
 import figlet from 'figlet';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
-
 async function server() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.set('trust proxy', 'loopback');
@@ -38,13 +37,13 @@ async function server() {
     },
   });
   const configService = app.get(ConfigService);
-    const port: number = configService.getOrThrow('app.port');
-    const corsOrigin: string = configService.getOrThrow('app.web_url');
+  const port: number = configService.getOrThrow('app.port');
+  const corsOrigin: string = configService.getOrThrow('app.web_url');
 
-    app.enableCors({
-        origin: corsOrigin,
-        credentials: true,
-    });
+  app.enableCors({
+    origin: corsOrigin,
+    credentials: true,
+  });
 
   await app.listen(port);
 

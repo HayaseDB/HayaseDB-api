@@ -163,5 +163,4 @@ export class UsersController {
 
     return res.send(pfp);
   }
-
 }

@@ -28,6 +28,15 @@ export enum AnimeType {
   SPECIAL = 'Special',
 }
 
+export enum AgeRating {
+  G = 'G',
+  PG = 'PG',
+  PG13 = 'PG-13',
+  R = 'R',
+  NC17 = 'NC-17',
+  R18 = 'R-18',
+}
+
 @Entity('animes')
 export class Anime {
   @PrimaryGeneratedColumn('uuid')
@@ -88,6 +97,20 @@ export class Anime {
   @Label('Official Website')
   @Type('Url')
   website?: string;
+
+  @Column({
+    type: 'enum',
+    enum: AgeRating,
+    nullable: true,
+  })
+  @Label('Age Rating')
+  @Type('Enum')
+  ageRating?: AgeRating;
+
+  @Column({ length: 255, nullable: true })
+  @Label('Crunchyroll')
+  @Type('Url')
+  crunchyroll?: string;
 
   @ManyToOne(() => Media, {
     nullable: true,
