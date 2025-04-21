@@ -284,23 +284,21 @@ export class ContributionsService {
     }
     return anime;
   }
-
   private async applyAcceptedContribution(
-    contribution: Contribution,
+      contribution: Contribution,
   ): Promise<
-    Contribution | { id: string; affected?: number; contribution: Contribution }
+      Contribution | { id: string; affected?: number; contribution: Contribution }
   > {
     if (!contribution.anime) {
       const newAnime = this.animeRepository.create(contribution.data);
       contribution.anime = await this.animeRepository.save(newAnime);
     } else {
-      const result = await this.animeRepository.update(
-        contribution.anime.id,
-        contribution.data,
-      );
+      const { createdAt, ...animeUpdateData } = contribution.data;
+      const result = await this.animeRepository.update(contribution.anime.id, animeUpdateData);
       return { id: contribution.id, affected: result.affected, contribution };
     }
 
     return this.contributionRepository.save(contribution);
   }
+
 }
