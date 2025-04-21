@@ -46,57 +46,48 @@ export function IsYouTubeUrl(validationOptions?: ValidationOptions) {
     });
   };
 }
-
 export function IsCrunchyrollUrl(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     Transform(({ value }) => {
       if (typeof value !== 'string') return value;
 
-      let normalizedUrl = value.trim();
+      let url = value.trim();
 
-      if (!/^https?:\/\//i.test(normalizedUrl)) {
-        normalizedUrl = `https://${normalizedUrl}`;
+      if (!/^https?:\/\//i.test(url)) {
+        url = `https://${url}`;
       }
 
-      normalizedUrl = normalizedUrl
-        .replace(
-          /^https?:\/\/(www\.)?crunchyroll\.com\/[a-z]{2}\//,
-          'https://crunchyroll.com/',
-        )
-        .replace(
-          /^https?:\/\/(www\.)?crunchyroll\.com\/series\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?(\?utm_source=[^ ]*)?$/,
-          'https://crunchyroll.com/',
-        );
+      try {
+        const parsed = new URL(url);
 
-      const [baseUrl, queryParams] = normalizedUrl.split('?');
-      let normalizedQueryParams = '';
+        if (!parsed.hostname.includes('crunchyroll.com')) return value;
 
-      if (queryParams) {
-        const params = new URLSearchParams(queryParams);
-        if (params.has('utm_source')) {
-          normalizedQueryParams = `utm_source=${params.get('utm_source')}`;
+        const seriesMatch = parsed.pathname.match(/\/series\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?/);
+
+        if (seriesMatch) {
+          return `https://crunchyroll.com${seriesMatch[0]}`;
         }
-      }
 
-      return `${baseUrl}${normalizedQueryParams ? `?${normalizedQueryParams}` : ''}`;
+        return value;
+      } catch {
+        return value;
+      }
     })(object, propertyName);
 
     registerDecorator({
       name: 'isCrunchyrollUrl',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       options: validationOptions,
       validator: {
         validate(value: any) {
           if (typeof value !== 'string') return false;
-          const crunchUrlRegex =
-            /^https?:\/\/(www\.)?crunchyroll\.com\/series\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?(\?utm_source=[^ ]*)?$/;
-          return crunchUrlRegex.test(value);
+          return /^https:\/\/crunchyroll\.com\/series\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?$/.test(value);
         },
         defaultMessage(args: ValidationArguments): string {
-          return (
-            <string>validationOptions?.message ||
-            `${args.property} must be a valid Crunchyroll series or watch URL.`
+          return <string>(
+              validationOptions?.message ||
+              `${args.property} must be a valid Crunchyroll series URL (e.g., https://crunchyroll.com/series/XXXXX/title).`
           );
         },
       },
