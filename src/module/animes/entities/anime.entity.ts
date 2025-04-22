@@ -140,9 +140,5 @@ export class Anime {
   @OneToMany(() => Contribution, (contribution) => contribution.moderator)
   moderatedContributions: Contribution[];
 
-  @CreateDateColumn({select: false})
-  createdAt: Date;
 
-  @UpdateDateColumn({select: false})
-  updatedAt: Date;
 }
