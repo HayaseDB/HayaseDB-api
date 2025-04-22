@@ -72,9 +72,11 @@ export class Contribution {
     if (this.anime) {
       this.originalAnime = new Anime();
       Object.assign(this.originalAnime, this.anime);
+      this.originalAnime.id = this.anime.id;
     } else if (this.data) {
       this.originalAnime = new Anime();
       Object.assign(this.originalAnime, this.data);
+      this.originalAnime.id = this.data.id;
     }
   }
 }
