@@ -31,7 +31,7 @@ export class AnimesService {
       page = 1,
       limit = 10,
       sortBy = 'createdAt',
-      sortOrder = 'ASC',
+      sortOrder = 'DESC',
       caseSensitive = false,
     } = query;
 
@@ -39,6 +39,7 @@ export class AnimesService {
     const skip = Math.max(page - 1, 0) * take;
 
     const qb = this.animesRepository.createQueryBuilder('anime');
+    qb.addSelect(['anime.createdAt', 'anime.updatedAt']);
     const metadata = this.animesRepository.metadata;
     const validColumns = metadata.columns.map((col) => col.propertyName);
     const relations = metadata.relations;
