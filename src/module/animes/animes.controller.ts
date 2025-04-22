@@ -49,7 +49,15 @@ export class AnimesController {
     name: 'sortBy',
     required: false,
     description: 'Field to sort by',
-    enum: ['title', 'genres', 'releaseDate', 'studio', 'status', 'type', 'createdAt'],
+    enum: [
+      'title',
+      'genres',
+      'releaseDate',
+      'studio',
+      'status',
+      'type',
+      'createdAt',
+    ],
     default: 'releaseDate',
   })
   @ApiQuery({

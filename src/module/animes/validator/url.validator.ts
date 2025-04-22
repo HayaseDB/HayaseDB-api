@@ -62,7 +62,9 @@ export function IsCrunchyrollUrl(validationOptions?: ValidationOptions) {
 
         if (!parsed.hostname.includes('crunchyroll.com')) return value;
 
-        const seriesMatch = parsed.pathname.match(/\/series\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?/);
+        const seriesMatch = parsed.pathname.match(
+          /\/series\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?/,
+        );
 
         if (seriesMatch) {
           return `https://crunchyroll.com${seriesMatch[0]}`;
@@ -82,12 +84,14 @@ export function IsCrunchyrollUrl(validationOptions?: ValidationOptions) {
       validator: {
         validate(value: any) {
           if (typeof value !== 'string') return false;
-          return /^https:\/\/crunchyroll\.com\/series\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?$/.test(value);
+          return /^https:\/\/crunchyroll\.com\/series\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?$/.test(
+            value,
+          );
         },
         defaultMessage(args: ValidationArguments): string {
           return <string>(
-              validationOptions?.message ||
-              `${args.property} must be a valid Crunchyroll series URL (e.g., https://crunchyroll.com/series/XXXXX/title).`
+            (validationOptions?.message ||
+              `${args.property} must be a valid Crunchyroll series URL (e.g., https://crunchyroll.com/series/XXXXX/title).`)
           );
         },
       },

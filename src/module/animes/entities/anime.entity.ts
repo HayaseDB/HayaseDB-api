@@ -4,7 +4,9 @@ import {
   Column,
   OneToMany,
   ManyToOne,
-  JoinColumn, CreateDateColumn, UpdateDateColumn,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Contribution } from '@/module/contributions/entities/contribution.entity';
 import { Media } from '@/module/media/entities/media.entity';
@@ -140,9 +142,9 @@ export class Anime {
   @OneToMany(() => Contribution, (contribution) => contribution.moderator)
   moderatedContributions: Contribution[];
 
-  @CreateDateColumn({select: false})
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @UpdateDateColumn({select: false})
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 }

@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  BeforeInsert,
 } from 'typeorm';
 import { User } from '@/module/users/entities/user.entity';
 import { Anime } from '@/module/animes/entities/anime.entity';
@@ -62,4 +63,16 @@ export class Contribution {
     onDelete: 'CASCADE',
   })
   anime: Anime;
+
+  @Column(() => Anime)
+  originalAnime: { [p: string]: any };
+
+  @BeforeInsert()
+  snapshotOriginalAnime() {
+    if (this.anime) {
+      this.originalAnime = Object.assign(new Anime(), this.anime);
+    } else if (this.data) {
+      this.originalAnime = Object.assign(new Anime(), this.data);
+    }
+  }
 }

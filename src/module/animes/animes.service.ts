@@ -48,18 +48,18 @@ export class AnimesService {
     relations.forEach((relation) => {
       if (relation.isEager) {
         qb.leftJoinAndSelect(
-            `anime.${relation.propertyName}`,
-            relation.propertyName,
+          `anime.${relation.propertyName}`,
+          relation.propertyName,
         );
       }
     });
 
     Object.entries(filters).forEach(([key, value]) => {
       if (
-          !validColumns.includes(key) ||
-          value === undefined ||
-          value === null ||
-          value === ''
+        !validColumns.includes(key) ||
+        value === undefined ||
+        value === null ||
+        value === ''
       )
         return;
 
