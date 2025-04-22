@@ -233,6 +233,13 @@ export class ContributionsService {
       );
     }
 
+    if (contribution.originalAnime) {
+      result.originalAnime = this.enrichmentService.enrichFields(
+          contribution.originalAnime,
+          Anime,
+      );
+    }
+
     return result;
   }
 
