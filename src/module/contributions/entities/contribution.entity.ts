@@ -70,16 +70,9 @@ export class Contribution {
   @BeforeInsert()
   snapshotOriginalAnime() {
     if (this.anime) {
-      this.originalAnime = {
-        ...this.anime,
-        id: this.anime.id
-      };
+      this.originalAnime = Object.assign(new Anime(), this.anime);
     } else if (this.data) {
-      this.originalAnime = {
-        ...this.data,
-        id: this.data.id,
-
-      };
+      this.originalAnime = Object.assign(new Anime(), this.data);
     }
   }
 }
