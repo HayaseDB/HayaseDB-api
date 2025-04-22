@@ -18,6 +18,7 @@ export class AnimesService {
     const anime = this.animesRepository.create(createAnimeDto);
     return this.animesRepository.save(anime);
   }
+
   async findAll(query: {
     filters?: Record<string, any>;
     page?: number;
@@ -31,7 +32,7 @@ export class AnimesService {
       page = 1,
       limit = 10,
       sortBy = 'createdAt',
-      sortOrder = 'DESC',
+      sortOrder = 'ASC',
       caseSensitive = false,
     } = query;
 
