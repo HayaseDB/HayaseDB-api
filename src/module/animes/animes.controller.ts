@@ -49,7 +49,7 @@ export class AnimesController {
     name: 'sortBy',
     required: false,
     description: 'Field to sort by',
-    enum: ['title', 'genres', 'releaseDate', 'studio', 'status', 'type'],
+    enum: ['title', 'genres', 'releaseDate', 'studio', 'status', 'type', 'createdAt'],
     default: 'releaseDate',
   })
   @ApiQuery({
@@ -75,7 +75,7 @@ export class AnimesController {
     @Body() filters: FilterAnimeDto,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('sortBy') sortBy: string = 'releaseDate',
+    @Query('sortBy') sortBy: string = 'createdAt',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
     @Query('caseSensitive') caseSensitive: boolean = false,
   ) {
