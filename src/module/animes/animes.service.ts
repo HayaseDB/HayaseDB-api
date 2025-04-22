@@ -47,18 +47,18 @@ export class AnimesService {
     relations.forEach((relation) => {
       if (relation.isEager) {
         qb.leftJoinAndSelect(
-          `anime.${relation.propertyName}`,
-          relation.propertyName,
+            `anime.${relation.propertyName}`,
+            relation.propertyName,
         );
       }
     });
 
     Object.entries(filters).forEach(([key, value]) => {
       if (
-        !validColumns.includes(key) ||
-        value === undefined ||
-        value === null ||
-        value === ''
+          !validColumns.includes(key) ||
+          value === undefined ||
+          value === null ||
+          value === ''
       )
         return;
 
@@ -86,7 +86,9 @@ export class AnimesService {
     });
 
     const safeSortColumn = validColumns.includes(sortBy) ? sortBy : 'id';
-    const safeSortOrder = sortOrder?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+    const safeSortOrder = sortOrder === 'DESC' ? 'DESC' : 'ASC';
+
     qb.orderBy(`anime.${safeSortColumn}`, safeSortOrder);
 
     qb.skip(skip).take(take);
