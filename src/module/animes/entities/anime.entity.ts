@@ -46,10 +46,10 @@ export class Anime {
   @Label('Id')
   id: string;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, nullable: true })
   @Label('Title')
   @Required()
-  title: string;
+  title?: string;
 
   @Column('text', { array: true, nullable: true })
   @Label('Genres')
