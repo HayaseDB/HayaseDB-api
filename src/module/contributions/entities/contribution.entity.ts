@@ -73,8 +73,6 @@ export class Contribution {
       this.originalAnime = { ...this.anime };
     } else if (this.data && this.data.id) {
       this.originalAnime = { ...this.data };
-    } else {
-      this.originalAnime = {};
     }
   }
 }
