@@ -1,39 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class RecreateOriginalAnimeFields1745440000000 implements MigrationInterface {
-  name = 'RecreateOriginalAnimeFields1745440000000';
+export class OriginalAnime1745363328860 implements MigrationInterface {
+  name = 'OriginalAnime1745363328860';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "contributions" DROP CONSTRAINT IF EXISTS "FK_ed45a4a60e86434023826126ee4"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP CONSTRAINT IF EXISTS "FK_a7ec0897b4dc599f5cb513e03a6"`);
-
-    const dropColumns = [
-      'originalAnimeUpdatedat',
-      'originalAnimeCreatedat',
-      'originalAnimeCrunchyroll',
-      'originalAnimeAgerating',
-      'originalAnimeWebsite',
-      'originalAnimeAuthor',
-      'originalAnimeTrailer',
-      'originalAnimeType',
-      'originalAnimeStatus',
-      'originalAnimeStudio',
-      'originalAnimeReleasedate',
-      'originalAnimeDescription',
-      'originalAnimeGenres',
-      'originalAnimeTitle',
-      'originalAnimeId',
-      'originalAnimeCoverimage',
-      'originalAnimeBannerimage'
-    ];
-    for (const col of dropColumns) {
-      await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN IF EXISTS "${col}"`);
-    }
-
-    await queryRunner.query(`DROP TYPE IF EXISTS "public"."contributions_originalanimetype_enum"`);
-    await queryRunner.query(`DROP TYPE IF EXISTS "public"."contributions_originalanimestatus_enum"`);
-    await queryRunner.query(`DROP TYPE IF EXISTS "public"."contributions_originalanimeagerating_enum"`);
-
     await queryRunner.query(
         `ALTER TABLE "contributions" ADD "originalAnimeBannerimage" uuid`,
     );
@@ -44,17 +14,24 @@ export class RecreateOriginalAnimeFields1745440000000 implements MigrationInterf
         `ALTER TABLE "contributions" ADD "originalAnimeId" uuid NOT NULL DEFAULT uuid_generate_v4()`,
     );
     await queryRunner.query(
-        `ALTER TABLE "contributions" DROP CONSTRAINT IF EXISTS "PK_bde2bbb605a27ae4beeea3f895f"`,
-    );
-    await queryRunner.query(
-        `ALTER TABLE "contributions" DROP CONSTRAINT IF EXISTS "PK_5b66590506ded33085c6315f483"`,
+        `ALTER TABLE "contributions" DROP CONSTRAINT "PK_bde2bbb605a27ae4beeea3f895f"`,
     );
     await queryRunner.query(
         `ALTER TABLE "contributions" ADD CONSTRAINT "PK_5b66590506ded33085c6315f483" PRIMARY KEY ("id", "dataId", "originalAnimeId")`,
     );
+
     await queryRunner.query(
-        `ALTER TABLE "contributions" ADD "originalAnimeTitle" character varying(255) NOT NULL`,
+        `ALTER TABLE "contributions" ADD "originalAnimeTitle" character varying(255)`
     );
+
+    await queryRunner.query(
+        `UPDATE "contributions" SET "originalAnimeTitle" = 'N/A' WHERE "originalAnimeTitle" IS NULL`
+    );
+
+    await queryRunner.query(
+        `ALTER TABLE "contributions" ALTER COLUMN "originalAnimeTitle" SET NOT NULL`
+    );
+
     await queryRunner.query(
         `ALTER TABLE "contributions" ADD "originalAnimeGenres" text array`,
     );
@@ -112,29 +89,77 @@ export class RecreateOriginalAnimeFields1745440000000 implements MigrationInterf
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "contributions" DROP CONSTRAINT "FK_ed45a4a60e86434023826126ee4"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP CONSTRAINT "FK_a7ec0897b4dc599f5cb513e03a6"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeUpdatedat"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeCreatedat"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeCrunchyroll"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeAgerating"`);
-    await queryRunner.query(`DROP TYPE "public"."contributions_originalanimeagerating_enum"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeWebsite"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeAuthor"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeTrailer"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeType"`);
-    await queryRunner.query(`DROP TYPE "public"."contributions_originalanimetype_enum"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeStatus"`);
-    await queryRunner.query(`DROP TYPE "public"."contributions_originalanimestatus_enum"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeStudio"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeReleasedate"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeDescription"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeGenres"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeTitle"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP CONSTRAINT "PK_5b66590506ded33085c6315f483"`);
-    await queryRunner.query(`ALTER TABLE "contributions" ADD CONSTRAINT "PK_bde2bbb605a27ae4beeea3f895f" PRIMARY KEY ("id", "dataId")`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeId"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeCoverimage"`);
-    await queryRunner.query(`ALTER TABLE "contributions" DROP COLUMN "originalAnimeBannerimage"`);
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP CONSTRAINT "FK_ed45a4a60e86434023826126ee4"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP CONSTRAINT "FK_a7ec0897b4dc599f5cb513e03a6"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeUpdatedat"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeCreatedat"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeCrunchyroll"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeAgerating"`,
+    );
+    await queryRunner.query(
+        `DROP TYPE "public"."contributions_originalanimeagerating_enum"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeWebsite"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeAuthor"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeTrailer"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeType"`,
+    );
+    await queryRunner.query(
+        `DROP TYPE "public"."contributions_originalanimetype_enum"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeStatus"`,
+    );
+    await queryRunner.query(
+        `DROP TYPE "public"."contributions_originalanimestatus_enum"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeStudio"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeReleasedate"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeDescription"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeGenres"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeTitle"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP CONSTRAINT "PK_5b66590506ded33085c6315f483"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" ADD CONSTRAINT "PK_bde2bbb605a27ae4beeea3f895f" PRIMARY KEY ("id", "dataId")`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeId"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeCoverimage"`,
+    );
+    await queryRunner.query(
+        `ALTER TABLE "contributions" DROP COLUMN "originalAnimeBannerimage"`,
+    );
   }
 }
