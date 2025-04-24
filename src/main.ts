@@ -40,10 +40,20 @@ async function server() {
   const port: number = configService.getOrThrow('app.port');
   const corsOrigin: string = configService.getOrThrow('app.web_url');
 
-  app.enableCors({
-    origin: corsOrigin,
-    credentials: true,
-  });
+    app.enableCors({
+        origin: (origin, callback) => {
+            const allowedOrigins = [corsOrigin];
+            const localhostPattern = /^https?:\/\/localhost(:\d+)?$/;
+
+            if (!origin || allowedOrigins.includes(origin) || localhostPattern.test(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
+        credentials: true,
+    });
+
 
   await app.listen(port);
 
