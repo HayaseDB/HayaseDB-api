@@ -6,11 +6,9 @@ export class NullableTitle1745368711348 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`ALTER TABLE "animes" ALTER COLUMN "title" DROP NOT NULL`);
         await queryRunner.query(`ALTER TABLE "contributions" ALTER COLUMN "dataTitle" DROP NOT NULL`);
-        await queryRunner.query(`ALTER TABLE "contributions" ALTER COLUMN "originalAnimeTitle" DROP NOT NULL`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "contributions" ALTER COLUMN "originalAnimeTitle" SET NOT NULL`);
         await queryRunner.query(`ALTER TABLE "contributions" ALTER COLUMN "dataTitle" SET NOT NULL`);
         await queryRunner.query(`ALTER TABLE "animes" ALTER COLUMN "title" SET NOT NULL`);
     }

@@ -233,9 +233,9 @@ export class ContributionsService {
       );
     }
 
-    if (contribution.originalAnime) {
-      result.originalAnime = this.enrichmentService.enrichFields(
-          contribution.originalAnime,
+    if (contribution.original) {
+      result.original = this.enrichmentService.enrichFields(
+          contribution.original,
           Anime,
       );
     }

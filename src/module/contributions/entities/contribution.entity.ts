@@ -6,10 +6,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  BeforeInsert,
+  BeforeInsert, AfterInsert,
 } from 'typeorm';
 import { User } from '@/module/users/entities/user.entity';
 import { Anime } from '@/module/animes/entities/anime.entity';
+import {array} from "joi";
 
 export enum ContributionStatus {
   PENDING = 'pending',
@@ -57,6 +58,9 @@ export class Contribution {
   @Column(() => Anime)
   data: { [p: string]: any };
 
+  @Column({ type: 'jsonb', nullable: true })
+  original: Anime;
+
   @ManyToOne(() => Anime, (anime) => anime.contributions, {
     nullable: true,
     eager: true,
@@ -64,15 +68,10 @@ export class Contribution {
   })
   anime: Anime;
 
-  @Column(() => Anime)
-  originalAnime: { [p: string]: any };
-
   @BeforeInsert()
   snapshotOriginalAnime() {
     if (this.anime) {
-      this.originalAnime = Object.assign(new Anime(), this.anime);
-    } else if (this.data) {
-      this.originalAnime = Object.assign(new Anime(), this.data);
+      this.original = { ...this.anime };
     }
   }
 }
