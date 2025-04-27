@@ -47,36 +47,6 @@ export class AppController {
       },
     },
   })
-  @ApiBadRequestResponse({
-    description: 'Bad request',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            statusCode: { type: 'integer', example: 400 },
-            message: { type: 'string', example: 'Invalid request parameters' },
-            error: { type: 'string', example: 'Bad Request' },
-          },
-        },
-      },
-    },
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            statusCode: { type: 'integer', example: 500 },
-            message: { type: 'string', example: 'Something went wrong on the server' },
-            error: { type: 'string', example: 'Internal Server Error' },
-          },
-        },
-      },
-    },
-  })
   getAppInfo(): any {
     const packageInfo = require('../package.json');
     return {
