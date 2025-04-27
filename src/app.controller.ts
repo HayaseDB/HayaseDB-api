@@ -1,5 +1,5 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiConsumes } from '@nestjs/swagger';
 
 @ApiTags('Application')
 @Controller()
@@ -10,6 +10,7 @@ export class AppController {
     summary: 'Get application information',
     description: 'Returns basic information about the application.',
   })
+  @ApiConsumes('Infos')
   getAppInfo(): any {
     const packageInfo = require('../package.json');
     return {
