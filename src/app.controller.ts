@@ -51,10 +51,13 @@ export class AppController {
     description: 'Bad request',
     content: {
       'application/json': {
-        example: {
-          statusCode: 400,
-          message: 'Invalid request parameters',
-          error: 'Bad Request',
+        schema: {
+          type: 'object',
+          properties: {
+            statusCode: { type: 'integer', example: 400 },
+            message: { type: 'string', example: 'Invalid request parameters' },
+            error: { type: 'string', example: 'Bad Request' },
+          },
         },
       },
     },
@@ -63,10 +66,13 @@ export class AppController {
     description: 'Internal server error',
     content: {
       'application/json': {
-        example: {
-          statusCode: 500,
-          message: 'Something went wrong on the server',
-          error: 'Internal Server Error',
+        schema: {
+          type: 'object',
+          properties: {
+            statusCode: { type: 'integer', example: 500 },
+            message: { type: 'string', example: 'Something went wrong on the server' },
+            error: { type: 'string', example: 'Internal Server Error' },
+          },
         },
       },
     },
