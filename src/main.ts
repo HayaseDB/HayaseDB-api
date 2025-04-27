@@ -27,7 +27,16 @@ async function server() {
     )
     .addApiKey({ type: 'apiKey' }, 'key')
     .build();
+  const configService = app.get(ConfigService);
 
+  const corsOrigin: string = configService.getOrThrow('app.web_url');
+
+  app.enableCors({
+    origin: corsOrigin,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization,Accept,Origin,X-Requested-With',
+    credentials: true,
+  });
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('doc', app, document, {
     jsonDocumentUrl: 'doc.json',
@@ -36,24 +45,7 @@ async function server() {
       persistAuthorization: true,
     },
   });
-  const configService = app.get(ConfigService);
   const port: number = configService.getOrThrow('app.port');
-  const corsOrigin: string = configService.getOrThrow('app.web_url');
-
-    app.enableCors({
-        origin: (origin, callback) => {
-            const allowedOrigins = [corsOrigin];
-            const localhostPattern = /^https?:\/\/localhost(:\d+)?$/;
-
-            if (!origin || allowedOrigins.includes(origin) || localhostPattern.test(origin)) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        },
-        credentials: true,
-    });
-
 
   await app.listen(port);
 
