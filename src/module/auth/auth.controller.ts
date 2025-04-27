@@ -8,7 +8,7 @@ import {
   Query,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -21,6 +21,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @ApiOperation({
+    summary: 'User login',
+    description:
+      'Authenticates a user and returns a JWT token along with user information.',
+  })
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto) {
     const loginResult = await this.authService.login(
@@ -38,6 +43,11 @@ export class AuthController {
   }
 
   @Post('register')
+  @ApiOperation({
+    summary: 'User registration',
+    description:
+      "Registers a new user and returns the created user's basic information.",
+  })
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto) {
     const user = await this.authService.register(
@@ -54,6 +64,11 @@ export class AuthController {
   }
 
   @Get('me')
+  @ApiOperation({
+    summary: 'Get current user profile',
+    description:
+      "Returns the authenticated user's profile information based on the provided JWT token.",
+  })
   @HttpCode(HttpStatus.OK)
   @Auth()
   me(@GetUser() user: User) {
@@ -74,6 +89,11 @@ export class AuthController {
   }
 
   @Get('verify')
+  @ApiOperation({
+    summary: 'Verify user email',
+    description:
+      "Verifies a user's email address using a provided verification token.",
+  })
   @HttpCode(HttpStatus.OK)
   async verify(@Query('token') token: string) {
     const message = await this.authService.verifyUserWithToken(token);
@@ -83,6 +103,11 @@ export class AuthController {
   }
 
   @Get('verify/resend')
+  @ApiOperation({
+    summary: 'Resend email verification',
+    description:
+      "Resends the email verification link to the user's email address.",
+  })
   @HttpCode(HttpStatus.OK)
   async resend(@Query('email') email: string) {
     return await this.authService.resendVerifyByEmail(email);

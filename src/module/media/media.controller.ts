@@ -12,7 +12,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { MediaService } from './media.service';
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import sharp from 'sharp';
 import { Auth, GetUser } from '@/module/auth/decorator/auth.decorator';
 import { Role, User } from '@/module/users/entities/user.entity';
@@ -30,6 +30,11 @@ export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
   @Post('')
+  @ApiOperation({
+    summary: 'Upload a media file',
+    description:
+      'Allows an authenticated user to upload an image or PDF file. Converts images to JPEG before saving.',
+  })
   @Auth('User')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -83,6 +88,11 @@ export class MediaController {
   }
 
   @Get(':id/meta')
+  @ApiOperation({
+    summary: 'Get media metadata',
+    description:
+      'Returns metadata (like URL, filename, size) for a specific media file. Admin access required.',
+  })
   @Auth('Admin')
   async getMediaMeta(
     @Param('id') id: string,
@@ -112,6 +122,11 @@ export class MediaController {
   }
 
   @Get(':id')
+  @ApiOperation({
+    summary: 'Get media file by ID',
+    description:
+      'Retrieves and serves the actual media file (image or PDF) by its ID.',
+  })
   async getMediaById(@Param('id') id: string, @Res() res: Response) {
     const media = await this.mediaService.getFilebyId(id);
 
@@ -135,6 +150,10 @@ export class MediaController {
   }
 
   @Delete(':id')
+  @ApiOperation({
+    summary: 'Delete a media file',
+    description: 'Deletes a specific media file. Only accessible to Admins.',
+  })
   @Auth('Admin')
   async deleteMediaById(@Param('id') id: string, @Res() res: Response) {
     const media = await this.mediaService.deleteMediaById(id);

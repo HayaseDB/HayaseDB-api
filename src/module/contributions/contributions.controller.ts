@@ -16,7 +16,7 @@ import { ContributionStatus } from './entities/contribution.entity';
 import { Auth, GetUser } from '@/module/auth/decorator/auth.decorator';
 import { User } from '@/module/users/entities/user.entity';
 import { UpdateContributionStatusDto } from './dto/update-contribution-status.dto';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreateContributionDto } from '@/module/contributions/dto/create-contribution.dto';
 import { EditContributionDto } from '@/module/contributions/dto/edit-contribution.dto';
 import { ContributionQueryDto } from '@/module/contributions/dto/query.dto';
@@ -29,6 +29,11 @@ export class ContributionsController {
   constructor(private readonly contributionService: ContributionsService) {}
 
   @Post()
+  @ApiOperation({
+    summary: 'Create a new contribution',
+    description:
+      'Allows a user to create a new contribution suggestion for an anime.',
+  })
   @Auth('User')
   async createContribution(
     @Body() createContributionDto: CreateContributionDto,
@@ -41,6 +46,11 @@ export class ContributionsController {
   }
 
   @Post(':animeId')
+  @ApiOperation({
+    summary: 'Suggest an edit to an anime',
+    description:
+      'Allows a user to suggest an edit to an existing anime by submitting a contribution.',
+  })
   @Auth('User')
   async suggestEditToAnime(
     @Param('animeId') animeId: string,
@@ -55,6 +65,10 @@ export class ContributionsController {
   }
 
   @Patch(':contributionId')
+  @ApiOperation({
+    summary: 'Update a contribution',
+    description: 'Allows a user to update their pending contribution.',
+  })
   @Auth('User')
   async updateContribution(
     @Param('contributionId') contributionId: string,
@@ -69,6 +83,11 @@ export class ContributionsController {
   }
 
   @Patch(':contributionId/:status')
+  @ApiOperation({
+    summary: 'Update the status of a contribution',
+    description:
+      "Allows a moderator to approve, reject, or update the status of a user's contribution.",
+  })
   @Auth('Moderator')
   @ApiParam({
     name: 'status',
@@ -93,12 +112,21 @@ export class ContributionsController {
   }
 
   @Get()
+  @ApiOperation({
+    summary: 'Get all contributions',
+    description:
+      'Allows a moderator to retrieve a list of all contributions with optional filters.',
+  })
   @Auth('Moderator')
   async findContributions(@Query() query: ContributionQueryDto) {
     return await this.contributionService.findAll(query);
   }
 
   @Get('me')
+  @ApiOperation({
+    summary: "Get current user's contributions",
+    description: 'Retrieves all contributions made by the authenticated user.',
+  })
   @Auth('User')
   async findContributionsMe(
     @Query() query: ContributionMeQueryDto,
@@ -111,11 +139,20 @@ export class ContributionsController {
   }
 
   @Get('/schema')
+  @ApiOperation({
+    summary: 'Get contribution schema',
+    description: 'Returns the JSON schema structure used for contributions.',
+  })
   getSchema() {
     return this.contributionService.getSchema();
   }
 
   @Get(':contributionId')
+  @ApiOperation({
+    summary: 'Get a contribution by ID',
+    description:
+      'Retrieves a specific contribution by its ID for the authenticated user.',
+  })
   @Auth('User')
   async getContributionById(
     @Param(
@@ -141,6 +178,10 @@ export class ContributionsController {
   }
 
   @Delete(':contributionId')
+  @ApiOperation({
+    summary: 'Delete a contribution',
+    description: 'Allows a user to delete their own contribution by ID.',
+  })
   @Auth('User')
   async deleteContributionById(
     @Param('contributionId') contributionId: string,

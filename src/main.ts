@@ -19,11 +19,11 @@ async function server() {
       forbidNonWhitelisted: true,
     }),
   );
-    const configService = app.get(ConfigService);
-    const corsOrigin: string = configService.getOrThrow('app.web_url');
-    const apiUrl: string = configService.getOrThrow('app.base_url');
+  const configService = app.get(ConfigService);
+  const corsOrigin: string = configService.getOrThrow('app.web_url');
+  const apiUrl: string = configService.getOrThrow('app.base_url');
 
-    const config = new DocumentBuilder()
+  const config = new DocumentBuilder()
     .setTitle('HayaseDB API')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
@@ -32,7 +32,6 @@ async function server() {
     .addServer(apiUrl)
     .addApiKey({ type: 'apiKey' }, 'key')
     .build();
-
 
   app.enableCors({
     origin: corsOrigin,

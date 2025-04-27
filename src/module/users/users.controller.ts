@@ -17,6 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
   ApiConsumes,
+  ApiOperation,
   ApiParam,
   ApiQuery,
   ApiTags,
@@ -34,6 +35,10 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('/:userId')
+  @ApiOperation({
+    summary: 'Get user profile by ID',
+    description: 'Fetches the profile of a specific user based on the user ID.',
+  })
   @Auth()
   async getProfile(
     @GetUser() user: User,
@@ -43,6 +48,10 @@ export class UsersController {
   }
 
   @Patch(':userId/:action')
+  @ApiOperation({
+    summary: 'Perform an action on a user',
+    description: 'Allows admin to verify, unverify, ban, or unban a user.',
+  })
   @ApiParam({
     name: 'userId',
     description: 'ID of the user',
@@ -71,6 +80,10 @@ export class UsersController {
   }
 
   @Patch()
+  @ApiOperation({
+    summary: 'Update user profile',
+    description: "Update the current authenticated user's profile details.",
+  })
   @Auth('User')
   async updateProfile(
     @Body() updateUserDto: UpdateUserDto,
@@ -81,6 +94,10 @@ export class UsersController {
   }
 
   @Put('pfp')
+  @ApiOperation({
+    summary: 'Update user profile picture',
+    description: 'Allows the user to update their profile picture.',
+  })
   @Auth('User')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -105,6 +122,11 @@ export class UsersController {
   }
 
   @Get()
+  @ApiOperation({
+    summary: 'List all users',
+    description:
+      'Lists all users with filtering, sorting, and pagination options.',
+  })
   @Auth('Moderator')
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -138,6 +160,10 @@ export class UsersController {
   }
 
   @Delete(':userId')
+  @ApiOperation({
+    summary: 'Delete user by ID',
+    description: 'Allows admin to delete a user based on the user ID.',
+  })
   @Auth('Admin')
   async deleteUser(
     @Param('userId') userId: string,
@@ -147,6 +173,10 @@ export class UsersController {
   }
 
   @Get('/pfp/:id')
+  @ApiOperation({
+    summary: 'Get user profile picture',
+    description: 'Fetches the profile picture of a user by ID.',
+  })
   async getUserProfilePicture(@Param('id') id: string, @Res() res: Response) {
     const pfp = await this.usersService.getPfpById(id);
 
