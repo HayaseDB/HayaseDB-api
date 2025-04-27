@@ -36,7 +36,7 @@ async function server() {
   app.enableCors({
     origin: corsOrigin,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type,Authorization,Accept,Origin,X-Requested-With',
+    allowedHeaders: 'Content-Type,Authorization,Accept,Origin,X-Requested-With,Key',
     credentials: true,
   });
   const document = SwaggerModule.createDocument(app, config);
