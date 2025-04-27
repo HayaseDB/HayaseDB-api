@@ -1,5 +1,5 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 
 @ApiTags('Application')
 @Controller()
@@ -9,6 +9,43 @@ export class AppController {
   @ApiOperation({
     summary: 'Get application information',
     description: 'Returns basic information about the application.',
+  })
+  @ApiOkResponse({
+    description: 'Application info returned successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          properties: {
+            application: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                version: { type: 'string' },
+                description: { type: 'string' },
+                status: { type: 'string' },
+                environment: { type: 'string' },
+              },
+            },
+            links: {
+              type: 'object',
+              properties: {
+                website: { type: 'string' },
+                documentation: { type: 'string' },
+                github: { type: 'string' },
+                discord: { type: 'string' },
+                x: { type: 'string' },
+                instagram: { type: 'string' },
+              },
+            },
+            author: { type: 'string' },
+            license: { type: 'string' },
+            copyright: { type: 'string' },
+          },
+        },
+      },
+    },
   })
   getAppInfo(): any {
     const packageInfo = require('../package.json');
