@@ -1,5 +1,5 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiOkResponse, ApiBadRequestResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger';
 
 @ApiTags('Application')
 @Controller()
@@ -43,6 +43,30 @@ export class AppController {
             license: { type: 'string' },
             copyright: { type: 'string' },
           },
+        },
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 400,
+          message: 'Invalid request parameters',
+          error: 'Bad Request',
+        },
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 500,
+          message: 'Something went wrong on the server',
+          error: 'Internal Server Error',
         },
       },
     },
