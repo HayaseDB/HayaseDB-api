@@ -16,6 +16,7 @@ import { Required } from '@/module/animes/decorator/required.decorator';
 
 export enum AnimeStatus {
   AIRING = 'Airing',
+  ON_GOING = 'Ongoing',
   COMPLETED = 'Completed',
   UPCOMING = 'Upcoming',
   ON_HOLD = 'On Hold',
