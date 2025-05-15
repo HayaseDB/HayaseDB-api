@@ -10,6 +10,7 @@ import { Role, User } from '@/module/users/entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Pfp } from '@/module/users/entities/pfp.entity';
 import { validate as isUuid } from 'uuid';
+import * as bcrypt from "bcryptjs";
 @Injectable()
 export class UsersService {
   constructor(
@@ -192,6 +193,9 @@ export class UsersService {
     userId: string,
     updateUserDto: UpdateUserDto,
   ): Promise<User | null> {
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
     await this.usersRepository.update(userId, updateUserDto);
     return this.getProfile(userId);
   }
